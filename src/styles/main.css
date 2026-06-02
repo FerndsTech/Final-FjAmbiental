@@ -1,0 +1,13 @@
+/**
+ * main.css — Entry point CSS
+ *
+ * Ordem importa: tokens primeiro (são consumidos por todo o resto),
+ * depois Tailwind layers, depois base styles que dependem dos tokens.
+ */
+
+@import './tokens.css';
+@import './base.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

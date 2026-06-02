@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .drop { fill: #00A859; }
+    .flow { stroke: #FFFFFF; opacity: 0.55; }
+    @media (prefers-color-scheme: dark) {
+      .drop { fill: #00B4D8; }
+      .flow { stroke: #FFFFFF; opacity: 0.75; }
+    }
+  </style>
+  <path class="drop" d="M38 6C32 10 24 16 18 26C12 36 10 46 14 53C19 59 30 60 38 58C48 55 54 47 54 38C54 27 48 16 42 9C41 7 39 6 38 6Z"/>
+  <path class="flow" d="M40 12C30 22 22 34 22 46" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,112 @@
+/**
+ * tokens.css — Fonte única de verdade do design system FJ Ambiental
+ *
+ * Documentação completa em: ../../DESIGN_SYSTEM.md
+ *
+ * Regras:
+ * - NUNCA hardcode hex em componente. Sempre via token.
+ * - tailwind.config.js consome destas variáveis via theme.extend.
+ * - Quando adicionar novo token, atualizar DESIGN_SYSTEM.md.
+ */
+
+:root {
+  /* ============================================
+     BRAND
+     ============================================ */
+  --color-fj-green: #00A859;
+  --color-fj-green-dim: #008A48;
+  --color-fj-green-vivid: #00C766;
+  --color-fj-aqua: #00B4D8;
+
+  /* ============================================
+     SURFACES — Light mode (body padrão)
+     ============================================ */
+  --color-canvas: #FAFAF7;
+  --color-surface: #FFFFFF;
+  --color-ink: #1A1F2E;
+  --color-slate: #6B7280;
+  --color-slate-light: #9CA3AF;
+  --color-border: rgba(26, 31, 46, 0.08);
+  --color-border-strong: rgba(26, 31, 46, 0.16);
+
+  /* ============================================
+     SURFACES — Dark sections (hero, sobre, footer)
+     ============================================ */
+  --color-deep-navy: #0A1628;
+  --color-deep-navy-2: #14202E;
+  --color-ink-inverse: #FFFFFF;
+  --color-slate-inverse: rgba(255, 255, 255, 0.65);
+  --color-slate-inverse-dim: rgba(255, 255, 255, 0.45);
+  --color-border-inverse: rgba(255, 255, 255, 0.10);
+
+  /* ============================================
+     ESTADOS SEMÂNTICOS
+     ============================================ */
+  --color-success: #00A859;
+  --color-warning: #F59E0B;
+  --color-danger: #DC2626;
+  --color-info: #00B4D8;
+
+  /* ============================================
+     TIPOGRAFIA
+     ============================================ */
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Type scale — fluid, sem media queries em font-size */
+  --text-xs: 0.75rem;     /* 12px */
+  --text-sm: 0.875rem;    /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.5rem;      /* 24px */
+  --text-2xl: 2rem;       /* 32px */
+  --text-3xl: 2.75rem;    /* 44px */
+  --text-display: clamp(2.5rem, 6vw, 4.5rem);
+  --text-display-xl: clamp(3.5rem, 9vw, 6.5rem);
+
+  /* ============================================
+     ESPAÇAMENTO
+     ============================================ */
+  --space-section: clamp(4rem, 8vw, 8rem);
+  --space-block: clamp(2rem, 4vw, 4rem);
+  --space-container: clamp(1.25rem, 4vw, 2rem);
+  --container-max: 1280px;
+
+  /* ============================================
+     MOTION
+     ============================================ */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --duration-fast: 200ms;
+  --duration-base: 400ms;
+  --duration-slow: 800ms;
+
+  /* ============================================
+     RAIO DE BORDA
+     ============================================ */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+
+  /* ============================================
+     SOMBRAS
+     ============================================ */
+  --shadow-card: 0 1px 2px 0 rgba(26, 31, 46, 0.04);
+  --shadow-card-hover: 0 12px 32px -8px rgba(26, 31, 46, 0.12);
+  --shadow-modal: 0 24px 64px -12px rgba(26, 31, 46, 0.18);
+}
+
+/* ============================================
+   prefers-reduced-motion — globalmente respeitado
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+    --duration-slow: 0ms;
+  }
+}

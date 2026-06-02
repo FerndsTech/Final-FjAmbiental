@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="logo-primary-title">
+  <title id="logo-primary-title">FJ Ambiental</title>
+  <path d="M38 6C32 10 24 16 18 26C12 36 10 46 14 53C19 59 30 60 38 58C48 55 54 47 54 38C54 27 48 16 42 9C41 7 39 6 38 6Z" fill="#00A859"/>
+  <path d="M40 12C30 22 22 34 22 46" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.55"/>
+</svg>

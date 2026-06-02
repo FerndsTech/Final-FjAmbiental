@@ -1,0 +1,32 @@
+{
+  "name": "FJ Ambiental — Consultoria e Recursos Hídricos",
+  "short_name": "FJ Ambiental",
+  "description": "Consultoria ambiental especializada em outorga, hidrometria e hidrologia. Sede em Salvador-BA, atuação em todo o Brasil.",
+  "lang": "pt-BR",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAFAF7",
+  "theme_color": "#0A1628",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
