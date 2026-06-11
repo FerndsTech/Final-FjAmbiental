@@ -55,15 +55,16 @@
   <main id="main-content">
 
     <section class="hero" aria-labelledby="hero-heading">
-      <!--
-        LCP — quando foto drone chegar, adicionar ANTES de .hero__overlay:
-        <img class="hero__image" src="/images/hero.avif"
-             srcset="/images/hero-640.avif 640w, /images/hero-1280.avif 1280w, /images/hero-1920.avif 1920w"
-             sizes="100vw" width="1920" height="1080"
-             alt="" fetchpriority="high" decoding="async">
-        E no <head>:
-        <link rel="preload" as="image" href="/images/hero.avif" fetchpriority="high">
-      -->
+      <video
+        class="hero__video"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+        aria-hidden="true">
+        <source src="/video-hero.mp4" type="video/mp4">
+      </video>
       <div class="hero__overlay" aria-hidden="true"></div>
 
       <div class="container-main">

@@ -27,7 +27,7 @@ export default {
         },
 
         'deep-navy': {
-          DEFAULT: 'var(--color-deep-navy)',
+          DEFAULT: 'rgb(var(--color-deep-navy-rgb) / <alpha-value>)',
           2: 'var(--color-deep-navy-2)',
         },
       },
