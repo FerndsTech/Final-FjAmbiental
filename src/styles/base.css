@@ -67,18 +67,25 @@ svg {
 img,
 video {
   /* Evita CLS quando aspect-ratio é declarada */
-  font-style: italic; /* Indica imagem quebrada se alt for visível */
+  font-style: italic;
+  /* Indica imagem quebrada se alt for visível */
   vertical-align: middle;
 }
 
 /* ============================================
    TIPOGRAFIA
    ============================================ */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-sans);
   font-weight: 500;
   color: var(--color-ink);
-  text-wrap: balance; /* Quebra de linha mais agradável em headings */
+  text-wrap: balance;
+  /* Quebra de linha mais agradável em headings */
 }
 
 h1 {
@@ -106,8 +113,10 @@ h4 {
 }
 
 p {
-  text-wrap: pretty; /* Evita "orfãos" no final de parágrafos */
-  max-width: 65ch;   /* Largura ideal de leitura */
+  text-wrap: pretty;
+  /* Evita "orfãos" no final de parágrafos */
+  max-width: 65ch;
+  /* Largura ideal de leitura */
 }
 
 /* ============================================
@@ -260,6 +269,7 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .btn-pill,
   .btn-pill__icon {
     transition: none;
@@ -409,7 +419,7 @@ textarea {
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   gap: clamp(2rem, 5vw, 4rem);
-  align-items: center;
+  align-items: start;
   margin-bottom: clamp(2.5rem, 5vw, 3.5rem);
 }
 
@@ -448,7 +458,7 @@ textarea {
 }
 
 .services__intro {
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.65);
   line-height: 1.7;
   max-width: none;
 }
@@ -459,9 +469,10 @@ textarea {
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   list-style: none;
+  align-items: stretch;
 }
 
-.services__grid > li {
+.services__grid>li {
   display: flex;
 }
 
@@ -471,9 +482,11 @@ textarea {
   background: var(--color-deep-navy-2);
   border: 0.5px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
-  padding: 20px;
+  padding: 1.75rem;
   overflow: hidden;
   flex: 1;
+  height: 100%;
+  min-height: 300px;
   display: flex;
   flex-direction: column;
   transition:
@@ -509,7 +522,7 @@ textarea {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 1.25rem;
 }
 
 .service-card__icon {
@@ -540,8 +553,8 @@ textarea {
 }
 
 .service-card__title {
-  font-size: var(--text-base);
-  font-weight: 600;
+  font-size: var(--text-lg);
+  font-weight: 500;
   line-height: 1.2;
   letter-spacing: -0.01em;
   color: var(--color-ink-inverse);
@@ -566,12 +579,12 @@ textarea {
 }
 
 .service-card__desc {
-  font-size: 12px;
+  font-size: 15px;
   color: rgba(255, 255, 255, 0.55);
-  line-height: 1.65;
+  line-height: 1.6;
   max-width: none;
   flex: 1;
-  margin-bottom: 16px;
+  margin-bottom: 1.25rem;
 }
 
 .service-card__tags {
@@ -579,6 +592,7 @@ textarea {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  margin-top: auto;
   padding-top: 14px;
   border-top: 0.5px solid rgba(255, 255, 255, 0.10);
 }
@@ -596,8 +610,17 @@ textarea {
 /* --- CTA footer --- */
 .services__cta {
   display: flex;
-  justify-content: center;
-  margin-top: 28px;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 0.5px solid rgba(255, 255, 255, 0.10);
+}
+
+.services__cta-text {
+  font-size: var(--text-base);
+  color: rgba(255, 255, 255, 0.55);
+  max-width: none;
 }
 
 /* --- Responsividade --- */
@@ -611,6 +634,12 @@ textarea {
 @media (max-width: 600px) {
   .services__grid {
     grid-template-columns: 1fr;
+  }
+
+  .services__cta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
   }
 }
 
