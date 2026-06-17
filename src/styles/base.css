@@ -647,3 +647,74 @@ textarea {
     transition: none;
   }
 }
+
+/* ============================================
+   SECTION: CLIENTES (marquee band)
+   ============================================ */
+.clients {
+  background: var(--color-deep-navy);
+  padding-block: 2rem;
+  overflow: hidden;
+}
+
+.clients__label {
+  text-align: center;
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.02em;
+  margin-bottom: 1.75rem;
+  max-width: none;
+}
+
+.clients__track-wrapper {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+
+.clients__track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  animation: clients-marquee 35s linear infinite;
+}
+
+.clients__track:hover {
+  animation-play-state: paused;
+}
+
+.clients__track-dupe {
+  display: contents;
+}
+
+.clients__logo {
+  height: 36px;
+  width: auto;
+  flex-shrink: 0;
+  filter: brightness(0) invert(1);
+  margin-right: 3.5rem;
+  opacity: 0.55;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+.clients__logo:hover {
+  filter: brightness(0) invert(1);
+  opacity: 1;
+}
+
+@keyframes clients-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@media (max-width: 600px) {
+  .clients__logo {
+    height: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clients__track {
+    animation: none;
+  }
+}
