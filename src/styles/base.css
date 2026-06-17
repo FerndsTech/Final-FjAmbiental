@@ -521,28 +521,27 @@ textarea {
   z-index: 1;
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 16px;
   margin-bottom: 1.25rem;
 }
 
 .service-card__icon {
   flex-shrink: 0;
-  width: 42px;
-  height: 42px;
-  border-radius: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .service-card__icon--green {
-  background: rgba(0, 168, 89, 0.12);
   color: var(--color-fj-green);
 }
 
 .service-card__icon--aqua {
-  background: rgba(0, 180, 216, 0.12);
   color: var(--color-fj-aqua);
+}
+
+.service-card__icon svg {
+  width: 40px;
+  height: 40px;
+  display: block;
+  fill: currentColor;
 }
 
 .service-card__heading {
