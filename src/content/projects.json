@@ -1,0 +1,194 @@
+{
+  "_meta": {
+    "AVISO": "DADOS PLACEHOLDER — fictícios, apenas para validação visual do layout. Substituir TODOS antes de publicar. Cada projeto tem o campo _placeholder: true; quando inserir o dado real, troque para false. Coordenadas e números NÃO são reais.",
+    "total_catalogo": 24,
+    "total_catalogo_label": "100+",
+    "imagens_dir": "src/assets/imgs/"
+  },
+  "projects": [
+    {
+      "id": "disponibilidade-hidrica",
+      "_placeholder": true,
+      "image": "analise-disponibilidade-hidrica-bacias.webp",
+      "titulo": "Disponibilidade Hídrica",
+      "thumb_titulo": "DISPONIBILIDADE HÍDRICA",
+      "accent": "green",
+      "tag_primaria": "ESTUDO",
+      "tag_secundaria": "BACIA",
+      "cliente": "Prefeitura Municipal",
+      "ano": "2022",
+      "local": "Feira de Santana · BA",
+      "coords": "12°15'58\"S / 38°57'56\"W",
+      "headline_l1": "Análise técnica de",
+      "headline_l2": "disponibilidade hídrica.",
+      "descricao": "Avaliação quantitativa de bacias hidrográficas para subsidiar a gestão e a outorga do uso da água em escala regional.",
+      "stats": [
+        { "label": "BACIAS", "valor": "12", "unidade": "und" },
+        { "label": "ÁREA", "valor": "3.400", "unidade": "km²" },
+        { "label": "VAZÃO Q90", "valor": "8,5", "unidade": "m³/s" },
+        { "label": "DURAÇÃO", "valor": "6", "unidade": "meses" }
+      ]
+    },
+    {
+      "id": "rede-hidrometrica",
+      "_placeholder": true,
+      "image": "instalacao-rede-hidrometrica-ana-aneel.webp",
+      "titulo": "Rede Hidrométrica",
+      "thumb_titulo": "REDE HIDROMÉTRICA",
+      "accent": "aqua",
+      "tag_primaria": "MEDIÇÃO",
+      "tag_secundaria": "ANA · ANEEL",
+      "cliente": "ANA / ANEEL",
+      "ano": "2021",
+      "local": "Bacia do Paraguaçu · BA",
+      "coords": "12°45'10\"S / 39°06'30\"W",
+      "headline_l1": "Instalação de",
+      "headline_l2": "rede hidrométrica.",
+      "descricao": "Implantação e operação de estações de monitoramento fluviométrico segundo padrões da ANA e ANEEL, com telemetria.",
+      "stats": [
+        { "label": "ESTAÇÕES", "valor": "18", "unidade": "und" },
+        { "label": "COBERTURA", "valor": "240", "unidade": "km" },
+        { "label": "TELEMETRIA", "valor": "100", "unidade": "%" },
+        { "label": "DURAÇÃO", "valor": "10", "unidade": "meses" }
+      ]
+    },
+    {
+      "id": "pocos-tubulares",
+      "_placeholder": true,
+      "image": "perfuracao-poco-artesiano-outorga.webp",
+      "titulo": "Poços Tubulares",
+      "thumb_titulo": "POÇOS TUBULARES",
+      "accent": "green",
+      "tag_primaria": "SUBTERRÂNEO",
+      "tag_secundaria": "ÁREA RURAL",
+      "cliente": "EMBASA",
+      "ano": "2023",
+      "local": "Saubara · BA",
+      "coords": "12°58'17\"S / 38°30'05\"W",
+      "headline_l1": "Excelência em",
+      "headline_l2": "soluções ambientais.",
+      "descricao": "Gestão completa: desde o estudo geofísico e perfuração até o teste de bombeamento e outorga de uso.",
+      "stats": [
+        { "label": "VAZÃO", "valor": "45", "unidade": "L/s" },
+        { "label": "POÇOS", "valor": "07", "unidade": "und" },
+        { "label": "PROFUNDIDADE", "valor": "120", "unidade": "m" },
+        { "label": "DURAÇÃO", "valor": "8", "unidade": "meses" }
+      ]
+    },
+    {
+      "id": "medicao-vazao-pojuca",
+      "_placeholder": true,
+      "image": "medicao-vazao-rio-pojuca-bahia.webp",
+      "titulo": "Medição de Vazão",
+      "thumb_titulo": "MEDIÇÃO DE VAZÃO",
+      "accent": "aqua",
+      "tag_primaria": "MEDIÇÃO",
+      "tag_secundaria": "RIO POJUCA",
+      "cliente": "Indústria Privada",
+      "ano": "2022",
+      "local": "Rio Pojuca · BA",
+      "coords": "12°27'40\"S / 38°20'15\"W",
+      "headline_l1": "Medição de vazão",
+      "headline_l2": "em campo.",
+      "descricao": "Campanhas de medição de descarga líquida com ADCP e construção da curva-chave para consistência de séries históricas.",
+      "stats": [
+        { "label": "VAZÃO MÉD.", "valor": "32", "unidade": "m³/s" },
+        { "label": "SEÇÕES", "valor": "06", "unidade": "und" },
+        { "label": "CAMPANHAS", "valor": "14", "unidade": "und" },
+        { "label": "DURAÇÃO", "valor": "12", "unidade": "meses" }
+      ]
+    },
+    {
+      "id": "outorga-uso-agua",
+      "_placeholder": true,
+      "image": "outorga-direito-uso-agua.webp",
+      "titulo": "Outorga de Uso",
+      "thumb_titulo": "OUTORGA DE USO",
+      "accent": "green",
+      "tag_primaria": "REGULARIZAÇÃO",
+      "tag_secundaria": "SUPERFICIAL",
+      "cliente": "Agropecuária Regional",
+      "ano": "2023",
+      "local": "Barreiras · BA",
+      "coords": "12°09'12\"S / 44°59'24\"W",
+      "headline_l1": "Direito de",
+      "headline_l2": "uso da água.",
+      "descricao": "Processo completo de outorga de captação superficial perante o órgão gestor, do requerimento à emissão da portaria.",
+      "stats": [
+        { "label": "VAZÃO OUT.", "valor": "210", "unidade": "m³/h" },
+        { "label": "PROCESSOS", "valor": "04", "unidade": "und" },
+        { "label": "ÁREA IRRIG.", "valor": "850", "unidade": "ha" },
+        { "label": "DURAÇÃO", "valor": "9", "unidade": "meses" }
+      ]
+    },
+    {
+      "id": "mapa-hidrografico",
+      "_placeholder": true,
+      "image": "mapa-hidrografico-reconcavo-norte.webp",
+      "titulo": "Mapa Hidrográfico",
+      "thumb_titulo": "MAPA HIDROGRÁFICO",
+      "accent": "green",
+      "tag_primaria": "CARTOGRAFIA",
+      "tag_secundaria": "RECÔNCAVO",
+      "cliente": "Consórcio Intermunicipal",
+      "ano": "2021",
+      "local": "Recôncavo Norte · BA",
+      "coords": "12°40'00\"S / 38°45'00\"W",
+      "headline_l1": "Cartografia do",
+      "headline_l2": "Recôncavo Norte.",
+      "descricao": "Mapeamento hidrográfico georreferenciado de sub-bacias para planejamento de recursos hídricos e ordenamento territorial.",
+      "stats": [
+        { "label": "SUB-BACIAS", "valor": "09", "unidade": "und" },
+        { "label": "RIOS MAPE.", "valor": "120", "unidade": "km" },
+        { "label": "ESCALA", "valor": "1:50k", "unidade": "" },
+        { "label": "DURAÇÃO", "valor": "7", "unidade": "meses" }
+      ]
+    },
+    {
+      "id": "estrutura-hidraulica",
+      "_placeholder": true,
+      "image": "projeto-estrutura-hidraulica-drenagem.webp",
+      "titulo": "Estrutura Hidráulica",
+      "thumb_titulo": "ESTRUTURA HIDRÁULICA",
+      "accent": "green",
+      "tag_primaria": "PROJETO",
+      "tag_secundaria": "DRENAGEM",
+      "cliente": "Prefeitura Municipal",
+      "ano": "2023",
+      "local": "Camaçari · BA",
+      "coords": "12°41'52\"S / 38°19'27\"W",
+      "headline_l1": "Engenharia de",
+      "headline_l2": "drenagem urbana.",
+      "descricao": "Projeto executivo de estruturas hidráulicas de macrodrenagem dimensionadas para eventos de cheia de tempo de retorno elevado.",
+      "stats": [
+        { "label": "EXTENSÃO", "valor": "3,2", "unidade": "km" },
+        { "label": "T. RETORNO", "valor": "25", "unidade": "anos" },
+        { "label": "VAZÃO PROJ.", "valor": "48", "unidade": "m³/s" },
+        { "label": "DURAÇÃO", "valor": "11", "unidade": "meses" }
+      ]
+    },
+    {
+      "id": "barragem-irrigacao",
+      "_placeholder": true,
+      "image": "regularizacao-barragem-irrigacao.webp",
+      "titulo": "Barragem de Irrigação",
+      "thumb_titulo": "BARRAGEM IRRIGAÇÃO",
+      "accent": "green",
+      "tag_primaria": "REGULARIZAÇÃO",
+      "tag_secundaria": "BARRAMENTO",
+      "cliente": "Produtor Rural",
+      "ano": "2022",
+      "local": "Luís Eduardo Magalhães · BA",
+      "coords": "12°05'30\"S / 45°48'18\"W",
+      "headline_l1": "Regularização de",
+      "headline_l2": "barramento.",
+      "descricao": "Estudos de segurança e regularização de barragem de acumulação para fins de irrigação, com plano de monitoramento.",
+      "stats": [
+        { "label": "VOLUME", "valor": "1,8", "unidade": "hm³" },
+        { "label": "ÁREA INUN.", "valor": "62", "unidade": "ha" },
+        { "label": "ALTURA", "valor": "14", "unidade": "m" },
+        { "label": "DURAÇÃO", "valor": "10", "unidade": "meses" }
+      ]
+    }
+  ]
+}
