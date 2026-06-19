@@ -19,6 +19,8 @@ import '@fontsource/ibm-plex-sans/500.css';
 import '@fontsource/ibm-plex-mono/400.css';
 
 // === Módulos ===
+import { initHeader } from './modules/header.js';
+import { initHero } from './modules/hero.js';
 import { initSmoothScroll } from './modules/smooth-scroll.js';
 import { initReveal } from './modules/reveal.js';
 
@@ -27,6 +29,8 @@ import { initReveal } from './modules/reveal.js';
 const cleanups = [];
 
 function init() {
+  cleanups.push(initHeader());
+  cleanups.push(initHero());
   cleanups.push(initSmoothScroll());
   cleanups.push(initReveal());
 

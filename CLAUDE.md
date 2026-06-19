@@ -473,26 +473,43 @@ A rotação `-45deg` + mudança para verde no hover de qualquer "círculo com se
 - **Micro-interações (produção):** H1 recebe SplitType — palavras entram em fade-up stagger no load (após preloader). Badge com leve fade-in. Background com possível parallax sutil no scroll (subtle, respeitando reduced-motion).
 - **Header:** logo + navegação ficam por cima do Hero (já existe `src/partials/header.html` no scaffold). Header tem fundo translúcido com backdrop-blur sobre o Hero.
 
-### 12.5 Section 02 — Serviços (VALIDADO)
+### 12.5 Section 02 — Serviços (IMPLEMENTADO — refinamentos pendentes)
 
-- **Tema:** dark (`#0A1628` wrap, cards `#14202E`)
-- **Título:** "Três pilares da **engenharia hídrica.**" (segunda linha verde)
-- **Label:** "02 · Serviços" (mono, dot verde antes)
-- **Intro:** à direita do título — "Do licenciamento à medição em campo e ao estudo preditivo — o ciclo completo dos recursos hídricos."
-- **Layout:** grid 3 colunas (vira 1 coluna em mobile <600px), gap 12px
-- **Cards (compactos):**
-  - Número ghosted "01/02/03" no fundo (opacity ~3.5%, mono, 64px, top-right)
-  - Topo: ícone (42px, rounded 11px, fundo tint) + título + subtítulo mono lado a lado
-  - Descrição (12px, ~3 linhas)
-  - Tags de sub-serviços (pills, separadas por border-top)
-  - SEM seta individual nos cards, SEM footer com contador
-- **Hierarquia por cor:** Outorga (verde) · Hidrometria (aqua) · Hidrologia (verde). Aqua marca contexto hídrico direto (medição); verde marca consultoria/regularização.
+#### Estado atual do CSS (`src/styles/base.css`)
+
+- **Tema:** dark (`#0A1628` wrap, cards `#14202E`) ✅
+- **Título:** "Três pilares da **engenharia hídrica.**" (segunda linha verde) ✅
+- **Label:** "02 · Serviços" (mono, dot verde antes) ✅
+- **Intro** (`.services__intro`): `color: rgba(255,255,255,0.65)` ✅
+- **Header** (`.services__header`): `align-items: start` ✅
+- **Layout:** grid 3 colunas (vira 1 coluna em mobile <600px), gap 12px ✅
+- **Cards** (`.service-card`): `min-height: 300px`, `display: flex`, `flex-direction: column`, `height: 100%`, `padding: 28px` ✅
+  - Número ghosted "01/02/03" no fundo (opacity ~3.5%, mono, 64px, top-right) ✅
+  - Topo (`.service-card__top`): gap 16px — ícone + título/subtítulo lado a lado ✅
+  - Título (`.service-card__title`): `font-size: var(--text-lg)` (18px) ✅
+  - Descrição (`.service-card__desc`): `font-size: 15px`, `line-height: 1.6` ✅
+  - Tags ancoradas na base: `.service-card__tags { margin-top: auto }` ✅
+  - Tags de sub-serviços (pills, separadas por border-top) ✅
+  - SEM seta individual nos cards, SEM footer com contador ✅
+- **Rodapé** (`.services__cta`): `justify-content: space-between` + `border-top: 0.5px solid rgba(255,255,255,0.10)` + `padding-top: 24px`; texto à esquerda, `.btn-pill` à direita; no mobile: `flex-direction: column`, `align-items: flex-start` ✅
+- **Hierarquia por cor:** Outorga (verde) · Hidrometria (aqua) · Hidrologia (verde) ✅
 - **Conteúdo dos 3 cards:**
   - **01 Outorga** / RECURSOS HÍDRICOS / "Regularização do uso da água perante órgãos ambientais — captação, barramento, perfuração e lançamento de efluentes." / tags: Poços (APPO), Captação, Barramento / 10 sub-serviços
   - **02 Hidrometria** / MEDIÇÃO EM CAMPO / "Instalação de estações, medição de vazão e sedimentos, curvas de descarga e consistência de séries históricas." / tags: Fluviométrica, ADCP, Topobatimetria / 08 sub-serviços
   - **03 Hidrologia** / ESTUDOS PREDITIVOS / "Vazão regularizada, previsão de cheias, estudos hidrossedimentológicos e modelagem de qualidade de água." / tags: Vazão regul., Cheias, Modelo SMAP / 05 sub-serviços
-- **CTA:** botão `.btn-pill` "Ver todos os serviços" → `/servicos.html`, centralizado
-- **Ícones:** ATUAIS SÃO PLACEHOLDER. Cliente quer ícones mais sofisticados — a destrinchar em sessão futura. Não considerar finalizados.
+
+#### Ícones (parcialmente implementado)
+
+- **Vetores:** 3 SVGs Flaticon reais substituíram placeholders — inline em `index.html`, `fill="currentColor"` em `<g>` interno, `viewBox` originais preservados (160×160 / 60×60 / 160×160), `id`s internos removidos ✅
+- **Arquivos-fonte:** `src/assets/icones/` (**português com "e"** — não `icons/`) ✅
+- **CSS cor:** `.service-card__icon--green { color: var(--color-fj-green) }` / `--aqua { color: var(--color-fj-aqua) }` — cor herdada via `currentColor` ✅
+- **CSS tamanho atual:** `.service-card__icon svg { width: 20px; height: 20px }` — tamanho ainda pequeno ⚠️
+- **⬜ PENDENTE:** remover caixa de fundo do `.service-card__icon` (tirar `background`, `padding`, `border-radius`, `width/height` do wrapper) e aumentar SVG para ~40px — ícone maior e "solto"
+
+#### Notas de arquitetura (não alucinar)
+
+- **CSS:** todo o CSS de Serviços está em `src/styles/base.css`. NÃO existe `src/styles/sections/`. Dívida técnica: dividir por section no futuro.
+- **Tailwind + tokens:** Tailwind v3.4 e CSS custom coexistem. `tokens.css` é a fonte da verdade para variáveis; Tailwind para layout/espaçamento.
 
 ### 12.6 Section 03 — Portfólio (VALIDADO)
 
@@ -535,17 +552,45 @@ Site de referência principal do cliente: `webhubeducacao.com.br/comunidade-webh
 
 ### 12.9 Próximos passos (ordem)
 
-1. **Aplicar fix do §0** e subir o servidor (`npm run dev` sem erros)
-2. **Implementar Hero (Section 01)** conforme §12.4 — é o LCP e a primeira dobra; usar placeholder de imagem até a foto drone final chegar
-3. **Implementar Section 02 (Serviços)** conforme §12.5
-4. **Implementar Section 03 (Portfólio)** conforme §12.6 + `projects.json` + `portfolio.js`
-5. **Prototipar + implementar FAQ (light)**
-6. **Refinar Footer (dark)** — já existe base no scaffold
-7. **Adicionar preloader** (§12.8) + SplitType no Hero
-8. **Destrinchar ícones premium dos serviços** (§12.5 — pendente)
-9. Otimização de imagens (sharp), favicon system completo, Lighthouse pass
+1. ✅ ~~**Aplicar fix do §0**~~ — servidor rodando
+2. ✅ ~~**Implementar Hero (Section 01)**~~ — conforme §12.4
+3. ✅ ~~**Implementar Section 02 (Serviços)**~~ — estrutura e conteúdo prontos · **⬜ pendente: ícones soltos (~40px, sem caixa)** — ver §12.5
+4. **Corrigir CLS** (0.472 → < 0.05) — causa principal: fontes IBM Plex sem dimensões reservadas, seção Serviços responde por 88% do shift — ver §12.10
+5. **Implementar Section 03 (Portfólio)** conforme §12.6 + `projects.json` + `portfolio.js`
+6. **Prototipar + implementar FAQ (light)**
+7. **Refinar Footer (dark)** — base existente no scaffold; corrigir contraste `text-white/40` (falha WCAG) — ver §12.10
+8. **Adicionar preloader** (§12.8) + SplitType no Hero
+9. Otimização de imagens (sharp), favicon system completo, Lighthouse pass em produção
 
 **Componente reutilizável a criar primeiro:** `.btn-pill` (§12.2) — usado em Hero, Serviços e Portfólio. Definir uma vez no CSS antes de implementar as sections.
+
+### 12.10 Diagnóstico de performance (pendente de correção)
+
+> Medição em dev local (localhost, Slow 4G emulado no DevTools). **Performance 40 não representa produção** — dev server não minifica nem comprime.
+
+| Categoria      | Score (dev) |
+| -------------- | ----------- |
+| Performance    | 40          |
+| Accessibility  | 96          |
+| Best Practices | 81          |
+| SEO            | 100         |
+
+#### CLS — problema principal
+
+- **CLS medido:** 0.472 (meta do projeto: < 0.05 — ver §7)
+- **Culpado:** `section#servicos` responde por 0.417 (88% do CLS total)
+- **Causa provável:** fontes IBM Plex causando layout shift ao carregarem + altura dos elementos não reservada explicitamente no CSS
+- **FOUC:** flash de HTML sem estilo ao recarregar (~2-3s) — mesma raiz do CLS; fontes sem `size-adjust` ou fallback de métricas correto
+
+#### Falso positivo identificado
+
+- **Fontes Google (Inter/Roboto)** apareciam no Network tab — era injeção da extensão **CodeGPT**, não do código. Confirmado limpo em aba anônima. O site usa **somente IBM Plex** via `@fontsource` self-hosted.
+
+#### Outros achados (menor prioridade)
+
+- **Contraste footer:** textos com `text-white/40` (opacity 40%) falham WCAG 4.5:1 — corrigir antes do launch
+- **Headers de segurança** (CSP, HSTS, COOP, X-Frame-Options): ausentes — configurar somente no deploy, não aplicável em dev
+- **Preloader:** ainda não implementado — quando pronto reduz percepção de FOUC (ver §12.8)
 
 ---
 
