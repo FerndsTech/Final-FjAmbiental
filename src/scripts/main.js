@@ -19,6 +19,7 @@ import '@fontsource/ibm-plex-sans/500.css';
 import '@fontsource/ibm-plex-mono/400.css';
 
 // === Módulos ===
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { initHeader } from './modules/header.js';
 import { initHero } from './modules/hero.js';
 import { initSmoothScroll } from './modules/smooth-scroll.js';
@@ -29,10 +30,11 @@ import { initReveal } from './modules/reveal.js';
 const cleanups = [];
 
 function init() {
-  cleanups.push(initHeader());
+  cleanups.push(initSmoothScroll()); // Lenis primeiro — ScrollTrigger depende do scroller
   cleanups.push(initHero());
-  cleanups.push(initSmoothScroll());
+  cleanups.push(initHeader());       // ScrollTrigger do header criado após Lenis estar ativo
   cleanups.push(initReveal());
+  setTimeout(() => { requestAnimationFrame(() => ScrollTrigger.refresh()); }, 100);
 
   if (import.meta.env.DEV) {
     console.log('[FJ] Modules initialized');
