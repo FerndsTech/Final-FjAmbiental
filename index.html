@@ -408,7 +408,7 @@
       <section class="portfolio section" id="portfolio" aria-labelledby="portfolio-heading" data-theme="light">
         <div class="container-main">
 
-          <!-- Header: label + h2 (esq) · counter + setas (dir) -->
+          <!-- Header: label + h2 -->
           <div class="portfolio__header">
             <div class="portfolio__header-left">
               <div class="portfolio__label">
@@ -419,23 +419,6 @@
                 Engenharia hídrica
                 <span class="portfolio__title-accent">em ação.</span>
               </h2>
-            </div>
-            <div class="portfolio__header-right">
-              <p class="portfolio__counter font-mono-numerals">
-                <span class="portfolio__counter-current">01</span>/24 CASES
-              </p>
-              <div class="portfolio__arrows" role="group" aria-label="Anterior e próximo case">
-                <button class="portfolio__arrow portfolio__arrow--prev" type="button" aria-label="Case anterior">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                    <path d="M15 18l-6-6 6-6"/>
-                  </svg>
-                </button>
-                <button class="portfolio__arrow portfolio__arrow--next" type="button" aria-label="Próximo case">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                    <path d="M9 18l6-6-6-6"/>
-                  </svg>
-                </button>
-              </div>
             </div>
           </div>
 
@@ -516,70 +499,82 @@
             </div>
           </div>
 
-          <!-- Thumbnails seletores (5 estáticos, card 1 ativo) -->
+          <!-- Thumbnails seletores + setas de navegação -->
           <div class="portfolio__thumbs-wrapper">
-            <!-- Barra EXPLORAR acima dos thumbs -->
+            <div class="portfolio__thumbs-row">
+              <button class="portfolio__arrow portfolio__arrow--prev" type="button" aria-label="Cases anteriores">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                  <path d="M15 18l-6-6 6-6"/>
+                </svg>
+              </button>
+              <ul class="portfolio__thumbs" role="list" aria-label="Selecionar case do portfólio">
+                <li class="portfolio__thumb is-active" aria-current="true">
+                  <img
+                    class="portfolio__thumb-img"
+                    src="./src/assets/imgs/analise-disponibilidade-hidrica-bacias.webp"
+                    alt="Disponibilidade Hídrica"
+                    width="200"
+                    height="125"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <span class="portfolio__thumb-num font-mono-numerals" aria-hidden="true">01</span>
+                  <span class="portfolio__thumb-title font-mono-numerals" aria-hidden="true">Disponibilidade Hídrica</span>
+                </li>
+                <li class="portfolio__thumb">
+                  <img
+                    class="portfolio__thumb-img"
+                    src="./src/assets/imgs/instalacao-rede-hidrometrica-ana-aneel_1x.webp"
+                    alt="Rede Hidrométrica"
+                    width="200"
+                    height="125"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <span class="portfolio__thumb-num font-mono-numerals" aria-hidden="true">02</span>
+                  <span class="portfolio__thumb-title font-mono-numerals" aria-hidden="true">Rede Hidrométrica</span>
+                </li>
+                <li class="portfolio__thumb">
+                  <img
+                    class="portfolio__thumb-img"
+                    src="./src/assets/imgs/perfuracao-poco-artesiano-outorga.webp"
+                    alt="Poços Tubulares"
+                    width="200"
+                    height="125"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <span class="portfolio__thumb-num font-mono-numerals" aria-hidden="true">03</span>
+                  <span class="portfolio__thumb-title font-mono-numerals" aria-hidden="true">Poços Tubulares</span>
+                </li>
+                <li class="portfolio__thumb">
+                  <img
+                    class="portfolio__thumb-img"
+                    src="./src/assets/imgs/medicao-vazao-rio-pojuca-bahia.webp"
+                    alt="Medição de Vazão"
+                    width="200"
+                    height="125"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <span class="portfolio__thumb-num font-mono-numerals" aria-hidden="true">04</span>
+                  <span class="portfolio__thumb-title font-mono-numerals" aria-hidden="true">Medição de Vazão</span>
+                </li>
+              </ul>
+              <button class="portfolio__arrow portfolio__arrow--next" type="button" aria-label="Mais cases">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </button>
+            </div>
+            <!-- Barra EXPLORAR abaixo dos thumbs -->
             <div class="portfolio__explore" aria-hidden="true">
               <span class="portfolio__explore-label font-mono-numerals">Explorar</span>
               <div class="portfolio__explore-track">
                 <div class="portfolio__explore-fill" style="width: 12.5%"></div>
               </div>
-              <span class="portfolio__explore-count font-mono-numerals">01 / 24</span>
+              <span class="portfolio__explore-count font-mono-numerals">01 / 08</span>
             </div>
-            <ul class="portfolio__thumbs" role="list" aria-label="Selecionar case do portfólio">
-              <li class="portfolio__thumb is-active" aria-current="true">
-                <img
-                  class="portfolio__thumb-img"
-                  src="./src/assets/imgs/analise-disponibilidade-hidrica-bacias.webp"
-                  alt="Disponibilidade Hídrica"
-                  width="200"
-                  height="125"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <span class="portfolio__thumb-num font-mono-numerals" aria-hidden="true">01</span>
-                <span class="portfolio__thumb-title font-mono-numerals" aria-hidden="true">Disponibilidade Hídrica</span>
-              </li>
-              <li class="portfolio__thumb">
-                <img
-                  class="portfolio__thumb-img"
-                  src="./src/assets/imgs/instalacao-rede-hidrometrica-ana-aneel_1x.webp"
-                  alt="Rede Hidrométrica"
-                  width="200"
-                  height="125"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <span class="portfolio__thumb-num font-mono-numerals" aria-hidden="true">02</span>
-                <span class="portfolio__thumb-title font-mono-numerals" aria-hidden="true">Rede Hidrométrica</span>
-              </li>
-              <li class="portfolio__thumb">
-                <img
-                  class="portfolio__thumb-img"
-                  src="./src/assets/imgs/perfuracao-poco-artesiano-outorga.webp"
-                  alt="Poços Tubulares"
-                  width="200"
-                  height="125"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <span class="portfolio__thumb-num font-mono-numerals" aria-hidden="true">03</span>
-                <span class="portfolio__thumb-title font-mono-numerals" aria-hidden="true">Poços Tubulares</span>
-              </li>
-              <li class="portfolio__thumb">
-                <img
-                  class="portfolio__thumb-img"
-                  src="./src/assets/imgs/medicao-vazao-rio-pojuca-bahia.webp"
-                  alt="Medição de Vazão"
-                  width="200"
-                  height="125"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <span class="portfolio__thumb-num font-mono-numerals" aria-hidden="true">04</span>
-                <span class="portfolio__thumb-title font-mono-numerals" aria-hidden="true">Medição de Vazão</span>
-              </li>
-            </ul>
           </div>
 
           <!-- CTA global -->

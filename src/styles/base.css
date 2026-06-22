@@ -790,8 +790,8 @@ textarea {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-top: calc(var(--header-height) + 2rem);
-  padding-bottom: 3rem;
+  padding-top: calc(var(--header-height) + 1.25rem);
+  padding-bottom: 2rem;
 }
 
 /* --- Header --- */
@@ -799,17 +799,11 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .portfolio__header-left {
   flex: 1;
-}
-
-.portfolio__header-right {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
 }
 
 .portfolio__label {
@@ -849,30 +843,14 @@ textarea {
   color: var(--color-fj-green);
 }
 
-.portfolio__counter {
-  font-size: var(--text-sm);
-  color: var(--color-slate);
-  max-width: none;
-  white-space: nowrap;
-}
-
-.portfolio__counter-current {
-  color: var(--color-ink);
-  font-weight: 600;
-}
-
-.portfolio__arrows {
-  display: flex;
-  gap: 8px;
-}
-
 .portfolio__arrow {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   border-radius: var(--radius-md);
-  border: 1.5px solid var(--color-border-strong);
+  border: 1px solid var(--color-border);
   background: transparent;
-  color: var(--color-ink);
+  color: var(--color-slate);
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -893,7 +871,7 @@ textarea {
 .portfolio__split {
   display: grid;
   grid-template-columns: 1fr;
-  gap: clamp(1rem, 2vw, 1.5rem);
+  gap: clamp(0.75rem, 1.5vw, 1.25rem);
   align-items: center;
 }
 
@@ -904,7 +882,7 @@ textarea {
   border-radius: var(--radius-xl);
   background: var(--color-deep-navy);
   aspect-ratio: 16 / 11;
-  max-height: 400px;
+  max-height: 340px;
 }
 
 .portfolio__featured-img {
@@ -1068,10 +1046,18 @@ textarea {
 
 /* --- Thumbnails --- */
 .portfolio__thumbs-wrapper {
-  margin-top: 32px;
+  margin-top: 18px;
+}
+
+.portfolio__thumbs-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .portfolio__thumbs {
+  flex: 1;
+  min-width: 0;
   list-style: none;
   display: flex;
   gap: 10px;
@@ -1111,7 +1097,12 @@ textarea {
 }
 
 .portfolio__thumb-img {
-  display: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .portfolio__thumb-num {
@@ -1148,7 +1139,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-top: 10px;
 }
 
 .portfolio__explore-label,
@@ -1177,7 +1168,7 @@ textarea {
 
 /* --- Footer CTA --- */
 .portfolio__footer {
-  margin-top: 32px;
+  margin-top: 18px;
   display: flex;
   justify-content: center;
 }
