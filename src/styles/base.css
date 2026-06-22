@@ -280,9 +280,16 @@ textarea {
    SITE HEADER — shrinking + is-scrolled
    ============================================ */
 .site-header {
+  background-color: transparent;
+  border-bottom: 1px solid transparent;
   transition:
     background-color var(--duration-base) var(--ease-out),
     border-color var(--duration-base) var(--ease-out);
+}
+
+.site-header .container-main {
+  height: var(--header-height, 5rem);
+  transition: height var(--duration-base) var(--ease-out);
 }
 
 .site-header.is-scrolled {
@@ -292,15 +299,34 @@ textarea {
   border-color: rgba(255, 255, 255, 0.06);
 }
 
-/* Encolhe o container interno quando scrolled */
 .site-header.is-scrolled .container-main {
   height: 3.25rem;
-  transition: height var(--duration-base) var(--ease-out);
+}
+
+/* Light-mode override — ativo quando header passa por section data-theme="light" */
+.site-header.is-light {
+  background-color: rgba(255, 255, 255, 0.90);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: rgba(10, 22, 40, 0.10);
+}
+
+.site-header.is-light .primary-nav a {
+  color: var(--color-deep-navy);
+}
+
+.site-header.is-light span {
+  color: var(--color-deep-navy);
+}
+
+.site-header.is-light svg path[stroke="#FFFFFF"] {
+  stroke: var(--color-deep-navy);
+  opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .site-header,
-  .site-header.is-scrolled .container-main {
+  .site-header .container-main {
     transition: none;
   }
 }
