@@ -592,11 +592,124 @@
         </div>
       </section>
 
+      <!-- ============================================================
+      04 · Sobre   — mapa SVG Brasil + stats + band clientes
+      ============================================================ -->
+      <section class="sobre" id="sobre" aria-labelledby="sobre-heading">
+        <div class="container-main sobre__container">
+
+          <!-- Bloco de abertura: label + título + desc -->
+          <header class="sobre__header">
+            <p class="sobre__label font-mono-numerals">04 — SOBRE</p>
+            <h2 id="sobre-heading" class="sobre__title">
+              Presença técnica em <span class="sobre__title-accent">todo o Brasil.</span>
+            </h2>
+            <p class="sobre__desc">
+              Sede em Salvador, com projetos executados em quatro estados brasileiros e
+              parceria internacional ativa com a UNESCO.
+            </p>
+          </header>
+
+          <!-- Corpo: mapa (esq) + stats (dir) -->
+          <div class="sobre__body">
+
+            <!-- Silhueta estilizada do Brasil (decorativa) -->
+            <div class="sobre__map" aria-hidden="true">
+              <svg
+                class="sobre__map-svg"
+                viewBox="0 0 460 530"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <!-- Blob aproximado do Brasil -->
+                <path
+                  class="sobre__map-shape"
+                  d="M190,65 C248,45 308,52 348,80 C378,102 402,134 412,172 C422,210 418,252 402,290 C385,330 358,352 332,382 C308,412 284,444 258,464 C232,480 200,480 175,462 C150,444 132,412 122,376 C110,340 106,296 110,256 C114,216 126,176 148,146 C164,122 176,94 190,65 Z"
+                />
+
+                <!-- Linha tracejada — callout UNESCO/México -->
+                <line
+                  class="sobre__map-callout-line"
+                  x1="192" y1="228"
+                  x2="92" y2="152"
+                  stroke-dasharray="4 4"
+                />
+                <text class="sobre__map-callout-text" x="28" y="140">UNESCO</text>
+                <text class="sobre__map-callout-text" x="28" y="156">México 2019</text>
+
+                <!-- TO — dot aqua -->
+                <circle class="sobre__map-dot" cx="192" cy="268" r="7" />
+                <text class="sobre__map-state-label" x="206" y="268">TO</text>
+
+                <!-- PE — dot aqua -->
+                <circle class="sobre__map-dot" cx="346" cy="260" r="7" />
+                <text class="sobre__map-state-label" x="360" y="260">PE</text>
+
+                <!-- BA — elipse verde com label -->
+                <ellipse class="sobre__map-ba" cx="268" cy="334" rx="34" ry="27" />
+                <text class="sobre__map-ba-label" x="268" y="334">BA</text>
+
+                <!-- MG — dot aqua -->
+                <circle class="sobre__map-dot" cx="248" cy="418" r="7" />
+                <text class="sobre__map-state-label" x="262" y="418">MG</text>
+              </svg>
+            </div>
+
+            <!-- Stats em dl semântico -->
+            <dl class="sobre__stats">
+              <div class="sobre__stat">
+                <dt class="sobre__stat-label">
+                  <span class="sobre__stat-title">Projetos executados</span>
+                  <span class="sobre__stat-sub font-mono-numerals">2009 → 2026</span>
+                </dt>
+                <dd class="sobre__stat-value sobre__stat-value--green font-mono-numerals">100+</dd>
+              </div>
+              <div class="sobre__stat">
+                <dt class="sobre__stat-label">
+                  <span class="sobre__stat-title">Anos de atuação</span>
+                  <span class="sobre__stat-sub font-mono-numerals">Fundada em 2010</span>
+                </dt>
+                <dd class="sobre__stat-value sobre__stat-value--green font-mono-numerals">15+</dd>
+              </div>
+              <div class="sobre__stat">
+                <dt class="sobre__stat-label">
+                  <span class="sobre__stat-title">Estados atendidos</span>
+                  <span class="sobre__stat-sub font-mono-numerals">BA · PE · TO · MG</span>
+                </dt>
+                <dd class="sobre__stat-value sobre__stat-value--green font-mono-numerals">04</dd>
+              </div>
+              <div class="sobre__stat">
+                <dt class="sobre__stat-label">
+                  <span class="sobre__stat-title">Parceiro internacional</span>
+                  <span class="sobre__stat-sub font-mono-numerals">Morelos · México</span>
+                </dt>
+                <dd class="sobre__stat-value sobre__stat-value--aqua font-mono-numerals">UNESCO</dd>
+              </div>
+            </dl>
+          </div>
+
+          <!-- Band de clientes -->
+          <div class="sobre__clients-band">
+            <ul class="sobre__clients" role="list" aria-label="Alguns de nossos clientes">
+              <li class="sobre__client font-mono-numerals">EMBASA</li>
+              <li class="sobre__client font-mono-numerals">YAMANA GOLD</li>
+              <li class="sobre__client font-mono-numerals">MINERAÇÃO CARAÍBA</li>
+              <li class="sobre__client font-mono-numerals">BUNGE ALIMENTOS</li>
+              <li class="sobre__client font-mono-numerals">UNESCO</li>
+              <li class="sobre__client font-mono-numerals">TENDA</li>
+              <li class="sobre__client font-mono-numerals">+50 CLIENTES</li>
+            </ul>
+          </div>
+
+        </div>
+      </section>
+
       <!--
       ============================================================
       PRÓXIMAS SEÇÕES
       ============================================================
-      04 · Sobre   — mapa SVG Brasil + stats
       05 · FAQ     — acordeão técnico (light)
       06 · Footer  — dark, refinamento do scaffold
     --></main>
