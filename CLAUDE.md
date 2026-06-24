@@ -210,6 +210,14 @@ Vite remove em build se configurado. Para garantir, manter `if (import.meta.env.
 - Navegação → `<nav>`, não `<div>` com classe `nav`
 - Hierarchia heading — não pular níveis (h1 → h3 sem h2 é erro)
 
+### 4.11 Tailwind utilities em elementos com estado JS
+
+**Nunca** adicione Tailwind utilities diretamente em elementos que recebem classes de estado via JavaScript.
+
+Exemplo problemático: `.site-header` recebe `.is-scrolled` e `.is-light` por JS. Se alguém adicionar `bg-white` via Tailwind diretamente no `<header>`, a especificidade do utilitário pode bloquear silenciosamente os overrides das classes de estado, quebrando a troca de tema sem gerar erro visível.
+
+**Regra:** elementos controlados por JS usam **apenas classes BEM custom** no HTML. Tailwind fica nos elementos filhos estáticos que não mudam de estado. Ver arquitetura completa em §12.12.
+
 ---
 
 ## 5. Estrutura de pastas
@@ -238,7 +246,7 @@ fj-ambiental/
 │   │   └── utils/                 # Helpers reutilizáveis
 │   ├── content/                   # Dados em JSON
 │   │   ├── services.json          # (a criar)
-│   │   └── projects.json          # (a criar)
+│   │   └── projects.json          # ✅ 8 projetos placeholder
 │   └── assets/
 │       └── logo/                  # SVGs da marca
 ├── plugins/
@@ -449,6 +457,18 @@ Quando implementar, criar como componente `.btn-pill` reutilizável (Serviços, 
 }
 ```
 
+#### Variante `.btn-pill--dark` (para CTAs em fundo canvas/light)
+
+Quando o botão está sobre fundo claro (`--color-canvas`, `--color-surface`), usar esta variante:
+
+- Fundo: `--color-deep-navy`
+- Texto: `--color-ink-inverse` (branco)
+- Ícone: background `--color-fj-green`, cor `--color-deep-navy`
+- Hover ícone: background `--color-fj-green-vivid`
+- Comportamento de hover idêntico ao padrão (gap expande, ícone rotaciona -45°)
+
+Uso atual: CTA "Conheça todos os 100+ projetos" na section Portfólio.
+
 ### 12.3 Microinteração da seta circular (PADRÃO GLOBAL)
 
 A rotação `-45deg` + mudança para verde no hover de qualquer "círculo com seta" é a assinatura de interação do site. Aplicar consistentemente em: botões pill, cards de serviço (se tiverem arrow), card "Ver case" do portfólio.
@@ -469,7 +489,7 @@ A rotação `-45deg` + mudança para verde no hover de qualquer "círculo com se
   3. **Parágrafo:** branco/gelo (opacity 82%), max-width 460px, centralizado. "Atuamos no planejamento, organização e coordenação de ações necessárias para a regularização de atos ambientais." Margin-bottom 34px.
   4. **CTA cápsula assimétrico:** fundo navy `#0A1628`, texto branco caixa-alta "Entre em Contato". Círculo verde com seta escura COLADO NO CANTO ESQUERDO (atenção: invertido vs. os outros botões do site, onde o círculo fica à direita). Padding `8px 28px 8px 8px`. Hover: gap expande, círculo rotaciona -45°. Link → `/contato.html`.
 - **REMOVIDO (decisão do cliente):** coordenadas técnicas nos cantos e scroll indicator. Hero fica limpo, foco no conteúdo central.
-- **Verde sobre dark:** usar tom mais vibrante `#00C766` (não o `#00A859` do sistema), pois sobre fundo escuro precisa de mais luminância. Aplica-se ao Hero e a qualquer texto/acento verde sobre fundos escuros cinemáticos.
+- **Verde sobre dark:** usar o token `--color-fj-green-vivid` (`#00C766`), não o `--color-fj-green` (`#00A859`). Sobre fundo escuro precisa de mais luminância. Aplica-se ao Hero e a qualquer texto/acento verde sobre fundos escuros cinemáticos. Ver regra completa em §2.5 do DESIGN_SYSTEM.md.
 - **Micro-interações (produção):** H1 recebe SplitType — palavras entram em fade-up stagger no load (após preloader). Badge com leve fade-in. Background com possível parallax sutil no scroll (subtle, respeitando reduced-motion).
 - **Header:** logo + navegação ficam por cima do Hero (já existe `src/partials/header.html` no scaffold). Header tem fundo translúcido com backdrop-blur sobre o Hero.
 
@@ -511,25 +531,29 @@ A rotação `-45deg` + mudança para verde no hover de qualquer "círculo com se
 - **CSS:** todo o CSS de Serviços está em `src/styles/base.css`. NÃO existe `src/styles/sections/`. Dívida técnica: dividir por section no futuro.
 - **Tailwind + tokens:** Tailwind v3.4 e CSS custom coexistem. `tokens.css` é a fonte da verdade para variáveis; Tailwind para layout/espaçamento.
 
-### 12.6 Section 03 — Portfólio (VALIDADO)
+### 12.6 Section 03 — Portfólio (IMPLEMENTADO — UI estática)
 
 - **Tema:** light (`--color-canvas`)
-- **Título:** "Engenharia hídrica **em ação.**" (segunda linha verde) — lado direito do editorial split
-- **Label:** "PORTFÓLIO TÉCNICO" (pill verde com dot) + counter "03 / 24 CASES" + arrows prev/next no header
-- **Layout:** editorial split assimétrico `1.45fr / 1fr`:
-  - Esquerda: featured card (aspect 16/11) dark com imagem, tags overlay, coordenadas, título/metadata, CTA "Ver case"
-  - Direita: headline editorial + descrição + strip de stats 2×2 (mono numerals)
+- **Título:** "Engenharia hídrica **em ação.**" (segunda linha verde) — em `.portfolio__header-left`
+- **Label:** "PORTFÓLIO TÉCNICO" (pill verde com dot) — **sem counter e sem setas no header**
+- **Layout:** editorial split assimétrico:
+  - Mobile: `1fr` (coluna única)
+  - Desktop (≥ 900px): `1.45fr / 1fr`
+  - Esquerda: featured card (`aspect-ratio: 16/11`, `max-height: 340px`) dark com imagem, tags overlay, coordenadas, metadata, CTA "Ver case"
+  - Direita: headline editorial + descrição + stats 2×2 (mono numerals via `<dl>`)
 - **Featured card detalhes:**
-  - Padrão topográfico SVG sutil (opacity 7%) no fundo
-  - Glow aqua radial no canto superior direito
-  - Tags duplas top-left (primária verde sólida + secundária glassmorphism)
-  - Coordenadas geográficas top-right (mono, ex: 12°44'01"S / 38°47'05"W) — detalhe de engenharia
-  - Metadata em mono: cliente · ano · localização
-- **Stats por projeto:** cada projeto tem suas 4 stats próprias (label/value/unit) — trocam ao trocar de case. Ex: Poços = Vazão(L/s)/Poços/Profundidade/Duração.
-- **Thumbnails:** 5 thumbs seletores abaixo, com indicador (linha verde acima + glow verde no ativo), número mono
-- **Progress line:** barra com preenchimento verde mostrando posição no catálogo
-- **CTA final:** `.btn-pill` "Conheça todos os 100+ projetos" → `/portfolio.html`
-- **Dados:** estruturar em `src/content/projects.json`. Coordenadas reais ainda não disponíveis — usar fakes; se não houver listagem com localização exata, remover o campo coords dos cards na implementação final.
+  - Tags duplas top-left: primária (`.portfolio__tag-primary`, verde sólida) + secundária (`.portfolio__tag-secondary`, glassmorphism) — glassmorphism funcional aqui pois tem função semântica (distinguir hierarquia de tag sobre imagem); ver exceção em §10 do DESIGN_SYSTEM.md
+  - Coordenadas geográficas top-right (`aria-hidden="true"`, decorativas)
+  - Metadata em mono bottom-left: cliente · ano · localização
+  - CTA "Ver case" bottom-right: `.btn-pill` padrão (branco)
+  - **Não implementado:** padrão topográfico SVG e glow aqua radial foram considerados no protótipo mas não estão no código
+- **Stats por projeto:** 4 stats em `<dl>` com `<dt>` label e `<dd>` value + unit — trocam ao trocar de case
+- **Setas de navegação:** `.portfolio__arrow--prev` e `.portfolio__arrow--next` ficam **dentro da `.portfolio__thumbs-row`**, flanqueando a `<ul class="portfolio__thumbs">` — **não no header**
+- **Thumbnails:** o catálogo tem 8 projetos (`projects.json`), mas hoje há **4 thumbnails estáticos no HTML**. Quando `portfolio.js` for criado, gerará os 8 dinamicamente. Indicador visual do ativo: borda verde 2px + linha verde no topo via `::before`
+- **Barra "Explorar":** `.portfolio__explore` abaixo dos thumbs — label "Explorar" + track + `.portfolio__explore-fill` (preenchimento verde, largura via `style` inline) + count "01 / 08". **Não se chama "progress line".**
+- **CTA final:** `.btn-pill.btn-pill--dark` "Conheça todos os 100+ projetos" → `/portfolio.html` (fundo deep-navy, ícone verde)
+- **Módulo JS:** `portfolio.js` **ainda não existe**. A section é 100% estática. Interatividade (troca de case, navegação por setas, atualização da barra Explorar) está pendente de implementação.
+- **Dados:** `src/content/projects.json` ✅ já existe com 8 projetos placeholder. ⚠️ Bug de filename: ver §12.13.
 
 ### 12.7 Section 04 — Sobre (VALIDADO — já desenhado pelo cliente)
 
@@ -556,7 +580,7 @@ Site de referência principal do cliente: `webhubeducacao.com.br/comunidade-webh
 2. ✅ ~~**Implementar Hero (Section 01)**~~ — conforme §12.4
 3. ✅ ~~**Implementar Section 02 (Serviços)**~~ — estrutura e conteúdo prontos · **⬜ pendente: ícones soltos (~40px, sem caixa)** — ver §12.5
 4. **Corrigir CLS** (0.472 → < 0.05) — causa principal: fontes IBM Plex sem dimensões reservadas, seção Serviços responde por 88% do shift — ver §12.10
-5. **Implementar Section 03 (Portfólio)** conforme §12.6 + `projects.json` + `portfolio.js`
+5. ✅ ~~**Implementar Section 03 (Portfólio) — UI estática**~~ — conforme §12.6 · **⬜ pendente: `portfolio.js` (interatividade: troca de case, navegação, barra Explorar)**
 6. **Prototipar + implementar FAQ (light)**
 7. **Refinar Footer (dark)** — base existente no scaffold; corrigir contraste `text-white/40` (falha WCAG) — ver §12.10
 8. **Adicionar preloader** (§12.8) + SplitType no Hero
@@ -591,6 +615,64 @@ Site de referência principal do cliente: `webhubeducacao.com.br/comunidade-webh
 - **Contraste footer:** textos com `text-white/40` (opacity 40%) falham WCAG 4.5:1 — corrigir antes do launch
 - **Headers de segurança** (CSP, HSTS, COOP, X-Frame-Options): ausentes — configurar somente no deploy, não aplicável em dev
 - **Preloader:** ainda não implementado — quando pronto reduz percepção de FOUC (ver §12.8)
+
+### 12.11 Viewport fitting — `min-height: 100svh` (padrão das sections)
+
+As sections `.services` e `.portfolio` usam `min-height: 100svh` (não `100vh`).
+
+**Por que `svh` em vez de `vh`?** Em mobile, a unidade `vh` inclui a altura da barra de URL do navegador, que aparece e desaparece ao rolar. Isso provoca overflow e jumping indesejado. A unidade `svh` (small viewport height) usa a viewport **sem** a barra de URL — o menor tamanho possível — garantindo que o conteúdo nunca seja cortado independente do estado da barra.
+
+**Padrão de implementação:**
+```css
+.nome-da-section {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: calc(var(--header-height) + Xrem); /* compensa header fixo */
+  padding-bottom: Yrem;
+}
+```
+
+O conteúdo fica centralizado verticalmente no espaço restante. Usar este padrão em toda section que deve preencher a viewport.
+
+### 12.12 Header dinâmico — arquitetura (`.is-scrolled` + `.is-light`)
+
+Módulo: `src/scripts/modules/header.js`.
+
+#### Estados CSS ativados por JS
+
+| Classe | Gatilho ScrollTrigger | Efeito visual |
+|---|---|---|
+| `.is-scrolled` | `.hero bottom` passa por `top` da viewport | Fundo navy translúcido `rgba(10,22,40,0.85)` + backdrop-blur 12px + altura reduzida (5rem → 3.25rem) |
+| `.is-light` | Header entra/sai de `[data-theme="light"]` | Fundo branco translúcido + texto/ícones dark. Adicionada no `onEnter`/`onEnterBack`, removida no `onLeave`/`onLeaveBack`. |
+
+Sem animação própria no JS — toda transição é CSS `transition` ativada pela classe. `prefers-reduced-motion` cancela as transitions via CSS (`transition: none`).
+
+#### Ordem de inicialização em `main.js` (CRÍTICA — não alterar)
+
+```js
+initSmoothScroll(); // 1. Lenis primeiro — registra o scroller no ScrollTrigger
+initHero();         // 2. Hero segundo
+initHeader();       // 3. Header por último — ScrollTrigger precisa de Lenis ativo
+```
+
+Se `initHeader()` rodar antes de `initSmoothScroll()`, os triggers calculam posições erradas e os estados disparam fora de sincronia com o scroll visível.
+
+#### Regra crítica: nunca Tailwind utility em elemento com estado JS
+
+O `.site-header` usa apenas classes BEM custom no HTML. **Não adicionar** utilitários Tailwind (ex: `bg-white`, `text-gray-900`) diretamente no elemento `<header>`. A especificidade de utilitários Tailwind pode bloquear silenciosamente os overrides das classes `.is-scrolled` e `.is-light`. Ver também §4.11.
+
+### 12.13 Bug conhecido — discrepância de filename em `projects.json`
+
+**Ainda não corrigido.**
+
+| Local | Campo | Valor atual |
+|---|---|---|
+| `src/content/projects.json` linha 35 | `"image"` do projeto `"rede-hidrometrica"` | `instalacao-rede-hidrometrica-ana-aneel.webp` |
+| `index.html` linha ~527 | `src` do thumb correspondente | `instalacao-rede-hidrometrica-ana-aneel_1x.webp` |
+
+Um dos dois está errado (divergência no sufixo `_1x`). Antes de corrigir: verificar qual filename existe em `src/assets/imgs/` e corrigir o divergente. Se o arquivo real tem `_1x`, o `projects.json` deve ser atualizado; se não tem, o `index.html` deve ser corrigido.
 
 ---
 

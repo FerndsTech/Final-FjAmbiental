@@ -26,7 +26,8 @@ A inspiração visual vem de templates premium do Webflow (Altuz, Shokti, Forfut
 
 | Token | Hex | Uso |
 |---|---|---|
-| `--color-fj-green` | `#00A859` | **Cor principal da marca.** CTAs, links, ícones, ênfases. Vibrante mas profissional. |
+| `--color-fj-green` | `#00A859` | **Cor principal da marca.** CTAs, links, ícones, ênfases em fundos claros. |
+| `--color-fj-green-vivid` | `#00C766` | **Variante de alto contraste.** Usado sobre fundos dark para garantir contraste visual — o `#00A859` perde luminância sobre navy escuro. Aplica-se ao Hero, overlays dark, e qualquer texto/acento verde sobre fundo escuro cinemático. |
 | `--color-fj-green-dim` | `#008A48` | Hover de elementos verdes, sombras de elementos verdes |
 | `--color-fj-aqua` | `#00B4D8` | **Acento secundário.** Usado pontualmente para reforçar contexto hídrico — ícones de água, dados secundários, focus states. **Nunca** como cor dominante. |
 
@@ -66,6 +67,8 @@ A inspiração visual vem de templates premium do Webflow (Altuz, Shokti, Forfut
 - Verde sólido pra CTAs primárias; outline para CTAs secundárias.
 - Aqua só em contextos hídricos explícitos (gota d'água, ícones de água, "Recursos Hídricos" label) — não decoração.
 - Texto sobre verde: branco. Texto sobre aqua: navy escuro. **Nunca preto puro sobre cores da marca.**
+- **Verde sobre fundo dark** → usar `--color-fj-green-vivid` (`#00C766`). O `--color-fj-green` (`#00A859`) perde luminância sobre navy escuro e pode falhar WCAG.
+- **Verde sobre fundo light** → usar `--color-fj-green` (`#00A859`). O `--color-fj-green-vivid` é desnecessariamente vibrante sobre canvas/white.
 
 ---
 
@@ -283,7 +286,7 @@ Stroke width: `1.75px` (refinado, não gritante).
 
 - ❌ Gradientes lineares decorativos (`linear-gradient(45deg, purple, blue)`)
 - ❌ Drop shadow em texto
-- ❌ Glassmorphism (backdrop-blur ornamental)
+- ❌ Glassmorphism (backdrop-blur ornamental) — **EXCEÇÃO:** backdrop-blur é permitido quando tem função semântica clara e documentada. Ex: `.portfolio__tag-secondary` usa glassmorphism para distinguir visualmente a hierarquia entre tag primária e secundária sobrepostas à imagem — contexto onde a função justifica o uso. Nesses casos, registrar o motivo inline no CSS (`/* glassmorphism funcional: distingue hierarquia de tag sobre imagem */`).
 - ❌ Bordas multi-cor ou animadas
 - ❌ Cursor customizado em desktop
 - ❌ Emoji em UI (só em conteúdo escrito pelo usuário)
