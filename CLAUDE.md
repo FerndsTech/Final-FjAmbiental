@@ -102,6 +102,38 @@ Quando migrarmos para Astro, cada partial vira `.astro` direto, copy-paste.
 Serviços e projetos do portfólio ficam em `src/content/*.json` lidos em build-time.
 **Nunca** hardcode "23 serviços" em HTML. Migra direto para Content Collections do Astro.
 
+#### Critério de decisão: onde um conteúdo deve viver
+
+Antes de criar qualquer section nova, decida onde o conteúdo dela mora
+usando este critério de 3 vias:
+
+**1. Chrome do site (repete entre PÁGINAS diferentes) → `src/partials/`**
+Se o elemento aparece (ou vai aparecer) em mais de uma página do site —
+ex: header, footer, head — ele é um partial, incluído via
+`<include src="arquivo.html" />` (vite-plugin-includes.js). O critério é
+repetição CROSS-PAGE, não repetição dentro da mesma página. Pensando na
+migração futura para Astro: cada partial é candidato direto a virar
+componente `.astro` (`<Header />`).
+
+**2. Dado estruturado e repetido (N itens do mesmo shape) → `src/content/*.json`**
+Se o conteúdo de uma section é uma coleção de N registros com os mesmos
+campos — ex: 8 projetos do portfólio, N serviços, N perguntas de FAQ — ele
+vira um arquivo JSON em `src/content/`, lido em build-time, nunca
+hardcoded item-a-item no HTML. Pensando na migração futura: cada JSON é
+candidato direto a uma Astro Content Collection.
+
+**3. Conteúdo editorial único de uma section → inline no HTML da própria página**
+Se o conteúdo é único (não é uma lista de N itens iguais) — ex: o texto do
+Hero, a introdução da section Sobre, o título e intro da FAQ — ele fica
+escrito direto no HTML da section, sem JSON e sem partial. Não há
+repetição de shape que justifique abstração.
+
+**Módulos JS** (`src/scripts/modules/`) seguem uma lógica separada: cada
+módulo nasce quando a section **ganha comportamento interativo** (não quando
+a section é criada). Uma section pode existir 100% estática por várias
+sessões antes de receber seu módulo — isso é estágio de desenvolvimento,
+não ausência arquitetural.
+
 ### 3.3 Design tokens em CSS variables
 
 `src/styles/tokens.css` é a **única fonte de verdade**.
