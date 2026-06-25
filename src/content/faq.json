@@ -1,0 +1,42 @@
+[
+  {
+    "id": "outorga-o-que-e",
+    "question": "O que é outorga de direito de uso de recursos hídricos, e minha empresa precisa dela?",
+    "answer": "É o ato administrativo pelo qual o poder público autoriza, por prazo determinado, o uso de um recurso hídrico — captação superficial ou subterrânea, lançamento de efluentes, intervenções ou aproveitamento hidroelétrico. Empreendimentos que captam água de rios, poços ou barragens, ou que lançam efluentes, normalmente precisam regularizar essa situação junto ao órgão competente."
+  },
+  {
+    "id": "outorga-estadual-federal",
+    "question": "Outorga estadual ou federal — como saber qual se aplica ao meu caso?",
+    "answer": "Depende do domínio do corpo hídrico: rios e aquíferos estaduais são regulados por órgãos como o INEMA (Bahia), enquanto corpos hídricos de domínio da União são regulados pela ANA. Identificamos a esfera correta antes de protocolar, evitando o órgão errado."
+  },
+  {
+    "id": "lancamento-efluentes",
+    "question": "Preciso de outorga para lançar efluentes em um corpo hídrico?",
+    "answer": "Sim. O lançamento de efluentes em corpos d'água é um uso sujeito a outorga, pois afeta a qualidade do recurso hídrico. Conduzimos o processo de regularização junto ao órgão competente, com os estudos técnicos exigidos."
+  },
+  {
+    "id": "perfuracao-poco",
+    "question": "O que é necessário para perfurar um poço tubular e captar água subterrânea?",
+    "answer": "É preciso obter a Autorização para Perfuração de Poço (APPO) antes da perfuração e, em seguida, a outorga de uso para a captação subterrânea. Cuidamos do planejamento técnico e do trâmite administrativo completo das duas etapas."
+  },
+  {
+    "id": "intervencoes-hidricas",
+    "question": "Obras como pontes, bueiros e travessias em cursos d'água precisam de regularização?",
+    "answer": "Sim. Intervenções hídricas — pontes, bueiros, canalizações, passagens molhadas e estruturas semelhantes — exigem outorga específica. Elaboramos os projetos e a documentação técnica para regularizar a interferência no corpo hídrico."
+  },
+  {
+    "id": "renovacao-outorga",
+    "question": "Minha outorga está vencendo — como funciona a renovação?",
+    "answer": "A outorga tem prazo determinado e deve ser renovada antes do vencimento para manter o uso regularizado. Também conduzimos alterações de outorga existente quando muda a vazão, a finalidade ou a titularidade do empreendimento."
+  },
+  {
+    "id": "rede-hidrometrica",
+    "question": "Como funciona a instalação de estações de monitoramento hidrométrico?",
+    "answer": "Projetamos e instalamos estações pluviométricas, fluviométricas e piezométricas, conforme a Resolução Conjunta ANA-ANEEL nº 03/2010, além de medição de vazão, análise de qualidade da água e consistência de séries históricas."
+  },
+  {
+    "id": "tipo-de-cliente",
+    "question": "Que tipo de cliente a FJ Ambiental atende?",
+    "answer": "Atuamos para pessoa física e jurídica desde 2010: indústrias, mineradoras, concessionárias, irrigantes, prefeituras e organismos como a UNESCO, da outorga e hidrometria até a hidrologia (estudos de cheias, vazão regularizada e disponibilidade hídrica)."
+  }
+]
