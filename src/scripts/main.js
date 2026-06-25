@@ -24,6 +24,7 @@ import { initHeader } from './modules/header.js';
 import { initHero } from './modules/hero.js';
 import { initSmoothScroll } from './modules/smooth-scroll.js';
 import { initReveal } from './modules/reveal.js';
+import { initFaq } from './modules/faq.js';
 
 // === Inicialização ===
 // Cada init retorna função de cleanup para suporte futuro a View Transitions.
@@ -34,6 +35,7 @@ function init() {
   cleanups.push(initHero());
   cleanups.push(initHeader());       // ScrollTrigger do header criado após Lenis estar ativo
   cleanups.push(initReveal());
+  cleanups.push(initFaq());
   setTimeout(() => { requestAnimationFrame(() => ScrollTrigger.refresh()); }, 100);
 
   if (import.meta.env.DEV) {
