@@ -1663,3 +1663,314 @@ textarea {
     transition: none;
   }
 }
+
+/* ============================================
+   SECTION: .footer — Rodapé (dark + mapa)
+   ============================================ */
+
+.footer {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-deep-navy);
+  min-height: 560px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Camada 1: Mapa de fundo --- */
+
+.footer__map {
+  position: absolute;
+  inset: 0;
+  background-image: url('../assets/img1footer.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: invert(1);
+  opacity: 0.20;
+  z-index: 0;
+}
+
+/* --- Camada 2: Overlay gradiente sobre o mapa --- */
+
+.footer__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(10 22 40 / 0.82) 0%,
+    rgb(10 22 40 / 0.50) 35%,
+    rgb(10 22 40 / 0.78) 68%,
+    rgb(10 22 40 / 1.00) 100%
+  );
+  z-index: 1;
+}
+
+/* --- Camada 3: Conteúdo --- */
+
+.footer__inner {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.footer__container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 3.5rem var(--space-container) 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.footer__columns {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  gap: 2.5rem clamp(2rem, 5vw, 4rem);
+  flex: 1;
+  align-items: start;
+  padding-bottom: 3rem;
+}
+
+/* Col 1: Brand + nav */
+
+.footer__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.footer__logo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+}
+
+.footer__logo-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm); /* quadrado com canto arredondado, conforme footer.jpg */
+  background: var(--color-fj-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-deep-navy);
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+
+.footer__logo-name {
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.90);
+  letter-spacing: -0.01em;
+}
+
+.footer__tagline {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.6;
+  max-width: 22ch;
+}
+
+.footer__nav-label,
+.footer__contact-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 0.75rem;
+}
+
+.footer__nav-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.footer__nav-list a {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.footer__nav-list a:hover {
+  color: var(--color-fj-green-vivid);
+}
+
+/* Col 2: Contato */
+
+.footer__address {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.7;
+  font-style: normal;
+}
+
+.footer__address a {
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-out);
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.footer__address a:hover {
+  color: var(--color-fj-green-vivid);
+}
+
+/* Col 3: CTA + Social */
+
+.footer__cta-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.footer__cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--color-fj-green);
+  color: var(--color-deep-navy);
+  padding: 10px 10px 10px 20px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  align-self: flex-start;
+  transition: gap var(--duration-fast) var(--ease-out);
+}
+
+.footer__cta-btn:hover {
+  gap: 16px;
+}
+
+.footer__cta-btn__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--color-deep-navy);
+  color: var(--color-fj-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--duration-fast) var(--ease-out);
+  flex-shrink: 0;
+}
+
+.footer__cta-btn:hover .footer__cta-btn__icon {
+  transform: rotate(-45deg);
+}
+
+.footer__social {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.footer__social-link {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 0.5px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  transition: border-color var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out);
+}
+
+.footer__social-link:hover {
+  border-color: var(--color-fj-green-vivid);
+  color: var(--color-fj-green-vivid);
+}
+
+/* --- Faixa inferior: wordmark + legal --- */
+
+.footer__bottom {
+  position: relative;
+  overflow: hidden;
+  border-top: 0.5px solid rgba(255, 255, 255, 0.06);
+}
+
+.footer__wordmark-wrap {
+  overflow: hidden;
+  line-height: 0.8;
+  padding: 0 var(--space-container);
+}
+
+.footer__wordmark {
+  display: block;
+  font-size: clamp(3rem, 13vw, 11rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  line-height: 0.8;
+  /* Gradiente decorativo: texto com fade vertical para navy.
+     EXCEÇÃO DOCUMENTADA — ver DESIGN_SYSTEM.md §10 */
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82) 0%,
+    rgb(10 22 40 / 0.08) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: rgba(255, 255, 255, 0.35); /* fallback sem suporte a background-clip: text */
+  user-select: none;
+}
+
+.footer__legal {
+  position: absolute;
+  bottom: 0.625rem;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-container);
+}
+
+.footer__legal-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.30);
+  letter-spacing: 0.04em;
+  pointer-events: auto;
+}
+
+/* --- Responsivo: 1 coluna ≤ 760px --- */
+
+@media (max-width: 760px) {
+  .footer__columns {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .footer__wordmark {
+    font-size: clamp(2.5rem, 15vw, 6rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .footer__cta-btn,
+  .footer__cta-btn__icon,
+  .footer__nav-list a,
+  .footer__address a,
+  .footer__social-link {
+    transition: none;
+  }
+}
