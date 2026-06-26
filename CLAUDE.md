@@ -250,6 +250,24 @@ Exemplo problemático: `.site-header` recebe `.is-scrolled` e `.is-light` por JS
 
 **Regra:** elementos controlados por JS usam **apenas classes BEM custom** no HTML. Tailwind fica nos elementos filhos estáticos que não mudam de estado. Ver arquitetura completa em §12.12.
 
+### 4.12 Replicar convenção "por analogia" sem mostrar a fonte
+
+Ao seguir o padrão de um arquivo existente (ex: estrutura de um JSON de conteúdo), mostrar o trecho real desse arquivo antes de aplicar o padrão a um arquivo novo. Não afirmar "seguindo a convenção de X" sem exibir o trecho de X que embasa a afirmação.
+
+### 4.13 Campos semânticos com estado não verificado
+
+Um campo com significado de estado (ex: booleano de "validado", "placeholder", "publicado") não pode afirmar um estado que não ocorreu de fato. Inicializar com o valor real no momento da criação — não com o valor aspiracional ou copiado do template.
+
+### 4.14 Acordeão: não usar `grid-template-rows: 0fr` para colapso de altura
+
+Confirmado neste projeto (Chrome) que o item filho de grid impõe altura mínima residual e não colapsa para zero com `grid-template-rows: 0fr` — computed height resultou em 16px (o `padding-bottom` do `<p>` filho sobrevivendo ao colapso).
+
+**Padrão adotado:** `max-height: 0; overflow: hidden` no CSS estático para o estado fechado. JS da Etapa de interatividade mede `scrollHeight` real e aplica via `element.style.maxHeight = scrollHeight + 'px'` para o estado aberto — sem valor fixo chutado. A `transition: max-height` no CSS cuida da animação; o JS só fornece o valor de destino correto.
+
+### 4.15 Bug visual persistente: instrumentar antes de propor hipótese
+
+Se uma correção CSS não resolver um bug visual, a próxima etapa é **medir o estado computado real** — DevTools → Computed tab → `height` do elemento — ou listar a cascata CSS completa que alcança o elemento. Não propor outra hipótese a partir de nova leitura estática do código. A causa real pode ser diferente de qualquer hipótese baseada em leitura.
+
 ---
 
 ## 5. Estrutura de pastas
@@ -274,11 +292,15 @@ fj-ambiental/
 │   │   ├── main.js                # Entry point
 │   │   ├── modules/               # Um arquivo por feature
 │   │   │   ├── smooth-scroll.js   # Lenis + GSAP sync
-│   │   │   └── reveal.js          # Fade-up on scroll
+│   │   │   ├── reveal.js          # Fade-up on scroll
+│   │   │   ├── header.js          # Shrinking dinâmico + modo camaleão
+│   │   │   ├── hero.js            # Vídeo pause/play reduced-motion
+│   │   │   └── faq.js             # Acordeão FAQ (max-height + scrollHeight)
 │   │   └── utils/                 # Helpers reutilizáveis
 │   ├── content/                   # Dados em JSON
 │   │   ├── services.json          # (a criar)
-│   │   └── projects.json          # ✅ 8 projetos placeholder
+│   │   ├── projects.json          # ✅ 8 projetos placeholder
+│   │   └── faq.json               # ✅ 8 perguntas (id, question, answer)
 │   └── assets/
 │       └── logo/                  # SVGs da marca
 ├── plugins/
@@ -438,7 +460,7 @@ O site alterna fundo dark (navy da logo) e light (off-white) entre sections. Ess
 | 02  | Serviços  | LIGHT           | `--color-canvas` (ver nota)     | ✅ Validado (versão dark)       |
 | 03  | Portfólio | LIGHT           | `--color-canvas`                | ✅ Validado                     |
 | 04  | Sobre     | DARK            | `--color-deep-navy`             | ✅ Validado                     |
-| 05  | FAQ       | LIGHT           | `--color-canvas`                | ⬜ A prototipar                 |
+| 05  | FAQ       | LIGHT           | `--color-canvas`                | ✅ Implementado — ver §12.14    |
 | 06  | Footer    | DARK            | `--color-deep-navy`             | ✅ Existe no scaffold (refinar) |
 
 **NOTA DE AJUSTE DE RITMO:** o Hero virou dark cinemático (foto + overlay), diferente do plano original (white). Isso cria potencial conflito Hero(dark) → Serviços(dark). DECISÃO PENDENTE com cliente: ou (a) Serviços vira light com cards azuis, ou (b) mantém-se um respiro visual entre Hero e Serviços. A versão validada de Serviços em §12.4 está em dark — pode precisar de adaptação para light dependendo da decisão. O Hero dark cinemático é tão diferente visualmente de uma section dark sólida que o conflito é menor do que parece — avaliar na implementação.
@@ -500,6 +522,18 @@ Quando o botão está sobre fundo claro (`--color-canvas`, `--color-surface`), u
 - Comportamento de hover idêntico ao padrão (gap expande, ícone rotaciona -45°)
 
 Uso atual: CTA "Conheça todos os 100+ projetos" na section Portfólio.
+
+#### Variante `.btn-pill--hero` (CTA do Hero e CTAs sobre fundos dark com ícone à esquerda)
+
+Igual ao `--dark` em cores, com uma diferença estrutural: **o ícone fica à esquerda** (padding invertido — `8px 28px 8px 8px`). Usado quando o CTA está sobre fundo dark mas o ícone precisa ficar antes do texto.
+
+- Fundo: `--color-deep-navy`
+- Texto: `--color-ink-inverse` (branco)
+- Ícone: background `--color-fj-green-vivid`, cor `--color-deep-navy` — **à esquerda**
+- Hover ícone: mantém `--color-fj-green-vivid` (não escurece), rotaciona `-45deg`
+- Padding: `8px 28px 8px 8px` (espaço extra à direita, ícone cola na esquerda)
+
+Uso atual: Hero CTA ("Entre em Contato") e FAQ CTA (WhatsApp placeholder).
 
 ### 12.3 Microinteração da seta circular (PADRÃO GLOBAL)
 
@@ -613,7 +647,7 @@ Site de referência principal do cliente: `webhubeducacao.com.br/comunidade-webh
 3. ✅ ~~**Implementar Section 02 (Serviços)**~~ — estrutura e conteúdo prontos · **⬜ pendente: ícones soltos (~40px, sem caixa)** — ver §12.5
 4. **Corrigir CLS** (0.472 → < 0.05) — causa principal: fontes IBM Plex sem dimensões reservadas, seção Serviços responde por 88% do shift — ver §12.10
 5. ✅ ~~**Implementar Section 03 (Portfólio) — UI estática**~~ — conforme §12.6 · **⬜ pendente: `portfolio.js` (interatividade: troca de case, navegação, barra Explorar)**
-6. **Prototipar + implementar FAQ (light)**
+6. ✅ ~~**Prototipar + implementar FAQ (light)**~~ — conforme §12.14 · CTA WhatsApp ainda em placeholder
 7. **Refinar Footer (dark)** — base existente no scaffold; corrigir contraste `text-white/40` (falha WCAG) — ver §12.10
 8. **Adicionar preloader** (§12.8) + SplitType no Hero
 9. Otimização de imagens (sharp), favicon system completo, Lighthouse pass em produção
@@ -694,6 +728,19 @@ Se `initHeader()` rodar antes de `initSmoothScroll()`, os triggers calculam posi
 #### Regra crítica: nunca Tailwind utility em elemento com estado JS
 
 O `.site-header` usa apenas classes BEM custom no HTML. **Não adicionar** utilitários Tailwind (ex: `bg-white`, `text-gray-900`) diretamente no elemento `<header>`. A especificidade de utilitários Tailwind pode bloquear silenciosamente os overrides das classes `.is-scrolled` e `.is-light`. Ver também §4.11.
+
+### 12.14 Section 05 — FAQ (IMPLEMENTADO)
+
+- **Tema:** light (`--color-canvas`), `min-height: 100svh` (conforme §12.11)
+- **Título:** "Saiba mais sobre os serviços oferecidos / pela **FJ Ambiental**" (bold verde só em "FJ Ambiental")
+- **Eyebrow:** "Perguntas & respostas" (mono, verde)
+- **Layout:** grid 2 colunas (≥ 700px) / 1 coluna (< 700px), 8 cards distribuídos 4+4
+- **Cards:** fundo `#F1F1EE` (tom intermediário canvas↔surface), borda 0.5px, radius-lg, padding lateral 1.5rem. Estado aberto: borda verde 28% opacity.
+- **Dados:** `src/content/faq.json` — array de 8 objetos `{ id, question, answer }`. Arquivo existe mas **não é lido em build-time nesta fase** — o HTML dos 8 cards está hard-coded em `index.html`.
+- **Acordeão:** `max-height: 0; overflow: hidden` (fechado) no CSS; `faq.js` mede `scrollHeight` real e aplica via `style.maxHeight` (aberto). `transition: max-height` cuida da animação. `grid-template-rows: 0fr` foi testado e **descartado** — ver §4.14.
+- **Módulo JS:** `src/scripts/modules/faq.js` ✅ — toggle `.is-open` + `aria-expanded`, one-open-at-a-time, listener de resize com debounce 200ms, cleanup completo.
+- **CTA:** `btn-pill btn-pill--hero` → `https://wa.me/5571XXXXXXXXX` ⚠️ **placeholder — substituir pelo número real antes do deploy**
+- **`prefers-reduced-motion`:** transição desabilitada via CSS; JS de medição funciona normalmente.
 
 ### 12.13 Bug conhecido — discrepância de filename em `projects.json`
 
