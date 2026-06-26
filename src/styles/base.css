@@ -1906,7 +1906,8 @@ textarea {
 .footer__wordmark-wrap {
   overflow: hidden;
   line-height: 0.8;
-  padding: 0 var(--space-container);
+  padding: 0;
+  text-align: center;
 }
 
 .footer__wordmark {
