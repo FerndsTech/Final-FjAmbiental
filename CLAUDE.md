@@ -5,31 +5,10 @@
 >
 > Compatível com a convenção `AGENTS.md` da indústria — duplica este arquivo como `AGENTS.md` se necessário.
 
----
-
-## 0. Correção pendente do scaffold (APLICAR PRIMEIRO)
-
-**Bug conhecido:** o servidor de desenvolvimento falha ao iniciar com:
-
-```
-[plugin:vite:import-analysis] Failed to resolve import "./styles/main.css" from "src/scripts/main.js"
-```
-
-**Causa:** em `src/scripts/main.js`, o import do CSS usa caminho relativo errado. Como `main.js` está em `src/scripts/`, o caminho `./styles/main.css` aponta para `src/scripts/styles/main.css` (inexistente).
-
-**Fix:** em `src/scripts/main.js`, trocar:
-
-```js
-import "./styles/main.css"; // ERRADO
-```
-
-por:
-
-```js
-import "../styles/main.css"; // CORRETO (sobe um nível)
-```
-
-Após o fix, `npm run dev` deve subir sem erros.
+**Documentação complementar:**
+- Estado atual de cada section → `docs/SECTIONS.md`
+- Histórico de bugs e diagnósticos → `docs/LICOES.md`
+- Tarefas pendentes → `docs/PENDENCIAS.md`
 
 ---
 
@@ -248,7 +227,7 @@ Vite remove em build se configurado. Para garantir, manter `if (import.meta.env.
 
 Exemplo problemático: `.site-header` recebe `.is-scrolled` e `.is-light` por JS. Se alguém adicionar `bg-white` via Tailwind diretamente no `<header>`, a especificidade do utilitário pode bloquear silenciosamente os overrides das classes de estado, quebrando a troca de tema sem gerar erro visível.
 
-**Regra:** elementos controlados por JS usam **apenas classes BEM custom** no HTML. Tailwind fica nos elementos filhos estáticos que não mudam de estado. Ver arquitetura completa em §12.12.
+**Regra:** elementos controlados por JS usam **apenas classes BEM custom** no HTML. Tailwind fica nos elementos filhos estáticos que não mudam de estado. Ver docs/SECTIONS.md § Header dinâmico.
 
 ### 4.12 Replicar convenção "por analogia" sem mostrar a fonte
 
@@ -260,9 +239,12 @@ Um campo com significado de estado (ex: booleano de "validado", "placeholder", "
 
 ### 4.14 Acordeão: não usar `grid-template-rows: 0fr` para colapso de altura
 
-Confirmado neste projeto (Chrome) que o item filho de grid impõe altura mínima residual e não colapsa para zero com `grid-template-rows: 0fr` — computed height resultou em 16px (o `padding-bottom` do `<p>` filho sobrevivendo ao colapso).
+Em Chrome, o filho de grid impõe altura mínima residual — `grid-template-rows: 0fr`
+não colapsa para zero quando há padding no elemento filho.
 
-**Padrão adotado:** `max-height: 0; overflow: hidden` no CSS estático para o estado fechado. JS da Etapa de interatividade mede `scrollHeight` real e aplica via `element.style.maxHeight = scrollHeight + 'px'` para o estado aberto — sem valor fixo chutado. A `transition: max-height` no CSS cuida da animação; o JS só fornece o valor de destino correto.
+**Padrão correto:** `max-height: 0; overflow: hidden` no CSS estático +
+JS que mede `scrollHeight` real e aplica via `element.style.maxHeight`.
+Nunca usar valor fixo chutado. Ver docs/LICOES.md #2 para o diagnóstico.
 
 ### 4.15 Bug visual persistente: instrumentar antes de propor hipótese
 
@@ -294,23 +276,28 @@ fj-ambiental/
 │   │   │   ├── smooth-scroll.js   # Lenis + GSAP sync
 │   │   │   ├── reveal.js          # Fade-up on scroll
 │   │   │   ├── header.js          # Shrinking dinâmico + modo camaleão
-│   │   │   ├── hero.js            # Vídeo pause/play reduced-motion
+│   │   │   ├── hero.js            # Animações do Hero + reduced-motion
 │   │   │   └── faq.js             # Acordeão FAQ (max-height + scrollHeight)
 │   │   └── utils/                 # Helpers reutilizáveis
 │   ├── content/                   # Dados em JSON
-│   │   ├── services.json          # (a criar)
+│   │   ├── services.json          # ⬜ pendente — ver docs/PENDENCIAS.md
 │   │   ├── projects.json          # ✅ 8 projetos placeholder
 │   │   └── faq.json               # ✅ 8 perguntas (id, question, answer)
 │   └── assets/
-│       └── logo/                  # SVGs da marca
+│       ├── logo/                  # SVGs da marca
+│       └── icones/                # SVGs de ícones (Flaticon, com "e")
+├── docs/
+│   ├── SECTIONS.md                # Estado atual de cada section
+│   ├── LICOES.md                  # Histórico de bugs e diagnósticos
+│   └── PENDENCIAS.md              # Tarefas pendentes
 ├── plugins/
 │   └── vite-plugin-includes.js    # Sistema de partials HTML
 ├── scripts/                       # Scripts Node de build
 ├── index.html                     # Home
-├── servicos.html                  # (a criar nas próximas iterações)
-├── portfolio.html                 # idem
-├── sobre.html                     # idem
-├── contato.html                   # idem
+├── servicos.html                  # ⬜ pendente
+├── portfolio.html                 # ⬜ pendente
+├── sobre.html                     # ⬜ pendente
+├── contato.html                   # ⬜ pendente
 ├── package.json
 ├── vite.config.js
 ├── tailwind.config.js
@@ -446,247 +433,37 @@ Antes de marcar qualquer feature como pronta, validar:
 
 ---
 
-## 12. Estado dos protótipos da Home (atualizado)
+## 12. Padrões de componentes e implementação
 
-Esta seção registra as decisões de design tomadas nas sessões de prototipagem de alta fidelidade. Quando for implementar uma section, **siga estas especificações** — elas já foram validadas com o cliente.
+### 12.1 Botão CTA (`.btn-pill`)
 
-### 12.1 Ritmo de contraste das sections (CONFIRMADO)
+Componente reutilizável implementado em `src/styles/base.css`. Três variantes:
 
-O site alterna fundo dark (navy da logo) e light (off-white) entre sections. Esse ritmo é a identidade visual da FJ Ambiental (azul + verde da logo traduzidos na estrutura). Ordem da home:
+**`.btn-pill`** (base) — sobre fundo dark: fundo branco, texto navy, ícone
+navy à direita. Padding assimétrico `10px 10px 10px 26px`. Hover: gap
+14px → 18px, ícone vira verde e rotaciona -45°.
 
-| Nº  | Section   | Tema            | Background                      | Status protótipo                |
-| --- | --------- | --------------- | ------------------------------- | ------------------------------- |
-| 01  | Hero      | DARK CINEMÁTICO | Foto drone + overlay escuro 40% | ✅ Validado                     |
-| 02  | Serviços  | LIGHT           | `--color-canvas` (ver nota)     | ✅ Validado (versão dark)       |
-| 03  | Portfólio | LIGHT           | `--color-canvas`                | ✅ Validado                     |
-| 04  | Sobre     | DARK            | `--color-deep-navy`             | ✅ Validado                     |
-| 05  | FAQ       | LIGHT           | `--color-canvas`                | ✅ Implementado — ver §12.14    |
-| 06  | Footer    | DARK            | `--color-deep-navy`             | ✅ Existe no scaffold (refinar) |
+**`.btn-pill--dark`** — sobre fundo light/canvas: fundo navy, texto branco,
+ícone verde à direita. Mesmo comportamento de hover.
 
-**NOTA DE AJUSTE DE RITMO:** o Hero virou dark cinemático (foto + overlay), diferente do plano original (white). Isso cria potencial conflito Hero(dark) → Serviços(dark). DECISÃO PENDENTE com cliente: ou (a) Serviços vira light com cards azuis, ou (b) mantém-se um respiro visual entre Hero e Serviços. A versão validada de Serviços em §12.4 está em dark — pode precisar de adaptação para light dependendo da decisão. O Hero dark cinemático é tão diferente visualmente de uma section dark sólida que o conflito é menor do que parece — avaliar na implementação.
+**`.btn-pill--hero`** — ícone à **esquerda**: padding `8px 28px 8px 8px`.
+Fundo navy, texto branco, ícone `--color-fj-green-vivid`. Usado no Hero
+CTA e FAQ CTA.
 
-**Regra geral:** evitar duas sections com mesmo tratamento visual seguidas. O contraste é intencional.
+Seta em todas as variantes: path `M7 17L17 7M9 7h8v8`, `stroke-width 2.5`.
 
-### 12.2 Padrão de botão CTA primário (CONFIRMADO — reutilizar em todo o site)
+### 12.2 Microinteração da seta circular (padrão global)
 
-Quando implementar, criar como componente `.btn-pill` reutilizável (Serviços, Portfólio, Hero secundário). Especificação:
+A rotação `-45deg` + mudança para verde no hover de qualquer "círculo com
+seta" é a assinatura de interação do site. Aplicar consistentemente em:
+botões pill, cards de serviço (se tiverem arrow), card "Ver case" do
+portfólio.
 
-- Estado normal: fundo branco (`#fff`), texto navy (`--color-deep-navy`), círculo navy com seta branca à direita
-- Padding assimétrico: `10px 10px 10px 26px` (espaço extra à esquerda, círculo cola na direita)
-- Hover: gap texto→círculo expande (`14px → 18px`), círculo vira verde (`--color-fj-green`), seta rotaciona `-45deg`
-- Seta: ícone `arrow-up-right` (path `M7 17L17 7M9 7h8v8`), `stroke-width 2.5`
-- Border-radius: `999px` (pill)
+### 12.3 Viewport fitting — `min-height: 100svh`
 
-```css
-.btn-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  background: #fff;
-  color: var(--color-deep-navy);
-  padding: 10px 10px 10px 26px;
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.25s var(--ease-out);
-}
-.btn-pill:hover {
-  gap: 18px;
-}
-.btn-pill__icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--color-deep-navy);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s var(--ease-out);
-}
-.btn-pill:hover .btn-pill__icon {
-  background: var(--color-fj-green);
-  transform: rotate(-45deg);
-}
-```
-
-#### Variante `.btn-pill--dark` (para CTAs em fundo canvas/light)
-
-Quando o botão está sobre fundo claro (`--color-canvas`, `--color-surface`), usar esta variante:
-
-- Fundo: `--color-deep-navy`
-- Texto: `--color-ink-inverse` (branco)
-- Ícone: background `--color-fj-green`, cor `--color-deep-navy`
-- Hover ícone: background `--color-fj-green-vivid`
-- Comportamento de hover idêntico ao padrão (gap expande, ícone rotaciona -45°)
-
-Uso atual: CTA "Conheça todos os 100+ projetos" na section Portfólio.
-
-#### Variante `.btn-pill--hero` (CTA do Hero e CTAs sobre fundos dark com ícone à esquerda)
-
-Igual ao `--dark` em cores, com uma diferença estrutural: **o ícone fica à esquerda** (padding invertido — `8px 28px 8px 8px`). Usado quando o CTA está sobre fundo dark mas o ícone precisa ficar antes do texto.
-
-- Fundo: `--color-deep-navy`
-- Texto: `--color-ink-inverse` (branco)
-- Ícone: background `--color-fj-green-vivid`, cor `--color-deep-navy` — **à esquerda**
-- Hover ícone: mantém `--color-fj-green-vivid` (não escurece), rotaciona `-45deg`
-- Padding: `8px 28px 8px 8px` (espaço extra à direita, ícone cola na esquerda)
-
-Uso atual: Hero CTA ("Entre em Contato") e FAQ CTA (WhatsApp placeholder).
-
-### 12.3 Microinteração da seta circular (PADRÃO GLOBAL)
-
-A rotação `-45deg` + mudança para verde no hover de qualquer "círculo com seta" é a assinatura de interação do site. Aplicar consistentemente em: botões pill, cards de serviço (se tiverem arrow), card "Ver case" do portfólio.
-
-### 12.4 Section 01 — Hero (VALIDADO)
-
-- **Tema:** dark cinemático — imagem aérea (drone) realista de área natural/rio/plantação ocupando 100% da viewport, com overlay escuro 40% + vinheta radial para legibilidade
-- **Altura:** `min-height: 100vh` (primeira dobra completa)
-- **Alinhamento:** TUDO centralizado vertical e horizontalmente (flexbox center)
-- **É o LCP da página** — imagem de fundo precisa: formato AVIF/WebP, `fetchpriority="high"`, preload no `<head>`, dimensões explícitas. NÃO usar `loading="lazy"` aqui.
-- **Estrutura de camadas (z-index) do background:**
-  1. Imagem drone (camada base)
-  2. Overlay: `radial-gradient` vinheta + `linear-gradient` escuro 40%
-  3. Conteúdo central (z-index acima)
-- **Elementos centrais (ordem vertical):**
-  1. **Badge:** pílula com borda verde + texto verde caixa-alta "ENGENHARIA & CONSULTORIA", letter-spacing 2.5px, dot verde com glow, glassmorphism sutil (backdrop-blur 4px). Margin-bottom 26px.
-  2. **H1 split:** Extra Bold (800), caixa-alta, 2 linhas. Linha 1 "SOLUÇÕES EM" branca; linha 2 "ENGENHARIA AMBIENTAL" verde. `font-size: clamp(34px, 7vw, 58px)`, line-height 1.02, letter-spacing -0.02em. Margin-bottom 24px.
-  3. **Parágrafo:** branco/gelo (opacity 82%), max-width 460px, centralizado. "Atuamos no planejamento, organização e coordenação de ações necessárias para a regularização de atos ambientais." Margin-bottom 34px.
-  4. **CTA cápsula assimétrico:** fundo navy `#0A1628`, texto branco caixa-alta "Entre em Contato". Círculo verde com seta escura COLADO NO CANTO ESQUERDO (atenção: invertido vs. os outros botões do site, onde o círculo fica à direita). Padding `8px 28px 8px 8px`. Hover: gap expande, círculo rotaciona -45°. Link → `/contato.html`.
-- **REMOVIDO (decisão do cliente):** coordenadas técnicas nos cantos e scroll indicator. Hero fica limpo, foco no conteúdo central.
-- **Verde sobre dark:** usar o token `--color-fj-green-vivid` (`#00C766`), não o `--color-fj-green` (`#00A859`). Sobre fundo escuro precisa de mais luminância. Aplica-se ao Hero e a qualquer texto/acento verde sobre fundos escuros cinemáticos. Ver regra completa em §2.5 do DESIGN_SYSTEM.md.
-- **Micro-interações (produção):** H1 recebe SplitType — palavras entram em fade-up stagger no load (após preloader). Badge com leve fade-in. Background com possível parallax sutil no scroll (subtle, respeitando reduced-motion).
-- **Header:** logo + navegação ficam por cima do Hero (já existe `src/partials/header.html` no scaffold). Header tem fundo translúcido com backdrop-blur sobre o Hero.
-
-### 12.5 Section 02 — Serviços (IMPLEMENTADO — refinamentos pendentes)
-
-#### Estado atual do CSS (`src/styles/base.css`)
-
-- **Tema:** dark (`#0A1628` wrap, cards `#14202E`) ✅
-- **Título:** "Três pilares da **engenharia hídrica.**" (segunda linha verde) ✅
-- **Label:** "02 · Serviços" (mono, dot verde antes) ✅
-- **Intro** (`.services__intro`): `color: rgba(255,255,255,0.65)` ✅
-- **Header** (`.services__header`): `align-items: start` ✅
-- **Layout:** grid 3 colunas (vira 1 coluna em mobile <600px), gap 12px ✅
-- **Cards** (`.service-card`): `min-height: 300px`, `display: flex`, `flex-direction: column`, `height: 100%`, `padding: 28px` ✅
-  - Número ghosted "01/02/03" no fundo (opacity ~3.5%, mono, 64px, top-right) ✅
-  - Topo (`.service-card__top`): gap 16px — ícone + título/subtítulo lado a lado ✅
-  - Título (`.service-card__title`): `font-size: var(--text-lg)` (18px) ✅
-  - Descrição (`.service-card__desc`): `font-size: 15px`, `line-height: 1.6` ✅
-  - Tags ancoradas na base: `.service-card__tags { margin-top: auto }` ✅
-  - Tags de sub-serviços (pills, separadas por border-top) ✅
-  - SEM seta individual nos cards, SEM footer com contador ✅
-- **Rodapé** (`.services__cta`): `justify-content: space-between` + `border-top: 0.5px solid rgba(255,255,255,0.10)` + `padding-top: 24px`; texto à esquerda, `.btn-pill` à direita; no mobile: `flex-direction: column`, `align-items: flex-start` ✅
-- **Hierarquia por cor:** Outorga (verde) · Hidrometria (aqua) · Hidrologia (verde) ✅
-- **Conteúdo dos 3 cards:**
-  - **01 Outorga** / RECURSOS HÍDRICOS / "Regularização do uso da água perante órgãos ambientais — captação, barramento, perfuração e lançamento de efluentes." / tags: Poços (APPO), Captação, Barramento / 10 sub-serviços
-  - **02 Hidrometria** / MEDIÇÃO EM CAMPO / "Instalação de estações, medição de vazão e sedimentos, curvas de descarga e consistência de séries históricas." / tags: Fluviométrica, ADCP, Topobatimetria / 08 sub-serviços
-  - **03 Hidrologia** / ESTUDOS PREDITIVOS / "Vazão regularizada, previsão de cheias, estudos hidrossedimentológicos e modelagem de qualidade de água." / tags: Vazão regul., Cheias, Modelo SMAP / 05 sub-serviços
-
-#### Ícones (parcialmente implementado)
-
-- **Vetores:** 3 SVGs Flaticon reais substituíram placeholders — inline em `index.html`, `fill="currentColor"` em `<g>` interno, `viewBox` originais preservados (160×160 / 60×60 / 160×160), `id`s internos removidos ✅
-- **Arquivos-fonte:** `src/assets/icones/` (**português com "e"** — não `icons/`) ✅
-- **CSS cor:** `.service-card__icon--green { color: var(--color-fj-green) }` / `--aqua { color: var(--color-fj-aqua) }` — cor herdada via `currentColor` ✅
-- **CSS tamanho atual:** `.service-card__icon svg { width: 20px; height: 20px }` — tamanho ainda pequeno ⚠️
-- **⬜ PENDENTE:** remover caixa de fundo do `.service-card__icon` (tirar `background`, `padding`, `border-radius`, `width/height` do wrapper) e aumentar SVG para ~40px — ícone maior e "solto"
-
-#### Notas de arquitetura (não alucinar)
-
-- **CSS:** todo o CSS de Serviços está em `src/styles/base.css`. NÃO existe `src/styles/sections/`. Dívida técnica: dividir por section no futuro.
-- **Tailwind + tokens:** Tailwind v3.4 e CSS custom coexistem. `tokens.css` é a fonte da verdade para variáveis; Tailwind para layout/espaçamento.
-
-### 12.6 Section 03 — Portfólio (IMPLEMENTADO — UI estática)
-
-- **Tema:** light (`--color-canvas`)
-- **Título:** "Engenharia hídrica **em ação.**" (segunda linha verde) — em `.portfolio__header-left`
-- **Label:** "PORTFÓLIO TÉCNICO" (pill verde com dot) — **sem counter e sem setas no header**
-- **Layout:** editorial split assimétrico:
-  - Mobile: `1fr` (coluna única)
-  - Desktop (≥ 900px): `1.45fr / 1fr`
-  - Esquerda: featured card (`aspect-ratio: 16/11`, `max-height: 340px`) dark com imagem, tags overlay, coordenadas, metadata, CTA "Ver case"
-  - Direita: headline editorial + descrição + stats 2×2 (mono numerals via `<dl>`)
-- **Featured card detalhes:**
-  - Tags duplas top-left: primária (`.portfolio__tag-primary`, verde sólida) + secundária (`.portfolio__tag-secondary`, glassmorphism) — glassmorphism funcional aqui pois tem função semântica (distinguir hierarquia de tag sobre imagem); ver exceção em §10 do DESIGN_SYSTEM.md
-  - Coordenadas geográficas top-right (`aria-hidden="true"`, decorativas)
-  - Metadata em mono bottom-left: cliente · ano · localização
-  - CTA "Ver case" bottom-right: `.btn-pill` padrão (branco)
-  - **Não implementado:** padrão topográfico SVG e glow aqua radial foram considerados no protótipo mas não estão no código
-- **Stats por projeto:** 4 stats em `<dl>` com `<dt>` label e `<dd>` value + unit — trocam ao trocar de case
-- **Setas de navegação:** `.portfolio__arrow--prev` e `.portfolio__arrow--next` ficam **dentro da `.portfolio__thumbs-row`**, flanqueando a `<ul class="portfolio__thumbs">` — **não no header**
-- **Thumbnails:** o catálogo tem 8 projetos (`projects.json`), mas hoje há **4 thumbnails estáticos no HTML**. Quando `portfolio.js` for criado, gerará os 8 dinamicamente. Indicador visual do ativo: borda verde 2px + linha verde no topo via `::before`
-- **Barra "Explorar":** `.portfolio__explore` abaixo dos thumbs — label "Explorar" + track + `.portfolio__explore-fill` (preenchimento verde, largura via `style` inline) + count "01 / 08". **Não se chama "progress line".**
-- **CTA final:** `.btn-pill.btn-pill--dark` "Conheça todos os 100+ projetos" → `/portfolio.html` (fundo deep-navy, ícone verde)
-- **Módulo JS:** `portfolio.js` **ainda não existe**. A section é 100% estática. Interatividade (troca de case, navegação por setas, atualização da barra Explorar) está pendente de implementação.
-- **Dados:** `src/content/projects.json` ✅ já existe com 8 projetos placeholder. ⚠️ Bug de filename: ver §12.13.
-
-### 12.7 Section 04 — Sobre (VALIDADO — já desenhado pelo cliente)
-
-- **Tema:** dark
-- **Título:** "Presença técnica em **todo o Brasil.**" (verde) com label "04 — SOBRE"
-- **Layout:** mapa do Brasil estilizado à esquerda + stats list à direita
-- **Mapa:** SVG Brasil, BA destacado em verde (elipse), PE/TO/MG como dots aqua, callout UNESCO/México com linha tracejada
-- **Stats (mono numerals, verde):** 100+ Projetos (2009→2026) · 15+ Anos (fundada 2010) · 04 Estados (BA·PE·TO·MG) · UNESCO Parceiro internacional (Morelos·México)
-- **Band de clientes (footer da section):** EMBASA · YAMANA GOLD · MINERAÇÃO CARAÍBA · BUNGE ALIMENTOS · UNESCO · TENDA · +50 CLIENTES
-
-### 12.8 Referência de fluidez/renderização premium
-
-Site de referência principal do cliente: `webhubeducacao.com.br/comunidade-webhub`. Técnicas a incorporar:
-
-- **Preloader de contador 0→100%** com GSAP Timeline (esconde carregamento, entrada controlada) — ADICIONAR ao roadmap (módulo `src/scripts/modules/preloader.js`)
-- **SplitType** para reveals de texto palavra-por-palavra / linha-por-linha nos headings grandes — considerar adicionar como dependência quando chegar no Hero
-- **Lenis + ScrollTrigger** — já implementado no scaffold ✅
-- **Marquees infinitos** opcionais (band de clientes pode rolar)
-- **Pill buttons com ícone circular** — já definido em §12.2 ✅
-
-### 12.9 Próximos passos (ordem)
-
-1. ✅ ~~**Aplicar fix do §0**~~ — servidor rodando
-2. ✅ ~~**Implementar Hero (Section 01)**~~ — conforme §12.4
-3. ✅ ~~**Implementar Section 02 (Serviços)**~~ — estrutura e conteúdo prontos · **⬜ pendente: ícones soltos (~40px, sem caixa)** — ver §12.5
-4. **Corrigir CLS** (0.472 → < 0.05) — causa principal: fontes IBM Plex sem dimensões reservadas, seção Serviços responde por 88% do shift — ver §12.10
-5. ✅ ~~**Implementar Section 03 (Portfólio) — UI estática**~~ — conforme §12.6 · **⬜ pendente: `portfolio.js` (interatividade: troca de case, navegação, barra Explorar)**
-6. ✅ ~~**Prototipar + implementar FAQ (light)**~~ — conforme §12.14 · CTA WhatsApp ainda em placeholder
-7. **Refinar Footer (dark)** — base existente no scaffold; corrigir contraste `text-white/40` (falha WCAG) — ver §12.10
-8. **Adicionar preloader** (§12.8) + SplitType no Hero
-9. Otimização de imagens (sharp), favicon system completo, Lighthouse pass em produção
-
-**Componente reutilizável a criar primeiro:** `.btn-pill` (§12.2) — usado em Hero, Serviços e Portfólio. Definir uma vez no CSS antes de implementar as sections.
-
-### 12.10 Diagnóstico de performance (pendente de correção)
-
-> Medição em dev local (localhost, Slow 4G emulado no DevTools). **Performance 40 não representa produção** — dev server não minifica nem comprime.
-
-| Categoria      | Score (dev) |
-| -------------- | ----------- |
-| Performance    | 40          |
-| Accessibility  | 96          |
-| Best Practices | 81          |
-| SEO            | 100         |
-
-#### CLS — problema principal
-
-- **CLS medido:** 0.472 (meta do projeto: < 0.05 — ver §7)
-- **Culpado:** `section#servicos` responde por 0.417 (88% do CLS total)
-- **Causa provável:** fontes IBM Plex causando layout shift ao carregarem + altura dos elementos não reservada explicitamente no CSS
-- **FOUC:** flash de HTML sem estilo ao recarregar (~2-3s) — mesma raiz do CLS; fontes sem `size-adjust` ou fallback de métricas correto
-
-#### Falso positivo identificado
-
-- **Fontes Google (Inter/Roboto)** apareciam no Network tab — era injeção da extensão **CodeGPT**, não do código. Confirmado limpo em aba anônima. O site usa **somente IBM Plex** via `@fontsource` self-hosted.
-
-#### Outros achados (menor prioridade)
-
-- **Contraste footer:** textos com `text-white/40` (opacity 40%) falham WCAG 4.5:1 — corrigir antes do launch
-- **Headers de segurança** (CSP, HSTS, COOP, X-Frame-Options): ausentes — configurar somente no deploy, não aplicável em dev
-- **Preloader:** ainda não implementado — quando pronto reduz percepção de FOUC (ver §12.8)
-
-### 12.11 Viewport fitting — `min-height: 100svh` (padrão das sections)
-
-As sections `.services` e `.portfolio` usam `min-height: 100svh` (não `100vh`).
-
-**Por que `svh` em vez de `vh`?** Em mobile, a unidade `vh` inclui a altura da barra de URL do navegador, que aparece e desaparece ao rolar. Isso provoca overflow e jumping indesejado. A unidade `svh` (small viewport height) usa a viewport **sem** a barra de URL — o menor tamanho possível — garantindo que o conteúdo nunca seja cortado independente do estado da barra.
+Sections intermediárias usam `min-height: 100svh` (não `100vh`). A unidade
+`svh` (small viewport height) exclui a barra de URL mobile — garante que
+o conteúdo nunca seja cortado independente do estado da barra.
 
 **Padrão de implementação:**
 ```css
@@ -695,63 +472,13 @@ As sections `.services` e `.portfolio` usam `min-height: 100svh` (não `100vh`).
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-top: calc(var(--header-height) + Xrem); /* compensa header fixo */
+  padding-top: calc(var(--header-height) + Xrem);
   padding-bottom: Yrem;
 }
 ```
 
-O conteúdo fica centralizado verticalmente no espaço restante. Usar este padrão em toda section que deve preencher a viewport.
-
-### 12.12 Header dinâmico — arquitetura (`.is-scrolled` + `.is-light`)
-
-Módulo: `src/scripts/modules/header.js`.
-
-#### Estados CSS ativados por JS
-
-| Classe | Gatilho ScrollTrigger | Efeito visual |
-|---|---|---|
-| `.is-scrolled` | `.hero bottom` passa por `top` da viewport | Fundo navy translúcido `rgba(10,22,40,0.85)` + backdrop-blur 12px + altura reduzida (5rem → 3.25rem) |
-| `.is-light` | Header entra/sai de `[data-theme="light"]` | Fundo branco translúcido + texto/ícones dark. Adicionada no `onEnter`/`onEnterBack`, removida no `onLeave`/`onLeaveBack`. |
-
-Sem animação própria no JS — toda transição é CSS `transition` ativada pela classe. `prefers-reduced-motion` cancela as transitions via CSS (`transition: none`).
-
-#### Ordem de inicialização em `main.js` (CRÍTICA — não alterar)
-
-```js
-initSmoothScroll(); // 1. Lenis primeiro — registra o scroller no ScrollTrigger
-initHero();         // 2. Hero segundo
-initHeader();       // 3. Header por último — ScrollTrigger precisa de Lenis ativo
-```
-
-Se `initHeader()` rodar antes de `initSmoothScroll()`, os triggers calculam posições erradas e os estados disparam fora de sincronia com o scroll visível.
-
-#### Regra crítica: nunca Tailwind utility em elemento com estado JS
-
-O `.site-header` usa apenas classes BEM custom no HTML. **Não adicionar** utilitários Tailwind (ex: `bg-white`, `text-gray-900`) diretamente no elemento `<header>`. A especificidade de utilitários Tailwind pode bloquear silenciosamente os overrides das classes `.is-scrolled` e `.is-light`. Ver também §4.11.
-
-### 12.14 Section 05 — FAQ (IMPLEMENTADO)
-
-- **Tema:** light (`--color-canvas`), `min-height: 100svh` (conforme §12.11)
-- **Título:** "Saiba mais sobre os serviços oferecidos / pela **FJ Ambiental**" (bold verde só em "FJ Ambiental")
-- **Eyebrow:** "Perguntas & respostas" (mono, verde)
-- **Layout:** grid 2 colunas (≥ 700px) / 1 coluna (< 700px), 8 cards distribuídos 4+4
-- **Cards:** fundo `#F1F1EE` (tom intermediário canvas↔surface), borda 0.5px, radius-lg, padding lateral 1.5rem. Estado aberto: borda verde 28% opacity.
-- **Dados:** `src/content/faq.json` — array de 8 objetos `{ id, question, answer }`. Arquivo existe mas **não é lido em build-time nesta fase** — o HTML dos 8 cards está hard-coded em `index.html`.
-- **Acordeão:** `max-height: 0; overflow: hidden` (fechado) no CSS; `faq.js` mede `scrollHeight` real e aplica via `style.maxHeight` (aberto). `transition: max-height` cuida da animação. `grid-template-rows: 0fr` foi testado e **descartado** — ver §4.14.
-- **Módulo JS:** `src/scripts/modules/faq.js` ✅ — toggle `.is-open` + `aria-expanded`, one-open-at-a-time, listener de resize com debounce 200ms, cleanup completo.
-- **CTA:** `btn-pill btn-pill--hero` → `https://wa.me/5571XXXXXXXXX` ⚠️ **placeholder — substituir pelo número real antes do deploy**
-- **`prefers-reduced-motion`:** transição desabilitada via CSS; JS de medição funciona normalmente.
-
-### 12.13 Bug conhecido — discrepância de filename em `projects.json`
-
-**Ainda não corrigido.**
-
-| Local | Campo | Valor atual |
-|---|---|---|
-| `src/content/projects.json` linha 35 | `"image"` do projeto `"rede-hidrometrica"` | `instalacao-rede-hidrometrica-ana-aneel.webp` |
-| `index.html` linha ~527 | `src` do thumb correspondente | `instalacao-rede-hidrometrica-ana-aneel_1x.webp` |
-
-Um dos dois está errado (divergência no sufixo `_1x`). Antes de corrigir: verificar qual filename existe em `src/assets/imgs/` e corrigir o divergente. Se o arquivo real tem `_1x`, o `projects.json` deve ser atualizado; se não tem, o `index.html` deve ser corrigido.
+Exceção: o Hero usa `min-height: 100vh` — é a primeira dobra, não sofre
+do problema da barra mobile.
 
 ---
 
@@ -765,7 +492,9 @@ Este `CLAUDE.md` é **versionado junto com o código**. Toda decisão arquitetur
 - Mudar uma disciplina arquitetural
 - Descobrir uma armadilha nova de IA
 - Mudar performance budget
-- Validar um novo protótipo de section (atualizar §13)
+- Implementar ou alterar uma section → atualizar `docs/SECTIONS.md`
+- Resolver um bug relevante → registrar em `docs/LICOES.md`
+- Concluir ou adicionar tarefa → atualizar `docs/PENDENCIAS.md`
 - Definir um novo padrão de componente reutilizável
 - Antes da migração Fase 1 → Fase 2
 

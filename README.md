@@ -5,6 +5,11 @@ Landing site institucional da FJ Ambiental — Consultoria Ambiental e Recursos 
 > **Documentação técnica:**
 > - 📐 [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) — tokens visuais e padrões
 > - 🤖 [CLAUDE.md](./CLAUDE.md) — guia para desenvolvimento assistido por IA
+>
+> **Documentação interna:**
+> - 📋 [docs/SECTIONS.md](./docs/SECTIONS.md) — estado atual de cada section
+> - 🔍 [docs/LICOES.md](./docs/LICOES.md) — histórico de bugs e diagnósticos
+> - ✅ [docs/PENDENCIAS.md](./docs/PENDENCIAS.md) — tarefas pendentes
 
 ---
 
