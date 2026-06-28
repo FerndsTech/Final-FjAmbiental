@@ -245,7 +245,6 @@ textarea {
   text-decoration: none;
   position: relative;
   overflow: hidden;
-  isolation: isolate;
   transition: color 500ms cubic-bezier(0.65, 0, 0.076, 1);
 }
 
@@ -261,7 +260,7 @@ textarea {
   left: calc(100% - 52px);
   border-radius: 50%;
   background: var(--color-deep-navy);
-  z-index: -1;
+  z-index: 0;
   pointer-events: none;
   transition: left 500ms cubic-bezier(0.65, 0, 0.076, 1),
               border-radius 500ms cubic-bezier(0.65, 0, 0.076, 1);
@@ -287,7 +286,14 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  z-index: 1;
   transition: background 500ms cubic-bezier(0.65, 0, 0.076, 1);
+}
+
+.btn-pill__label {
+  position: relative;
+  z-index: 1;
 }
 
 .btn-pill:hover .btn-pill__icon {
@@ -468,7 +474,6 @@ textarea {
   padding: 8px 28px 8px 8px;
   position: relative;
   overflow: hidden;
-  isolation: isolate;
   transition: color 500ms cubic-bezier(0.65, 0, 0.076, 1);
 }
 
@@ -485,7 +490,7 @@ textarea {
   right: calc(100% - 48px);
   border-radius: 50%;
   background: var(--color-fj-green-vivid);
-  z-index: -1;
+  z-index: 0;
   pointer-events: none;
   transition: right 500ms cubic-bezier(0.65, 0, 0.076, 1),
               border-radius 500ms cubic-bezier(0.65, 0, 0.076, 1);
@@ -1030,6 +1035,20 @@ textarea {
   background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 100%);
 }
 
+/* Override: .btn-pill no card featured → altura 52px (igual --hero)
+   Recálculo ::before: 52px − 2×4px = 44px diâmetro; right(4px) + 44px = 48px */
+.portfolio__featured .btn-pill {
+  padding: 8px 10px 8px 26px;
+}
+
+.portfolio__featured .btn-pill::before {
+  left: calc(100% - 48px);
+}
+
+.portfolio__featured .btn-pill:hover::before {
+  left: 4px;
+}
+
 .portfolio__featured-meta {
   font-size: var(--text-xs);
   color: rgba(255, 255, 255, 0.65);
@@ -1239,12 +1258,16 @@ textarea {
   color: var(--color-ink-inverse);
 }
 
+.btn-pill--dark::before {
+  background: var(--color-fj-green-vivid);
+}
+
 .btn-pill--dark:hover {
   color: var(--color-ink-inverse);
 }
 
 .btn-pill--dark .btn-pill__icon {
-  background: var(--color-fj-green);
+  background: var(--color-fj-green-vivid);
   color: var(--color-deep-navy);
 }
 
