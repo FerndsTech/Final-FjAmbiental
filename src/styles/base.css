@@ -243,11 +243,38 @@ textarea {
   letter-spacing: 0.5px;
   text-transform: uppercase;
   text-decoration: none;
-  transition: gap 0.3s var(--ease-out);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: color 500ms cubic-bezier(0.65, 0, 0.076, 1);
+}
+
+/* Expansor: nasce como círculo insetado (ícone à dir.) e abre para cobrir o interior do pill.
+   Inset 4px constante → faixa do fundo original sempre visível ao redor.
+   left inicial: calc(100% - 52px) → diâmetro 48px = altura interna: btn-height(56px) - 2×4px */
+.btn-pill::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  right: 4px;
+  left: calc(100% - 52px);
+  border-radius: 50%;
+  background: var(--color-deep-navy);
+  z-index: -1;
+  pointer-events: none;
+  transition: left 500ms cubic-bezier(0.65, 0, 0.076, 1),
+              border-radius 500ms cubic-bezier(0.65, 0, 0.076, 1);
 }
 
 .btn-pill:hover {
-  gap: 18px;
+  gap: 14px;
+  color: var(--color-ink-inverse);
+}
+
+.btn-pill:hover::before {
+  left: 4px;
+  border-radius: var(--radius-pill);
 }
 
 .btn-pill__icon {
@@ -260,17 +287,16 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+  transition: background 500ms cubic-bezier(0.65, 0, 0.076, 1);
 }
 
 .btn-pill:hover .btn-pill__icon {
   background: var(--color-fj-green);
-  transform: rotate(-45deg);
 }
 
 @media (prefers-reduced-motion: reduce) {
-
   .btn-pill,
+  .btn-pill::before,
   .btn-pill__icon {
     transition: none;
   }
@@ -440,22 +466,56 @@ textarea {
   background: var(--color-deep-navy);
   color: var(--color-ink-inverse);
   padding: 8px 28px 8px 8px;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: color 500ms cubic-bezier(0.65, 0, 0.076, 1);
+}
+
+/* Expansor: nasce como círculo insetado (ícone à esq.) e abre para cobrir o interior do pill.
+   Inset 4px constante em todos os estados → faixa do fundo original sempre visível ao redor.
+   right inicial: 4px(left-inset) + 44px(diâmetro) = 48px → right: calc(100% - 48px)
+   44px = altura interna: btn-height(52px) − inset-top(4px) − inset-bottom(4px) */
+.btn-pill--hero::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  right: calc(100% - 48px);
+  border-radius: 50%;
+  background: var(--color-fj-green-vivid);
+  z-index: -1;
+  pointer-events: none;
+  transition: right 500ms cubic-bezier(0.65, 0, 0.076, 1),
+              border-radius 500ms cubic-bezier(0.65, 0, 0.076, 1);
 }
 
 .btn-pill--hero:hover {
-  color: var(--color-ink-inverse);
+  gap: 14px;
+  color: var(--color-deep-navy);
+}
+
+.btn-pill--hero:hover::before {
+  right: 4px;
+  border-radius: var(--radius-pill);
 }
 
 .btn-pill--hero .btn-pill__icon {
   background: var(--color-fj-green-vivid);
   color: var(--color-deep-navy);
+  transition: background 500ms cubic-bezier(0.65, 0, 0.076, 1);
 }
 
 .btn-pill--hero:hover .btn-pill__icon {
-  background: var(--color-fj-green-vivid);
+  background: var(--color-deep-navy);
+  color: var(--color-fj-green-vivid);
+  transform: none;  /* sem rotação — sobrescreve .btn-pill:hover .btn-pill__icon */
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .btn-pill--hero,
+  .btn-pill--hero::before,
   .btn-pill--hero .btn-pill__icon {
     transition: none;
   }
