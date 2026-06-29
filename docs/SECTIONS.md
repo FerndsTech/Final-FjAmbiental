@@ -15,14 +15,14 @@ O site alterna dark e light entre sections. Esse contraste é identidade
 visual da marca — não é acidente. Regra: nunca duas sections com mesmo
 tratamento visual seguidas.
 
-| Nº | Section   | Tema            | Background               | Status                       |
-|----|-----------|-----------------|--------------------------|------------------------------|
-| 01 | Hero      | DARK cinemático | Foto drone + overlay 40% | ✅ Implementado               |
-| 02 | Serviços  | DARK            | `--color-deep-navy`      | ✅ Implementado               |
-| 03 | Portfólio | LIGHT           | `--color-canvas`         | ✅ Implementado (UI estática) |
-| 04 | Sobre     | DARK            | `--color-deep-navy`      | ⬜ Pendente                   |
-| 05 | FAQ       | LIGHT           | `--color-canvas`         | ✅ Implementado               |
-| 06 | Footer    | DARK            | `--color-deep-navy`      | ✅ Implementado               |
+| Nº  | Section   | Tema            | Background               | Status                        |
+| --- | --------- | --------------- | ------------------------ | ----------------------------- |
+| 01  | Hero      | DARK cinemático | Foto drone + overlay 40% | ✅ Implementado               |
+| 02  | Serviços  | DARK            | `--color-deep-navy`      | ✅ Implementado               |
+| 03  | Portfólio | LIGHT           | `--color-canvas`         | ✅ Implementado (UI estática) |
+| 04  | Sobre     | DARK            | `--color-deep-navy`      | ⬜ Pendente                   |
+| 05  | FAQ       | LIGHT           | `--color-canvas`         | ✅ Implementado               |
+| 06  | Footer    | DARK            | `--color-deep-navy`      | ✅ Implementado               |
 
 **Nota Serviços:** a implementação ficou dark (sequência Hero dark cinemático
 → Serviços dark sólido). O contraste entre imagem com overlay e fundo sólido
@@ -35,6 +35,7 @@ tratamento visual seguidas.
 Arquivos: `index.html` (section #hero), CSS `base.css` § Hero.
 
 **Decisões não-óbvias:**
+
 - Usa `min-height: 100vh` (não `svh`) — é a primeira dobra, não sofre do
   problema da barra mobile que afeta sections intermediárias (CLAUDE.md §12.11).
 - Verde usa `--color-fj-green-vivid` (#00C766), não `--color-fj-green`
@@ -45,6 +46,7 @@ Arquivos: `index.html` (section #hero), CSS `base.css` § Hero.
   Preload deve estar em `src/partials/head.html`.
 
 **Camadas de background (ordem z-index):**
+
 1. `<picture>` — imagem drone, `object-fit: cover`
 2. `.hero__overlay` — `radial-gradient` vinheta + `linear-gradient` 40%
 3. `.hero__content` — conteúdo centralizado
@@ -56,6 +58,7 @@ Arquivos: `index.html` (section #hero), CSS `base.css` § Hero.
 Arquivos: `index.html` (section #servicos), CSS `base.css` § Serviços.
 
 **Decisões não-óbvias:**
+
 - Grid colapsa para 1 coluna em `< 600px` — breakpoint customizado, fora
   dos breakpoints padrão do Tailwind.
 - Número ghosted ("01"/"02"/"03"): decorativo, `aria-hidden="true"`,
@@ -78,6 +81,7 @@ Arquivos: `index.html` (section #portfolio, `data-theme="light"`),
 CSS `base.css` § Portfólio.
 
 **Decisões não-óbvias:**
+
 - Grid assimétrico desktop `≥ 900px`: `1.45fr 1fr`. Mobile: `1fr`.
 - Tags duplas no featured card: `.portfolio__tag-primary` (verde sólida) +
   `.portfolio__tag-secondary` (glassmorphism). O glassmorphism é funcional —
@@ -116,6 +120,7 @@ Arquivos: `index.html` (section #faq, `data-theme="light"`),
 CSS `base.css` § FAQ, JS `src/scripts/modules/faq.js`.
 
 **Decisões não-óbvias:**
+
 - Cards: fundo `#F1F1EE` — tom intermediário entre `--color-canvas` e
   `--color-surface`, não um dos tokens principais.
 - Estado aberto: borda verde com 28% de opacidade (não sólida).
@@ -135,20 +140,37 @@ CSS `base.css` § FAQ, JS `src/scripts/modules/faq.js`.
 Arquivo: `src/partials/footer.html`, CSS `base.css` § Footer.
 
 **Estrutura (3 colunas em `.footer__columns`):**
+
 - `.footer__brand` — logo + tagline + `<nav>` interna
 - `.footer__address` — `<address>` semântico: e-mail, telefone, endereço
 - `.footer__cta-col` — `.btn-pill` "Solicitar Proposta" + ícones sociais
 
 **Camadas de background:**
+
 1. `.footer__map` — padrão decorativo (`aria-hidden`)
 2. `.footer__overlay` — gradiente
 3. `.footer__inner` — conteúdo
 
 **Decisões não-óbvias:**
+
 - `.footer__wordmark` na faixa inferior: decorativo, `aria-hidden="true"`.
 - Links sociais têm `href="#"` (placeholder) — URLs reais pendentes com cliente.
 
 ---
+
+- Link "Início" (footer.html:28, href="/") tem comportamento JS via
+  `src/scripts/modules/footer.js` (`initFooterNav()`): se o usuário já
+  está na home, intercepta o clique e faz scroll suave ao topo via
+  `lenis.scrollTo(0)` (fallback `window.scrollTo` quando Lenis não
+  inicializou, ex: prefers-reduced-motion); se está em outra página,
+  navegação padrão (sem interceptar). Depende de `getLenis()` exportado
+  por `smooth-scroll.js`.
+- Os demais links de navegação do footer (Serviços, Projetos, Sobre,
+  Contato) ainda não têm comportamento JS — são `<a href>` de navegação
+  padrão, porque as páginas internas de destino ainda não existem
+  (ver docs/PENDENCIAS.md § Páginas internas). Não é uma pendência de JS
+  isolada; depende da criação das páginas primeiro.
+- Commit de referência: ee5dd50 (28/06/2026).
 
 ## Header dinâmico (`.site-header`)
 
@@ -157,17 +179,19 @@ CSS `base.css` § Header.
 
 **Estados JS:**
 
-| Classe        | Gatilho ScrollTrigger                       | Efeito                                                          |
-|---------------|---------------------------------------------|-----------------------------------------------------------------|
-| `.is-scrolled`| Bottom de `.hero` cruza top da viewport     | Fundo `rgba(10,22,40,0.85)` + blur 12px + altura reduz (5rem → 3.25rem) |
-| `.is-light`   | Header entra/sai de `[data-theme="light"]`  | Fundo branco translúcido + texto/ícones dark                    |
+| Classe         | Gatilho ScrollTrigger                      | Efeito                                                                  |
+| -------------- | ------------------------------------------ | ----------------------------------------------------------------------- |
+| `.is-scrolled` | Bottom de `.hero` cruza top da viewport    | Fundo `rgba(10,22,40,0.85)` + blur 12px + altura reduz (5rem → 3.25rem) |
+| `.is-light`    | Header entra/sai de `[data-theme="light"]` | Fundo branco translúcido + texto/ícones dark                            |
 
 **Ordem de inicialização em `main.js` — não alterar:**
+
 ```js
 initSmoothScroll(); // 1. Lenis primeiro — registra scroller no ScrollTrigger
-initHero();         // 2. Hero segundo
-initHeader();       // 3. Header por último — precisa de Lenis ativo
+initHero(); // 2. Hero segundo
+initHeader(); // 3. Header por último — precisa de Lenis ativo
 ```
+
 Se `initHeader()` rodar antes de `initSmoothScroll()`, triggers calculam
 posições erradas e os estados disparam fora de sincronia.
 
