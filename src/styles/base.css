@@ -1280,6 +1280,11 @@ textarea {
   color: var(--color-fj-green-vivid);
 }
 
+/* No hover o ::before verde cobre o botão — navy contrasta, igual ao padrão do ícone */
+.btn-pill--dark:hover .portfolio__cta-accent {
+  color: var(--color-deep-navy);
+}
+
 /* --- Responsividade --- */
 @media (min-width: 900px) {
   .portfolio__header {
