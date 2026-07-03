@@ -120,3 +120,48 @@ causando layout shift ao carregar.
 **Ação antes do launch:** rodar Lighthouse em build de produção
 (`npm run build && npm run preview`), em aba anônima, sem extensões.
 Priorizar Section Serviços na análise de CLS.
+
+---
+
+## #6 — Overwrite acidental de base.css via popup do VS Code (resolvido)
+
+**Contexto:** sessão de desenvolvimento de 28/06/2026. `base.css` estava
+aberto no VS Code com o Vite em modo `npm run dev` rodando em paralelo.
+
+**Sintoma:** ao tentar salvar com Ctrl+S, apareceu o popup do VS Code:
+"The file 'base.css' has been changed on disk. Do you want to reload it?"
+O usuário clicou no segundo botão (Overwrite) sem ter certeza da ação.
+Resultado: o buffer do editor — que estava numa versão anterior ao commit
+`042b04d` (antes do `.btn-pill::before`, o círculo expansor) — sobrescreveu
+o arquivo no disco. O arquivo ficou com 712 linhas (de 2059), perdendo
+todos os estilos a partir da Section Portfólio: `.btn-pill::before`,
+Header dinâmico, Portfólio, Sobre, FAQ e Footer ficaram sem CSS.
+
+**Causa raiz:** o Vite HMR tocou em `base.css` enquanto o editor tinha
+o arquivo aberto com um buffer desatualizado (versão anterior ao commit
+mais recente). Isso gerou dessincronização entre buffer do editor e
+arquivo em disco. O popup do VS Code perguntou qual versão deveria vencer
+— o usuário escolheu o buffer antigo (Overwrite), que era mais curto,
+truncando o arquivo no disco.
+
+**Correção aplicada:**
+1. `git restore src/styles/base.css` — restaurou a versão íntegra do HEAD
+   (`ee5dd50`, 2059 linhas) em menos de 1 segundo.
+2. Reaplicação manual das 3 linhas de hover que não estavam commitadas:
+   `.btn-pill--dark:hover .portfolio__cta-accent { color: var(--color-deep-navy); }`
+3. Commit `9dc40cb` registrou o fix do hover.
+
+**Causa raiz da dessincronização:** ainda não totalmente confirmada.
+Suspeita: extensão de formatter com "format on save" competindo com o
+processo do Vite. Investigar antes de editar arquivos CSS grandes
+novamente (ver docs/PENDENCIAS.md).
+
+**Regra derivada:** antes de responder a qualquer popup de "arquivo
+modificado no disco" durante desenvolvimento, pausar o Vite (`Ctrl+C`
+no terminal de dev) para eliminar a fonte de modificações externas,
+verificar qual versão é mais atual via `git diff`, e só então decidir.
+Em caso de dúvida: fechar o VS Code sem salvar e checar via `git status`
+antes de reabrir.
+
+**Status:** ✅ resolvido. base.css restaurado e fix de hover commitado
+em 28/06/2026.
