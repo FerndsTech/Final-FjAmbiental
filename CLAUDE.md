@@ -250,6 +250,37 @@ Nunca usar valor fixo chutado. Ver docs/LICOES.md #2 para o diagnóstico.
 
 Se uma correção CSS não resolver um bug visual, a próxima etapa é **medir o estado computado real** — DevTools → Computed tab → `height` do elemento — ou listar a cascata CSS completa que alcança o elemento. Não propor outra hipótese a partir de nova leitura estática do código. A causa real pode ser diferente de qualquer hipótese baseada em leitura.
 
+### 4.16 Popup "file changed on disk" no VS Code: nunca clicar sem verificar
+
+Quando o VS Code exibir "The file has been changed on disk. Do you want to
+reload it?" durante Ctrl+S: (1) não clicar em nada ainda, (2) abrir outro
+terminal, (3) rodar `git diff [arquivo]` para ver qual versão é mais atual,
+(4) só então decidir. Em caso de dúvida: fechar o VS Code sem salvar e checar
+via `git status` antes de reabrir. Origem: incidente #6 (docs/LICOES.md).
+
+### 4.17 `git restore [arquivo]` é a recuperação padrão para working tree corrompida
+
+Quando o conteúdo desejado estiver no HEAD (commitado), `git restore [arquivo]`
+restaura em 1 segundo sem risco. Antes de restaurar: anotar qualquer mudança
+no working tree que não estava commitada, para reaplicar manualmente depois.
+Origem: incidente #6 (docs/LICOES.md).
+
+### 4.18 Prompt de encerramento é obrigatório antes de fechar qualquer sessão longa
+
+Ao encerrar uma sessão de desenvolvimento (Claude Code ou Claude Chat), sempre
+gerar o bloco CONTEXTO_TRANSICAO antes de fechar. Sem ele, o próximo chat
+começa sem saber o porquê das decisões tomadas — só o "o quê", não o "como"
+e o "por quê". O prompt de encerramento está em
+`prompt-encerramento-sessao.md` (gerado na sessão de 03/07/2026).
+
+### 4.19 Documentação desatualizada é mais perigosa que ausente
+
+Ao concluir qualquer task de código, atualizar o doc correspondente
+(SECTIONS.md, PENDENCIAS.md) no mesmo commit ou no imediatamente seguinte.
+Nunca deixar para "depois" — documentação que não reflete o código real
+induz retrabalho nas sessões seguintes. Exemplo: Section Sobre ficou marcada
+como "não implementada" por várias sessões após já estar completa no código.
+
 ---
 
 ## 5. Estrutura de pastas
