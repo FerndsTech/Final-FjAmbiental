@@ -20,7 +20,7 @@ tratamento visual seguidas.
 | 01  | Hero      | DARK cinemático | Foto drone + overlay 40% | ✅ Implementado               |
 | 02  | Serviços  | DARK            | `--color-deep-navy`      | ✅ Implementado               |
 | 03  | Portfólio | LIGHT           | `--color-canvas`         | ✅ Implementado (UI estática) |
-| 04  | Sobre     | DARK            | `--color-deep-navy`      | ⬜ Pendente                   |
+| 04  | Sobre     | DARK            | `--color-deep-navy`      | ✅ Implementado (marquee pendente) |
 | 05  | FAQ       | LIGHT           | `--color-canvas`         | ✅ Implementado               |
 | 06  | Footer    | DARK            | `--color-deep-navy`      | ✅ Implementado               |
 
@@ -100,17 +100,31 @@ CSS `base.css` § Portfólio.
 
 ## Section 04 — Sobre
 
-Ainda não implementada. Spec validada com o cliente:
+Arquivos: `index.html` (section #sobre, `index.html:595-707`),
+CSS `base.css` § Sobre (`base.css:1326-1534`).
 
-- Tema: dark (`--color-deep-navy`)
-- Label: "04 — SOBRE"
-- Título: "Presença técnica em **todo o Brasil.**" (negrito verde)
-- Layout: mapa SVG do Brasil (esq) + lista de stats (dir)
+**Status:** implementada no código. Única pendência: animação de marquee
+da band de clientes na base (ver docs/PENDENCIAS.md).
+
+**Estrutura implementada:**
+
+- Label "04 — SOBRE"
+- Título "Presença técnica em **todo o Brasil.**" (negrito verde)
+- Layout: mapa SVG inline do Brasil (esq) + stats (dir)
   - BA em verde (elipse) · PE/TO/MG como dots aqua
   - Callout UNESCO/México com linha tracejada
-- Stats (mono, verde): 100+ Projetos · 15+ Anos · 04 Estados · UNESCO Parceiro
-- Band de clientes na base: EMBASA · YAMANA GOLD · MINERAÇÃO CARAÍBA ·
-  BUNGE ALIMENTOS · UNESCO · TENDA · +50 CLIENTES
+- Stats (`<dl>`, mono, verde): 100+ Projetos · 15+ Anos · 04 Estados ·
+  UNESCO Parceiro. Sub-label "Fundada em 2010" abaixo do stat de anos.
+- Band de clientes estática na base: EMBASA · YAMANA GOLD · MINERAÇÃO
+  CARAÍBA · BUNGE ALIMENTOS · UNESCO · TENDA · +50 CLIENTES
+  (marquee animado via GSAP ainda pendente)
+
+**Decisões não-óbvias:**
+
+- Mapa do Brasil é SVG inline no HTML (não asset separado em `src/assets/`).
+  Sem arquivo de mapa no disco — está embutido diretamente em `index.html:619-657`.
+- Nenhum módulo JS dedicado à Sobre — conteúdo estático, animações de
+  reveal via `initReveal()` global.
 
 ---
 
@@ -155,14 +169,11 @@ Arquivo: `src/partials/footer.html`, CSS `base.css` § Footer.
 
 - `.footer__wordmark` na faixa inferior: decorativo, `aria-hidden="true"`.
 - Links sociais têm `href="#"` (placeholder) — URLs reais pendentes com cliente.
-
----
-
-- Link "Início" (footer.html:28, href="/") tem comportamento JS via
+- Link "Início" (`footer.html:28`, `href="/"`) tem comportamento JS via
   `src/scripts/modules/footer.js` (`initFooterNav()`): se o usuário já
   está na home, intercepta o clique e faz scroll suave ao topo via
   `lenis.scrollTo(0)` (fallback `window.scrollTo` quando Lenis não
-  inicializou, ex: prefers-reduced-motion); se está em outra página,
+  inicializou, ex: `prefers-reduced-motion`); se está em outra página,
   navegação padrão (sem interceptar). Depende de `getLenis()` exportado
   por `smooth-scroll.js`.
 - Os demais links de navegação do footer (Serviços, Projetos, Sobre,
@@ -170,7 +181,9 @@ Arquivo: `src/partials/footer.html`, CSS `base.css` § Footer.
   padrão, porque as páginas internas de destino ainda não existem
   (ver docs/PENDENCIAS.md § Páginas internas). Não é uma pendência de JS
   isolada; depende da criação das páginas primeiro.
-- Commit de referência: ee5dd50 (28/06/2026).
+- Commit de referência: `ee5dd50` (28/06/2026).
+
+---
 
 ## Header dinâmico (`.site-header`)
 
