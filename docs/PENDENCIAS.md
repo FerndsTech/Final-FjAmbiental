@@ -8,11 +8,10 @@
 
 ## Home — sections
 
-- [ ] **Section Sobre** — implementar do zero (spec em docs/SECTIONS.md)
-- [ ] **Section Serviços — ícones:** remover caixa de fundo do
-  `.service-card__icon` (tirar `background`, `padding`, `border-radius`,
-  `width`/`height` do wrapper) e aumentar SVG para ~40px — ícone solto,
-  sem container
+- [ ] **Section Sobre — marquee de clientes:** band de clientes na base
+  da Section Sobre existe como lista estática. Implementar rolagem
+  infinita via GSAP (módulo novo ou extensão do `initReveal()`).
+  Ver docs/SECTIONS.md § Section 04.
 - [ ] **Section Serviços — `services.json`:** arquivo ainda não existe em
   `src/content/`. Conteúdo dos 3 cards está hard-coded no HTML hoje.
   Criar o JSON antes da migração para Astro (Content Collections).
@@ -22,8 +21,6 @@
 - [ ] **Section Hero — micro-interações:** SplitType no H1 (fade-up por
   palavra no load, após preloader), fade-in no badge, parallax sutil no
   scroll — tudo respeitando `prefers-reduced-motion`
-- [ ] **Marquee de clientes** — band de clientes da Section Sobre rola
-  infinitamente com GSAP
 
 ---
 
