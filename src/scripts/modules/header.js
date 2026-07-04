@@ -25,6 +25,7 @@ export function initHeader(root = document) {
     ScrollTrigger.create({
       trigger: hero || document.body,
       start: hero ? 'bottom top' : 'top -100px',
+      end: 'max',
       onToggle: (self) => {
         header.classList.toggle('is-scrolled', self.isActive);
       },
