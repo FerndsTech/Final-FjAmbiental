@@ -1,7 +1,7 @@
 <a href="#main-content" class="skip-to-content">Pular para o conteúdo</a>
 
 <header class="site-header fixed top-0 z-50 w-full">
-  <div class="container-main flex items-center justify-between">
+  <div class="container-main grid grid-cols-[auto_1fr_auto] items-center">
 
     <a href="/" class="flex items-center gap-3 text-white" aria-label="FJ Ambiental — voltar para a home">
       <svg width="36" height="36" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
@@ -11,16 +11,19 @@
       <span class="font-sans font-medium text-base md:text-lg tracking-tight">FJ Ambiental</span>
     </a>
 
-    <nav class="primary-nav hidden md:flex items-center gap-8" aria-label="Navegação principal">
-      <a href="/servicos.html" class="text-sm text-white/80 hover:text-white transition-colors duration-fast">Serviços</a>
-      <a href="/portfolio.html" class="text-sm text-white/80 hover:text-white transition-colors duration-fast">Portfólio</a>
-      <a href="/sobre.html" class="text-sm text-white/80 hover:text-white transition-colors duration-fast">Sobre</a>
-      <a href="/contato.html" class="text-sm bg-fj-green text-white px-5 py-2.5 rounded-pill font-medium hover:bg-fj-green-dim transition-colors duration-fast">
-        Solicitar Contato
-      </a>
+    <nav class="primary-nav hidden md:flex items-center justify-center gap-8" aria-label="Navegação principal">
+      <a href="/" class="nav-link text-sm text-white/80 hover:text-white transition-colors duration-fast">Home</a>
+      <a href="/servicos.html" class="nav-link text-sm text-white/80 hover:text-white transition-colors duration-fast">Serviços</a>
+      <a href="/portfolio.html" class="nav-link text-sm text-white/80 hover:text-white transition-colors duration-fast">Portfólio</a>
+      <a href="/sobre.html" class="nav-link text-sm text-white/80 hover:text-white transition-colors duration-fast">Sobre</a>
     </nav>
 
-    <button
+    <div class="flex items-center justify-end gap-4">
+      <a href="/contato.html" class="hidden md:inline-flex text-sm bg-fj-green text-white px-5 py-2.5 rounded-pill font-medium hover:bg-fj-green-dim transition-colors duration-fast">
+        Solicitar Contato
+      </a>
+
+      <button
       type="button"
       class="nav-toggle md:hidden flex items-center justify-center w-10 h-10 text-white"
       aria-label="Abrir menu de navegação"
@@ -29,7 +32,8 @@
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
         <path d="M3 6h18M3 12h18M3 18h18"/>
       </svg>
-    </button>
+      </button>
+    </div>
 
   </div>
 </header>

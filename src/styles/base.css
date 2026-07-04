@@ -332,7 +332,7 @@ textarea {
 }
 
 .site-header.is-scrolled .container-main {
-  height: 3.25rem;
+  height: 4rem;
 }
 
 /* Light-mode override — ativo quando header passa por section data-theme="light" */
@@ -345,6 +345,21 @@ textarea {
 
 .site-header.is-light .primary-nav a {
   color: var(--color-deep-navy);
+}
+
+.primary-nav .nav-link {
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  transition: background-color var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out);
+}
+
+.primary-nav .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.site-header.is-light .primary-nav .nav-link:hover {
+  background-color: rgba(10, 22, 40, 0.06);
 }
 
 .site-header.is-light span {
