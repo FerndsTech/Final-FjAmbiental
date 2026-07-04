@@ -350,20 +350,27 @@ textarea {
 .primary-nav .nav-link {
   padding: 6px 14px;
   border-radius: var(--radius-pill);
+  font-weight: 500;
   transition: background-color var(--duration-fast) var(--ease-out),
               color var(--duration-fast) var(--ease-out);
 }
 
 .primary-nav .nav-link:hover {
   background-color: rgba(255, 255, 255, 0.08);
+  color: var(--color-fj-green-vivid);
 }
 
 .site-header.is-light .primary-nav .nav-link:hover {
   background-color: rgba(10, 22, 40, 0.06);
+  color: var(--color-fj-green);
 }
 
 .site-header.is-light span {
   color: var(--color-deep-navy);
+}
+
+.site-header.is-light .site-logo:hover span {
+  color: var(--color-fj-green);
 }
 
 .site-header.is-light svg path[stroke="#FFFFFF"] {
