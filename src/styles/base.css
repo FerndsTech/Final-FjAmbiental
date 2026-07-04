@@ -1560,12 +1560,28 @@ textarea {
   margin-bottom: clamp(2.5rem, 5vw, 4rem);
 }
 
-.faq__eyebrow {
-  font-size: var(--text-sm);
+.faq__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 168, 89, 0.1);
   color: var(--color-fj-green);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: 0.75rem;
+  margin-bottom: 14px;
+}
+
+.faq__label-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-fj-green);
+  flex-shrink: 0;
 }
 
 .faq__title {
