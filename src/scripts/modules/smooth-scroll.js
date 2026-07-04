@@ -20,6 +20,13 @@ import Lenis from 'lenis';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Instância vive no escopo do módulo — acessível via getLenis()
+let _lenis = null;
+
+export function getLenis() {
+  return _lenis;
+}
+
 export function initSmoothScroll() {
   // Respeitar preferência do usuário — não-negociável.
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -27,7 +34,7 @@ export function initSmoothScroll() {
     return () => {};
   }
 
-  const lenis = new Lenis({
+  _lenis = new Lenis({
     duration: 1.2,
     easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     smoothWheel: true,
@@ -37,11 +44,11 @@ export function initSmoothScroll() {
   });
 
   // Sincroniza Lenis com ScrollTrigger
-  lenis.on('scroll', ScrollTrigger.update);
+  _lenis.on('scroll', ScrollTrigger.update);
 
   // GSAP ticker dirige o requestAnimationFrame loop
   function raf(time) {
-    lenis.raf(time * 1000);
+    _lenis.raf(time * 1000);
   }
   gsap.ticker.add(raf);
   gsap.ticker.lagSmoothing(0);
@@ -49,7 +56,8 @@ export function initSmoothScroll() {
   // Cleanup function (importante para Astro islands na Fase 2)
   return () => {
     gsap.ticker.remove(raf);
-    lenis.destroy();
+    _lenis.destroy();
+    _lenis = null;
     ScrollTrigger.refresh();
   };
 }

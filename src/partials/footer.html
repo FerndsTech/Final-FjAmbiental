@@ -1,58 +1,101 @@
-<footer class="bg-deep-navy text-white">
-  <div class="container-main py-16 md:py-20">
+<footer class="footer">
 
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-16">
+  <!-- Camada 1: mapa pontilhado invertido -->
+  <div class="footer__map" aria-hidden="true"></div>
 
-      <div class="md:col-span-5">
-        <a href="/" class="flex items-center gap-3 mb-6" aria-label="FJ Ambiental — home">
-          <svg width="40" height="40" viewBox="0 0 64 64" aria-hidden="true">
-            <path d="M38 6C32 10 24 16 18 26C12 36 10 46 14 53C19 59 30 60 38 58C48 55 54 47 54 38C54 27 48 16 42 9C41 7 39 6 38 6Z" fill="#FFFFFF"/>
-            <path d="M40 12C30 22 22 34 22 46" stroke="#00A859" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.7"/>
-          </svg>
-          <span class="font-sans font-medium text-lg tracking-tight">FJ Ambiental</span>
-        </a>
-        <p class="text-sm text-white/70 leading-relaxed max-w-xs">
-          Consultoria ambiental e recursos hídricos desde 2010. Sede em Salvador, atuação em todo o Brasil.
-        </p>
-      </div>
+  <!-- Camada 2: overlay gradiente -->
+  <div class="footer__overlay" aria-hidden="true"></div>
 
-      <nav class="md:col-span-3" aria-label="Páginas do site">
-        <div class="font-mono text-xs uppercase tracking-wider text-white/40 mb-4">Navegação</div>
-        <ul class="space-y-3 text-sm">
-          <li><a href="/" class="text-white/80 hover:text-fj-green transition-colors duration-fast">Home</a></li>
-          <li><a href="/servicos.html" class="text-white/80 hover:text-fj-green transition-colors duration-fast">Serviços</a></li>
-          <li><a href="/portfolio.html" class="text-white/80 hover:text-fj-green transition-colors duration-fast">Portfólio</a></li>
-          <li><a href="/sobre.html" class="text-white/80 hover:text-fj-green transition-colors duration-fast">Sobre</a></li>
-          <li><a href="/contato.html" class="text-white/80 hover:text-fj-green transition-colors duration-fast">Contato</a></li>
-        </ul>
-      </nav>
+  <!-- Camada 3: conteúdo -->
+  <div class="footer__inner">
+    <div class="footer__container">
 
-      <address class="md:col-span-4 not-italic">
-        <div class="font-mono text-xs uppercase tracking-wider text-white/40 mb-4">Contato</div>
-        <ul class="space-y-3 text-sm text-white/80">
-          <li>
-            <a href="mailto:contato@fjambiental.com.br" class="hover:text-fj-green transition-colors duration-fast">
-              contato@fjambiental.com.br
+      <div class="footer__columns">
+
+        <!-- Col 1: Brand + navegação -->
+        <div class="footer__brand">
+          <a href="/" class="footer__logo-link" aria-label="FJ Ambiental — página inicial">
+            <span class="footer__logo-badge">FJ</span>
+            <span class="footer__logo-name">FJ Ambiental</span>
+          </a>
+          <!-- tagline: a confirmar com cliente se deve constar no footer -->
+          <p class="footer__tagline">
+            Consultoria ambiental e recursos hídricos desde 2010. Sede em Salvador, atuação em todo o Brasil.
+          </p>
+          <nav aria-label="Navegação do rodapé">
+            <p class="footer__nav-label">Navegação</p>
+            <ul class="footer__nav-list">
+              <li><a href="/">Início</a></li>
+              <li><a href="/servicos.html">Serviços</a></li>
+              <li><a href="/portfolio.html">Projetos</a></li>
+              <li><a href="/sobre.html">Sobre</a></li>
+              <li><a href="/contato.html">Contato</a></li>
+            </ul>
+          </nav>
+        </div>
+
+        <!-- Col 2: Contato (dados reais do projeto) -->
+        <address class="footer__address">
+          <p class="footer__contact-label">Contato</p>
+          <a href="mailto:contato@fjambiental.com.br">contato@fjambiental.com.br</a>
+          <a href="tel:+557130000000">(71) 3000-0000</a>
+          Edifício Ferreira Ferraz<br>
+          Av. Tancredo Neves<br>
+          Caminho das Árvores · Salvador-BA<br>
+          CEP 41.820-021
+        </address>
+
+        <!-- Col 3: CTA pill branca + redes sociais -->
+        <div class="footer__cta-col">
+          <a href="/contato.html" class="btn-pill">
+            <span class="btn-pill__label">Solicitar Proposta</span>
+            <span class="btn-pill__icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.5"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 17L17 7M9 7h8v8"/>
+              </svg>
+            </span>
+          </a>
+          <div class="footer__social">
+            <!-- URLs de perfil pendentes — substituir href="#" pelos perfis reais quando fornecidos -->
+            <a href="#" class="footer__social-link"
+               aria-label="FJ Ambiental no Instagram">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.75"
+                   stroke-linecap="round" stroke-linejoin="round"
+                   aria-hidden="true">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <circle cx="12" cy="12" r="4"/>
+                <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+              </svg>
             </a>
-          </li>
-          <li class="leading-relaxed">
-            Edifício Ferreira Ferraz<br>
-            Av. Tancredo Neves<br>
-            Caminho das Árvores · Salvador-BA<br>
-            CEP 41.820-021
-          </li>
-        </ul>
-      </address>
+            <a href="#" class="footer__social-link"
+               aria-label="FJ Ambiental no LinkedIn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.75"
+                   stroke-linecap="round" stroke-linejoin="round"
+                   aria-hidden="true">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                <rect x="2" y="9" width="4" height="12"/>
+                <circle cx="4" cy="4" r="2"/>
+              </svg>
+            </a>
+          </div>
+        </div>
 
+      </div>
     </div>
 
-    <div class="pt-8 border-t border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-      <p class="font-mono text-xs text-white/40 tracking-wide">
-        © 2026 FJ Ambiental · Todos os direitos reservados
-      </p>
-      <p class="font-mono text-xs text-white/40 tracking-wide">
-        Salvador · Bahia · Brasil
-      </p>
+    <!-- Faixa inferior: wordmark decorativo + legal -->
+    <div class="footer__bottom">
+      <div class="footer__wordmark-wrap">
+        <span class="footer__wordmark" aria-hidden="true">FJ Ambiental</span>
+      </div>
+      <div class="footer__legal">
+        <span class="footer__legal-text">© 2026 FJ Ambiental · Todos os direitos reservados</span>
+        <span class="footer__legal-text">Salvador · Bahia · Brasil</span>
+      </div>
     </div>
 
   </div>

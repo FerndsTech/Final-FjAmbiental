@@ -5,31 +5,10 @@
 >
 > Compatível com a convenção `AGENTS.md` da indústria — duplica este arquivo como `AGENTS.md` se necessário.
 
----
-
-## 0. Correção pendente do scaffold (APLICAR PRIMEIRO)
-
-**Bug conhecido:** o servidor de desenvolvimento falha ao iniciar com:
-
-```
-[plugin:vite:import-analysis] Failed to resolve import "./styles/main.css" from "src/scripts/main.js"
-```
-
-**Causa:** em `src/scripts/main.js`, o import do CSS usa caminho relativo errado. Como `main.js` está em `src/scripts/`, o caminho `./styles/main.css` aponta para `src/scripts/styles/main.css` (inexistente).
-
-**Fix:** em `src/scripts/main.js`, trocar:
-
-```js
-import "./styles/main.css"; // ERRADO
-```
-
-por:
-
-```js
-import "../styles/main.css"; // CORRETO (sobe um nível)
-```
-
-Após o fix, `npm run dev` deve subir sem erros.
+**Documentação complementar:**
+- Estado atual de cada section → `docs/SECTIONS.md`
+- Histórico de bugs e diagnósticos → `docs/LICOES.md`
+- Tarefas pendentes → `docs/PENDENCIAS.md`
 
 ---
 
@@ -101,6 +80,38 @@ Quando migrarmos para Astro, cada partial vira `.astro` direto, copy-paste.
 
 Serviços e projetos do portfólio ficam em `src/content/*.json` lidos em build-time.
 **Nunca** hardcode "23 serviços" em HTML. Migra direto para Content Collections do Astro.
+
+#### Critério de decisão: onde um conteúdo deve viver
+
+Antes de criar qualquer section nova, decida onde o conteúdo dela mora
+usando este critério de 3 vias:
+
+**1. Chrome do site (repete entre PÁGINAS diferentes) → `src/partials/`**
+Se o elemento aparece (ou vai aparecer) em mais de uma página do site —
+ex: header, footer, head — ele é um partial, incluído via
+`<include src="arquivo.html" />` (vite-plugin-includes.js). O critério é
+repetição CROSS-PAGE, não repetição dentro da mesma página. Pensando na
+migração futura para Astro: cada partial é candidato direto a virar
+componente `.astro` (`<Header />`).
+
+**2. Dado estruturado e repetido (N itens do mesmo shape) → `src/content/*.json`**
+Se o conteúdo de uma section é uma coleção de N registros com os mesmos
+campos — ex: 8 projetos do portfólio, N serviços, N perguntas de FAQ — ele
+vira um arquivo JSON em `src/content/`, lido em build-time, nunca
+hardcoded item-a-item no HTML. Pensando na migração futura: cada JSON é
+candidato direto a uma Astro Content Collection.
+
+**3. Conteúdo editorial único de uma section → inline no HTML da própria página**
+Se o conteúdo é único (não é uma lista de N itens iguais) — ex: o texto do
+Hero, a introdução da section Sobre, o título e intro da FAQ — ele fica
+escrito direto no HTML da section, sem JSON e sem partial. Não há
+repetição de shape que justifique abstração.
+
+**Módulos JS** (`src/scripts/modules/`) seguem uma lógica separada: cada
+módulo nasce quando a section **ganha comportamento interativo** (não quando
+a section é criada). Uma section pode existir 100% estática por várias
+sessões antes de receber seu módulo — isso é estágio de desenvolvimento,
+não ausência arquitetural.
 
 ### 3.3 Design tokens em CSS variables
 
@@ -210,6 +221,66 @@ Vite remove em build se configurado. Para garantir, manter `if (import.meta.env.
 - Navegação → `<nav>`, não `<div>` com classe `nav`
 - Hierarchia heading — não pular níveis (h1 → h3 sem h2 é erro)
 
+### 4.11 Tailwind utilities em elementos com estado JS
+
+**Nunca** adicione Tailwind utilities diretamente em elementos que recebem classes de estado via JavaScript.
+
+Exemplo problemático: `.site-header` recebe `.is-scrolled` e `.is-light` por JS. Se alguém adicionar `bg-white` via Tailwind diretamente no `<header>`, a especificidade do utilitário pode bloquear silenciosamente os overrides das classes de estado, quebrando a troca de tema sem gerar erro visível.
+
+**Regra:** elementos controlados por JS usam **apenas classes BEM custom** no HTML. Tailwind fica nos elementos filhos estáticos que não mudam de estado. Ver docs/SECTIONS.md § Header dinâmico.
+
+### 4.12 Replicar convenção "por analogia" sem mostrar a fonte
+
+Ao seguir o padrão de um arquivo existente (ex: estrutura de um JSON de conteúdo), mostrar o trecho real desse arquivo antes de aplicar o padrão a um arquivo novo. Não afirmar "seguindo a convenção de X" sem exibir o trecho de X que embasa a afirmação.
+
+### 4.13 Campos semânticos com estado não verificado
+
+Um campo com significado de estado (ex: booleano de "validado", "placeholder", "publicado") não pode afirmar um estado que não ocorreu de fato. Inicializar com o valor real no momento da criação — não com o valor aspiracional ou copiado do template.
+
+### 4.14 Acordeão: não usar `grid-template-rows: 0fr` para colapso de altura
+
+Em Chrome, o filho de grid impõe altura mínima residual — `grid-template-rows: 0fr`
+não colapsa para zero quando há padding no elemento filho.
+
+**Padrão correto:** `max-height: 0; overflow: hidden` no CSS estático +
+JS que mede `scrollHeight` real e aplica via `element.style.maxHeight`.
+Nunca usar valor fixo chutado. Ver docs/LICOES.md #2 para o diagnóstico.
+
+### 4.15 Bug visual persistente: instrumentar antes de propor hipótese
+
+Se uma correção CSS não resolver um bug visual, a próxima etapa é **medir o estado computado real** — DevTools → Computed tab → `height` do elemento — ou listar a cascata CSS completa que alcança o elemento. Não propor outra hipótese a partir de nova leitura estática do código. A causa real pode ser diferente de qualquer hipótese baseada em leitura.
+
+### 4.16 Popup "file changed on disk" no VS Code: nunca clicar sem verificar
+
+Quando o VS Code exibir "The file has been changed on disk. Do you want to
+reload it?" durante Ctrl+S: (1) não clicar em nada ainda, (2) abrir outro
+terminal, (3) rodar `git diff [arquivo]` para ver qual versão é mais atual,
+(4) só então decidir. Em caso de dúvida: fechar o VS Code sem salvar e checar
+via `git status` antes de reabrir. Origem: incidente #6 (docs/LICOES.md).
+
+### 4.17 `git restore [arquivo]` é a recuperação padrão para working tree corrompida
+
+Quando o conteúdo desejado estiver no HEAD (commitado), `git restore [arquivo]`
+restaura em 1 segundo sem risco. Antes de restaurar: anotar qualquer mudança
+no working tree que não estava commitada, para reaplicar manualmente depois.
+Origem: incidente #6 (docs/LICOES.md).
+
+### 4.18 Prompt de encerramento é obrigatório antes de fechar qualquer sessão longa
+
+Ao encerrar uma sessão de desenvolvimento (Claude Code ou Claude Chat), sempre
+gerar o bloco CONTEXTO_TRANSICAO antes de fechar. Sem ele, o próximo chat
+começa sem saber o porquê das decisões tomadas — só o "o quê", não o "como"
+e o "por quê". O prompt de encerramento está em
+`prompt-encerramento-sessao.md` (gerado na sessão de 03/07/2026).
+
+### 4.19 Documentação desatualizada é mais perigosa que ausente
+
+Ao concluir qualquer task de código, atualizar o doc correspondente
+(SECTIONS.md, PENDENCIAS.md) no mesmo commit ou no imediatamente seguinte.
+Nunca deixar para "depois" — documentação que não reflete o código real
+induz retrabalho nas sessões seguintes. Exemplo: Section Sobre ficou marcada
+como "não implementada" por várias sessões após já estar completa no código.
+
 ---
 
 ## 5. Estrutura de pastas
@@ -234,21 +305,30 @@ fj-ambiental/
 │   │   ├── main.js                # Entry point
 │   │   ├── modules/               # Um arquivo por feature
 │   │   │   ├── smooth-scroll.js   # Lenis + GSAP sync
-│   │   │   └── reveal.js          # Fade-up on scroll
+│   │   │   ├── reveal.js          # Fade-up on scroll
+│   │   │   ├── header.js          # Shrinking dinâmico + modo camaleão
+│   │   │   ├── hero.js            # Animações do Hero + reduced-motion
+│   │   │   └── faq.js             # Acordeão FAQ (max-height + scrollHeight)
 │   │   └── utils/                 # Helpers reutilizáveis
 │   ├── content/                   # Dados em JSON
-│   │   ├── services.json          # (a criar)
-│   │   └── projects.json          # (a criar)
+│   │   ├── services.json          # ⬜ pendente — ver docs/PENDENCIAS.md
+│   │   ├── projects.json          # ✅ 8 projetos placeholder
+│   │   └── faq.json               # ✅ 8 perguntas (id, question, answer)
 │   └── assets/
-│       └── logo/                  # SVGs da marca
+│       ├── logo/                  # SVGs da marca
+│       └── icones/                # SVGs de ícones (Flaticon, com "e")
+├── docs/
+│   ├── SECTIONS.md                # Estado atual de cada section
+│   ├── LICOES.md                  # Histórico de bugs e diagnósticos
+│   └── PENDENCIAS.md              # Tarefas pendentes
 ├── plugins/
 │   └── vite-plugin-includes.js    # Sistema de partials HTML
 ├── scripts/                       # Scripts Node de build
 ├── index.html                     # Home
-├── servicos.html                  # (a criar nas próximas iterações)
-├── portfolio.html                 # idem
-├── sobre.html                     # idem
-├── contato.html                   # idem
+├── servicos.html                  # ⬜ pendente
+├── portfolio.html                 # ⬜ pendente
+├── sobre.html                     # ⬜ pendente
+├── contato.html                   # ⬜ pendente
 ├── package.json
 ├── vite.config.js
 ├── tailwind.config.js
@@ -384,213 +464,52 @@ Antes de marcar qualquer feature como pronta, validar:
 
 ---
 
-## 12. Estado dos protótipos da Home (atualizado)
+## 12. Padrões de componentes e implementação
 
-Esta seção registra as decisões de design tomadas nas sessões de prototipagem de alta fidelidade. Quando for implementar uma section, **siga estas especificações** — elas já foram validadas com o cliente.
+### 12.1 Botão CTA (`.btn-pill`)
 
-### 12.1 Ritmo de contraste das sections (CONFIRMADO)
+Componente reutilizável implementado em `src/styles/base.css`. Três variantes:
 
-O site alterna fundo dark (navy da logo) e light (off-white) entre sections. Esse ritmo é a identidade visual da FJ Ambiental (azul + verde da logo traduzidos na estrutura). Ordem da home:
+**`.btn-pill`** (base) — sobre fundo dark: fundo branco, texto navy, ícone
+navy à direita. Padding assimétrico `10px 10px 10px 26px`. Hover: gap
+14px → 18px, ícone vira verde e rotaciona -45°.
 
-| Nº  | Section   | Tema            | Background                      | Status protótipo                |
-| --- | --------- | --------------- | ------------------------------- | ------------------------------- |
-| 01  | Hero      | DARK CINEMÁTICO | Foto drone + overlay escuro 40% | ✅ Validado                     |
-| 02  | Serviços  | LIGHT           | `--color-canvas` (ver nota)     | ✅ Validado (versão dark)       |
-| 03  | Portfólio | LIGHT           | `--color-canvas`                | ✅ Validado                     |
-| 04  | Sobre     | DARK            | `--color-deep-navy`             | ✅ Validado                     |
-| 05  | FAQ       | LIGHT           | `--color-canvas`                | ⬜ A prototipar                 |
-| 06  | Footer    | DARK            | `--color-deep-navy`             | ✅ Existe no scaffold (refinar) |
+**`.btn-pill--dark`** — sobre fundo light/canvas: fundo navy, texto branco,
+ícone verde à direita. Mesmo comportamento de hover.
 
-**NOTA DE AJUSTE DE RITMO:** o Hero virou dark cinemático (foto + overlay), diferente do plano original (white). Isso cria potencial conflito Hero(dark) → Serviços(dark). DECISÃO PENDENTE com cliente: ou (a) Serviços vira light com cards azuis, ou (b) mantém-se um respiro visual entre Hero e Serviços. A versão validada de Serviços em §12.4 está em dark — pode precisar de adaptação para light dependendo da decisão. O Hero dark cinemático é tão diferente visualmente de uma section dark sólida que o conflito é menor do que parece — avaliar na implementação.
+**`.btn-pill--hero`** — ícone à **esquerda**: padding `8px 28px 8px 8px`.
+Fundo navy, texto branco, ícone `--color-fj-green-vivid`. Usado no Hero
+CTA e FAQ CTA.
 
-**Regra geral:** evitar duas sections com mesmo tratamento visual seguidas. O contraste é intencional.
+Seta em todas as variantes: path `M7 17L17 7M9 7h8v8`, `stroke-width 2.5`.
 
-### 12.2 Padrão de botão CTA primário (CONFIRMADO — reutilizar em todo o site)
+### 12.2 Microinteração da seta circular (padrão global)
 
-Quando implementar, criar como componente `.btn-pill` reutilizável (Serviços, Portfólio, Hero secundário). Especificação:
+A rotação `-45deg` + mudança para verde no hover de qualquer "círculo com
+seta" é a assinatura de interação do site. Aplicar consistentemente em:
+botões pill, cards de serviço (se tiverem arrow), card "Ver case" do
+portfólio.
 
-- Estado normal: fundo branco (`#fff`), texto navy (`--color-deep-navy`), círculo navy com seta branca à direita
-- Padding assimétrico: `10px 10px 10px 26px` (espaço extra à esquerda, círculo cola na direita)
-- Hover: gap texto→círculo expande (`14px → 18px`), círculo vira verde (`--color-fj-green`), seta rotaciona `-45deg`
-- Seta: ícone `arrow-up-right` (path `M7 17L17 7M9 7h8v8`), `stroke-width 2.5`
-- Border-radius: `999px` (pill)
+### 12.3 Viewport fitting — `min-height: 100svh`
 
+Sections intermediárias usam `min-height: 100svh` (não `100vh`). A unidade
+`svh` (small viewport height) exclui a barra de URL mobile — garante que
+o conteúdo nunca seja cortado independente do estado da barra.
+
+**Padrão de implementação:**
 ```css
-.btn-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  background: #fff;
-  color: var(--color-deep-navy);
-  padding: 10px 10px 10px 26px;
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.25s var(--ease-out);
-}
-.btn-pill:hover {
-  gap: 18px;
-}
-.btn-pill__icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--color-deep-navy);
-  color: #fff;
+.nome-da-section {
+  min-height: 100svh;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-  transition: all 0.3s var(--ease-out);
-}
-.btn-pill:hover .btn-pill__icon {
-  background: var(--color-fj-green);
-  transform: rotate(-45deg);
+  padding-top: calc(var(--header-height) + Xrem);
+  padding-bottom: Yrem;
 }
 ```
 
-### 12.3 Microinteração da seta circular (PADRÃO GLOBAL)
-
-A rotação `-45deg` + mudança para verde no hover de qualquer "círculo com seta" é a assinatura de interação do site. Aplicar consistentemente em: botões pill, cards de serviço (se tiverem arrow), card "Ver case" do portfólio.
-
-### 12.4 Section 01 — Hero (VALIDADO)
-
-- **Tema:** dark cinemático — imagem aérea (drone) realista de área natural/rio/plantação ocupando 100% da viewport, com overlay escuro 40% + vinheta radial para legibilidade
-- **Altura:** `min-height: 100vh` (primeira dobra completa)
-- **Alinhamento:** TUDO centralizado vertical e horizontalmente (flexbox center)
-- **É o LCP da página** — imagem de fundo precisa: formato AVIF/WebP, `fetchpriority="high"`, preload no `<head>`, dimensões explícitas. NÃO usar `loading="lazy"` aqui.
-- **Estrutura de camadas (z-index) do background:**
-  1. Imagem drone (camada base)
-  2. Overlay: `radial-gradient` vinheta + `linear-gradient` escuro 40%
-  3. Conteúdo central (z-index acima)
-- **Elementos centrais (ordem vertical):**
-  1. **Badge:** pílula com borda verde + texto verde caixa-alta "ENGENHARIA & CONSULTORIA", letter-spacing 2.5px, dot verde com glow, glassmorphism sutil (backdrop-blur 4px). Margin-bottom 26px.
-  2. **H1 split:** Extra Bold (800), caixa-alta, 2 linhas. Linha 1 "SOLUÇÕES EM" branca; linha 2 "ENGENHARIA AMBIENTAL" verde. `font-size: clamp(34px, 7vw, 58px)`, line-height 1.02, letter-spacing -0.02em. Margin-bottom 24px.
-  3. **Parágrafo:** branco/gelo (opacity 82%), max-width 460px, centralizado. "Atuamos no planejamento, organização e coordenação de ações necessárias para a regularização de atos ambientais." Margin-bottom 34px.
-  4. **CTA cápsula assimétrico:** fundo navy `#0A1628`, texto branco caixa-alta "Entre em Contato". Círculo verde com seta escura COLADO NO CANTO ESQUERDO (atenção: invertido vs. os outros botões do site, onde o círculo fica à direita). Padding `8px 28px 8px 8px`. Hover: gap expande, círculo rotaciona -45°. Link → `/contato.html`.
-- **REMOVIDO (decisão do cliente):** coordenadas técnicas nos cantos e scroll indicator. Hero fica limpo, foco no conteúdo central.
-- **Verde sobre dark:** usar tom mais vibrante `#00C766` (não o `#00A859` do sistema), pois sobre fundo escuro precisa de mais luminância. Aplica-se ao Hero e a qualquer texto/acento verde sobre fundos escuros cinemáticos.
-- **Micro-interações (produção):** H1 recebe SplitType — palavras entram em fade-up stagger no load (após preloader). Badge com leve fade-in. Background com possível parallax sutil no scroll (subtle, respeitando reduced-motion).
-- **Header:** logo + navegação ficam por cima do Hero (já existe `src/partials/header.html` no scaffold). Header tem fundo translúcido com backdrop-blur sobre o Hero.
-
-### 12.5 Section 02 — Serviços (IMPLEMENTADO — refinamentos pendentes)
-
-#### Estado atual do CSS (`src/styles/base.css`)
-
-- **Tema:** dark (`#0A1628` wrap, cards `#14202E`) ✅
-- **Título:** "Três pilares da **engenharia hídrica.**" (segunda linha verde) ✅
-- **Label:** "02 · Serviços" (mono, dot verde antes) ✅
-- **Intro** (`.services__intro`): `color: rgba(255,255,255,0.65)` ✅
-- **Header** (`.services__header`): `align-items: start` ✅
-- **Layout:** grid 3 colunas (vira 1 coluna em mobile <600px), gap 12px ✅
-- **Cards** (`.service-card`): `min-height: 300px`, `display: flex`, `flex-direction: column`, `height: 100%`, `padding: 28px` ✅
-  - Número ghosted "01/02/03" no fundo (opacity ~3.5%, mono, 64px, top-right) ✅
-  - Topo (`.service-card__top`): gap 16px — ícone + título/subtítulo lado a lado ✅
-  - Título (`.service-card__title`): `font-size: var(--text-lg)` (18px) ✅
-  - Descrição (`.service-card__desc`): `font-size: 15px`, `line-height: 1.6` ✅
-  - Tags ancoradas na base: `.service-card__tags { margin-top: auto }` ✅
-  - Tags de sub-serviços (pills, separadas por border-top) ✅
-  - SEM seta individual nos cards, SEM footer com contador ✅
-- **Rodapé** (`.services__cta`): `justify-content: space-between` + `border-top: 0.5px solid rgba(255,255,255,0.10)` + `padding-top: 24px`; texto à esquerda, `.btn-pill` à direita; no mobile: `flex-direction: column`, `align-items: flex-start` ✅
-- **Hierarquia por cor:** Outorga (verde) · Hidrometria (aqua) · Hidrologia (verde) ✅
-- **Conteúdo dos 3 cards:**
-  - **01 Outorga** / RECURSOS HÍDRICOS / "Regularização do uso da água perante órgãos ambientais — captação, barramento, perfuração e lançamento de efluentes." / tags: Poços (APPO), Captação, Barramento / 10 sub-serviços
-  - **02 Hidrometria** / MEDIÇÃO EM CAMPO / "Instalação de estações, medição de vazão e sedimentos, curvas de descarga e consistência de séries históricas." / tags: Fluviométrica, ADCP, Topobatimetria / 08 sub-serviços
-  - **03 Hidrologia** / ESTUDOS PREDITIVOS / "Vazão regularizada, previsão de cheias, estudos hidrossedimentológicos e modelagem de qualidade de água." / tags: Vazão regul., Cheias, Modelo SMAP / 05 sub-serviços
-
-#### Ícones (parcialmente implementado)
-
-- **Vetores:** 3 SVGs Flaticon reais substituíram placeholders — inline em `index.html`, `fill="currentColor"` em `<g>` interno, `viewBox` originais preservados (160×160 / 60×60 / 160×160), `id`s internos removidos ✅
-- **Arquivos-fonte:** `src/assets/icones/` (**português com "e"** — não `icons/`) ✅
-- **CSS cor:** `.service-card__icon--green { color: var(--color-fj-green) }` / `--aqua { color: var(--color-fj-aqua) }` — cor herdada via `currentColor` ✅
-- **CSS tamanho atual:** `.service-card__icon svg { width: 20px; height: 20px }` — tamanho ainda pequeno ⚠️
-- **⬜ PENDENTE:** remover caixa de fundo do `.service-card__icon` (tirar `background`, `padding`, `border-radius`, `width/height` do wrapper) e aumentar SVG para ~40px — ícone maior e "solto"
-
-#### Notas de arquitetura (não alucinar)
-
-- **CSS:** todo o CSS de Serviços está em `src/styles/base.css`. NÃO existe `src/styles/sections/`. Dívida técnica: dividir por section no futuro.
-- **Tailwind + tokens:** Tailwind v3.4 e CSS custom coexistem. `tokens.css` é a fonte da verdade para variáveis; Tailwind para layout/espaçamento.
-
-### 12.6 Section 03 — Portfólio (VALIDADO)
-
-- **Tema:** light (`--color-canvas`)
-- **Título:** "Engenharia hídrica **em ação.**" (segunda linha verde) — lado direito do editorial split
-- **Label:** "PORTFÓLIO TÉCNICO" (pill verde com dot) + counter "03 / 24 CASES" + arrows prev/next no header
-- **Layout:** editorial split assimétrico `1.45fr / 1fr`:
-  - Esquerda: featured card (aspect 16/11) dark com imagem, tags overlay, coordenadas, título/metadata, CTA "Ver case"
-  - Direita: headline editorial + descrição + strip de stats 2×2 (mono numerals)
-- **Featured card detalhes:**
-  - Padrão topográfico SVG sutil (opacity 7%) no fundo
-  - Glow aqua radial no canto superior direito
-  - Tags duplas top-left (primária verde sólida + secundária glassmorphism)
-  - Coordenadas geográficas top-right (mono, ex: 12°44'01"S / 38°47'05"W) — detalhe de engenharia
-  - Metadata em mono: cliente · ano · localização
-- **Stats por projeto:** cada projeto tem suas 4 stats próprias (label/value/unit) — trocam ao trocar de case. Ex: Poços = Vazão(L/s)/Poços/Profundidade/Duração.
-- **Thumbnails:** 5 thumbs seletores abaixo, com indicador (linha verde acima + glow verde no ativo), número mono
-- **Progress line:** barra com preenchimento verde mostrando posição no catálogo
-- **CTA final:** `.btn-pill` "Conheça todos os 100+ projetos" → `/portfolio.html`
-- **Dados:** estruturar em `src/content/projects.json`. Coordenadas reais ainda não disponíveis — usar fakes; se não houver listagem com localização exata, remover o campo coords dos cards na implementação final.
-
-### 12.7 Section 04 — Sobre (VALIDADO — já desenhado pelo cliente)
-
-- **Tema:** dark
-- **Título:** "Presença técnica em **todo o Brasil.**" (verde) com label "04 — SOBRE"
-- **Layout:** mapa do Brasil estilizado à esquerda + stats list à direita
-- **Mapa:** SVG Brasil, BA destacado em verde (elipse), PE/TO/MG como dots aqua, callout UNESCO/México com linha tracejada
-- **Stats (mono numerals, verde):** 100+ Projetos (2009→2026) · 15+ Anos (fundada 2010) · 04 Estados (BA·PE·TO·MG) · UNESCO Parceiro internacional (Morelos·México)
-- **Band de clientes (footer da section):** EMBASA · YAMANA GOLD · MINERAÇÃO CARAÍBA · BUNGE ALIMENTOS · UNESCO · TENDA · +50 CLIENTES
-
-### 12.8 Referência de fluidez/renderização premium
-
-Site de referência principal do cliente: `webhubeducacao.com.br/comunidade-webhub`. Técnicas a incorporar:
-
-- **Preloader de contador 0→100%** com GSAP Timeline (esconde carregamento, entrada controlada) — ADICIONAR ao roadmap (módulo `src/scripts/modules/preloader.js`)
-- **SplitType** para reveals de texto palavra-por-palavra / linha-por-linha nos headings grandes — considerar adicionar como dependência quando chegar no Hero
-- **Lenis + ScrollTrigger** — já implementado no scaffold ✅
-- **Marquees infinitos** opcionais (band de clientes pode rolar)
-- **Pill buttons com ícone circular** — já definido em §12.2 ✅
-
-### 12.9 Próximos passos (ordem)
-
-1. ✅ ~~**Aplicar fix do §0**~~ — servidor rodando
-2. ✅ ~~**Implementar Hero (Section 01)**~~ — conforme §12.4
-3. ✅ ~~**Implementar Section 02 (Serviços)**~~ — estrutura e conteúdo prontos · **⬜ pendente: ícones soltos (~40px, sem caixa)** — ver §12.5
-4. **Corrigir CLS** (0.472 → < 0.05) — causa principal: fontes IBM Plex sem dimensões reservadas, seção Serviços responde por 88% do shift — ver §12.10
-5. **Implementar Section 03 (Portfólio)** conforme §12.6 + `projects.json` + `portfolio.js`
-6. **Prototipar + implementar FAQ (light)**
-7. **Refinar Footer (dark)** — base existente no scaffold; corrigir contraste `text-white/40` (falha WCAG) — ver §12.10
-8. **Adicionar preloader** (§12.8) + SplitType no Hero
-9. Otimização de imagens (sharp), favicon system completo, Lighthouse pass em produção
-
-**Componente reutilizável a criar primeiro:** `.btn-pill` (§12.2) — usado em Hero, Serviços e Portfólio. Definir uma vez no CSS antes de implementar as sections.
-
-### 12.10 Diagnóstico de performance (pendente de correção)
-
-> Medição em dev local (localhost, Slow 4G emulado no DevTools). **Performance 40 não representa produção** — dev server não minifica nem comprime.
-
-| Categoria      | Score (dev) |
-| -------------- | ----------- |
-| Performance    | 40          |
-| Accessibility  | 96          |
-| Best Practices | 81          |
-| SEO            | 100         |
-
-#### CLS — problema principal
-
-- **CLS medido:** 0.472 (meta do projeto: < 0.05 — ver §7)
-- **Culpado:** `section#servicos` responde por 0.417 (88% do CLS total)
-- **Causa provável:** fontes IBM Plex causando layout shift ao carregarem + altura dos elementos não reservada explicitamente no CSS
-- **FOUC:** flash de HTML sem estilo ao recarregar (~2-3s) — mesma raiz do CLS; fontes sem `size-adjust` ou fallback de métricas correto
-
-#### Falso positivo identificado
-
-- **Fontes Google (Inter/Roboto)** apareciam no Network tab — era injeção da extensão **CodeGPT**, não do código. Confirmado limpo em aba anônima. O site usa **somente IBM Plex** via `@fontsource` self-hosted.
-
-#### Outros achados (menor prioridade)
-
-- **Contraste footer:** textos com `text-white/40` (opacity 40%) falham WCAG 4.5:1 — corrigir antes do launch
-- **Headers de segurança** (CSP, HSTS, COOP, X-Frame-Options): ausentes — configurar somente no deploy, não aplicável em dev
-- **Preloader:** ainda não implementado — quando pronto reduz percepção de FOUC (ver §12.8)
+Exceção: o Hero usa `min-height: 100vh` — é a primeira dobra, não sofre
+do problema da barra mobile.
 
 ---
 
@@ -604,7 +523,9 @@ Este `CLAUDE.md` é **versionado junto com o código**. Toda decisão arquitetur
 - Mudar uma disciplina arquitetural
 - Descobrir uma armadilha nova de IA
 - Mudar performance budget
-- Validar um novo protótipo de section (atualizar §13)
+- Implementar ou alterar uma section → atualizar `docs/SECTIONS.md`
+- Resolver um bug relevante → registrar em `docs/LICOES.md`
+- Concluir ou adicionar tarefa → atualizar `docs/PENDENCIAS.md`
 - Definir um novo padrão de componente reutilizável
 - Antes da migração Fase 1 → Fase 2
 
