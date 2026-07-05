@@ -316,7 +316,13 @@ textarea {
   border-bottom: 1px solid transparent;
   transition:
     background-color var(--duration-base) var(--ease-out),
-    border-color var(--duration-base) var(--ease-out);
+    border-color var(--duration-base) var(--ease-out),
+    opacity var(--duration-base) var(--ease-out);
+}
+
+.site-header.is-menu-open {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .site-header .container-main {

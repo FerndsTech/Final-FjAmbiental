@@ -10,7 +10,8 @@
 
 export function initMobileNav(root = document) {
   const toggle  = root.querySelector('.nav-toggle');
-  const panel   = root.querySelector('#mobile-nav');
+  const panel      = root.querySelector('#mobile-nav');
+  const siteHeader = root.querySelector('.site-header');
   const overlay  = root.querySelector('.mobile-nav-overlay');
   const closeBtn = root.querySelector('.mobile-nav__close');
 
@@ -21,6 +22,7 @@ export function initMobileNav(root = document) {
     overlay.classList.add('is-open');
     toggle.setAttribute('aria-expanded', 'true');
     document.body.style.overflow = 'hidden';
+    if (siteHeader) siteHeader.classList.add('is-menu-open');
   }
 
   function closeMenu() {
@@ -28,6 +30,7 @@ export function initMobileNav(root = document) {
     overlay.classList.remove('is-open');
     toggle.setAttribute('aria-expanded', 'false');
     document.body.style.overflow = '';
+    if (siteHeader) siteHeader.classList.remove('is-menu-open');
   }
 
   function toggleMenu() {
