@@ -165,3 +165,90 @@ antes de reabrir.
 
 **Status:** ✅ resolvido. base.css restaurado e fix de hover commitado
 em 28/06/2026.
+
+---
+
+## #7 — ScrollTrigger sem `end` cria janela de ativação com duração zero
+
+**Contexto:** sessão de correção do header (contraste em sections dark),
+jul/2026. O trigger de `.is-scrolled` em `header.js` usava `onToggle`
+para adicionar/remover a classe, baseado em `start: 'bottom top'` do
+`.hero`, sem `end` definido.
+
+**Sintoma:** o header nunca ganhava contraste (fundo/blur) em nenhuma
+section além do Hero — Serviços, Sobre ficavam com o nav sem fundo,
+texto flutuando ilegível sobre o conteúdo.
+
+**Causa raiz:** sem `end`, o GSAP calcula um valor padrão que, neste
+caso, coincidia com o próprio `start` — criando uma janela de ativação
+de duração efetivamente zero. `self.isActive` virava `true` e `false`
+quase no mesmo instante, então a classe era adicionada e removida tão
+rápido que nunca "grudava" visualmente.
+
+**Diagnóstico:** três hipóteses de leitura estática foram descartadas
+com evidência antes de chegar na causa real (Tailwind sobrescrevendo,
+ordem de init errada, sync Lenis↔ScrollTrigger incorreto) — todas
+descartadas por leitura de código e/ou documentação oficial das libs.
+A causa real só foi confirmada medindo o estado real no DevTools
+(aba Elements, observando a lista de classes do `<header>` em tempo
+real durante o scroll) — a classe `is-scrolled` nunca aparecia fora do
+ponto exato de transição do Hero.
+
+**Correção aplicada:** adicionado `end: 'max'` ao `ScrollTrigger.create()`,
+estendendo a janela ativa até o fim da página.
+
+**Regra derivada:** ao criar um `ScrollTrigger` com `onToggle` que deve
+manter um estado persistente (não só um pulso pontual), sempre definir
+`end` explicitamente — nunca confiar no valor padrão quando o objetivo
+é "ativo a partir daqui até o fim do scroll".
+
+**Status:** ✅ resolvido e validado no navegador, jul/2026.
+
+---
+
+## #8 — `backdrop-filter` no pai quebra `position: fixed` de filhos aninhados
+
+**Contexto:** implementação do menu mobile (painel lateral `#mobile-nav`
+e overlay `.mobile-nav-overlay`), jul/2026. Ambos eram filhos diretos de
+`<header class="site-header">`.
+
+**Sintoma:** ao abrir o menu mobile no Hero (antes de rolar), tudo
+funcionava normalmente. Ao abrir o mesmo menu depois de rolar para
+Serviços/Sobre (ou sobre Portfólio/FAQ), o painel aparecia visualmente
+quebrado — conteúdo da página vazando através dos links, como se o
+painel não tivesse fundo sólido.
+
+**Causa raiz:** `.site-header.is-scrolled` e `.site-header.is-light`
+aplicam `backdrop-filter: blur(12px)` no `<header>`. Por especificação
+CSS, um elemento com `backdrop-filter` (assim como `filter`, `transform`,
+`perspective`, `will-change`, entre outros) se torna o "containing block"
+de qualquer descendente `position: fixed` — não é um bug de navegador,
+é comportamento documentado da spec. Como `#mobile-nav` é
+`position: fixed` com `top:0; right:0; bottom:0`, esses valores passaram
+a ser calculados relativos ao `<header>` (que tem só ~4rem de altura)
+em vez da viewport inteira. O painel encolhia para essa faixa pequena,
+mas o conteúdo interno continuava transbordando visualmente sem fundo
+pintado atrás.
+
+**Por que só acontecia depois de rolar:** no Hero, antes de `.is-scrolled`
+ativar, o header não tem `backdrop-filter` — não havia "containing block"
+alternativo, então `#mobile-nav` se posicionava normalmente relativo à
+viewport. O bug só se manifestava quando o header ganhava blur.
+
+**Correção aplicada:** `#mobile-nav` e `.mobile-nav-overlay` foram
+movidos para fora de `<header>`, tornando-se irmãos dele no DOM (ainda
+no mesmo arquivo `header.html`, já que o sistema de `<include>` faz
+substituição literal de texto — tudo após `</header>` no partial sai
+como irmão do `<header>` no HTML final). O JS (`mobile-nav.js`) não
+precisou de nenhuma alteração, pois já selecionava os elementos via
+`document.querySelector`, independente de posição no DOM.
+
+**Regra derivada:** qualquer elemento `position: fixed` (overlays,
+modais, painéis, tooltips) deve ser posicionado como irmão de nível
+alto no DOM (próximo do `<body>`), nunca aninhado dentro de um elemento
+que tenha ou possa vir a ter `backdrop-filter`, `filter`, `transform`
+ou `will-change` aplicados dinamicamente. Verificar isso ANTES de
+implementar qualquer novo painel/modal neste projeto, dado que o header
+já usa `backdrop-filter` extensivamente.
+
+**Status:** ✅ resolvido e validado no navegador, jul/2026.

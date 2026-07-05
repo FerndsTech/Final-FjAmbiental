@@ -44,25 +44,16 @@
 > (portfolio.js, páginas internas, etc.). Ordem sugerida: do menor
 > para o maior escopo.
 
-- [ ] **FAQ — estado inicial fechado:** hoje o primeiro card já abre
-  ao entrar na section. Corrigir para que todos os cards comecem
-  fechados no scroll — provavelmente 1 linha em `src/scripts/modules/faq.js`
-  (remover o `openCard()` chamado no init, se existir).
-
 - [ ] **Tags das sections — padronizar no estilo Portfólio:** hoje cada
   section usa um formato diferente (pill, texto simples, com número, sem
-  número). Padronizar todas no estilo da tag do Portfólio ("• PORTFÓLIO
+  número). Padronizar todas no estilo da tag do Portfólio ("PORTFÓLIO
   TÉCNICO" — pill com fundo suave, texto caps, sem número).
-  Sections afetadas: Hero ("ENGENHARIA & CONSULTORIA"), Serviços
-  ("• 02 · SERVIÇOS"), Sobre ("04 — SOBRE"), FAQ (tag existe, confirmar
-  texto atual antes de editar). Portfólio já está no padrão correto.
+  **FAQ já concluída** (`.faq__label`, texto "PERGUNTAS FREQUENTES").
+  Sections restantes: Hero ("ENGENHARIA & CONSULTORIA"), Serviços
+  ("• 02 · SERVIÇOS"), Sobre ("04 — SOBRE"). Portfólio já está no
+  padrão correto (referência original).
   Footer não tem tag (intencional). Section Contato terá tag quando
   for desenvolvida (modelo já existe com o cliente).
-
-- [ ] **Header — contraste em sections dark:** o nav não tem contraste
-  visível quando sobre sections dark (além do Hero). Verificar os estados
-  `.is-scrolled` e `.is-light` em `src/scripts/modules/header.js` e o
-  CSS correspondente em `base.css § Header` antes de propor correção.
 
 - [ ] **Hero — subir conteúdo:** conteúdo principal está baixo na
   viewport. Ajuste de `padding-top` ou `align-items` no `.hero__content`.
@@ -104,6 +95,12 @@
   Lighthouse em produção após build. Ver docs/LICOES.md #5.
 - [ ] **Contraste Footer** — textos com opacidade baixa provavelmente
   falham WCAG 4.5:1. Auditar e corrigir antes do launch.
+- [ ] **Focus trap no menu mobile** — ao abrir o painel `#mobile-nav`,
+  a navegação por teclado (Tab) ainda circula pelo conteúdo da página
+  por trás, não fica presa dentro do painel. Implementar focus trap
+  (mover foco pro primeiro link ao abrir, ciclar Tab dentro do painel,
+  devolver foco ao botão toggle ao fechar) — boa prática de
+  acessibilidade para menus modais.
 
 ---
 
