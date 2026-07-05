@@ -378,6 +378,10 @@ textarea {
   opacity: 1;
 }
 
+.site-header.is-light .nav-toggle {
+  color: var(--color-deep-navy);
+}
+
 .nav-toggle .icon-close {
   display: none;
 }
