@@ -400,6 +400,11 @@ textarea {
   visibility: hidden;
   transition: opacity var(--duration-base) var(--ease-out),
               visibility var(--duration-base) var(--ease-out);
+  /* glassmorphism funcional: sinaliza que o menu mobile tomou
+     prioridade sobre o conteúdo da página (exceção documentada em
+     DESIGN_SYSTEM.md §10) */
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   z-index: 40;
 }
 .mobile-nav-overlay.is-open {
@@ -428,6 +433,7 @@ textarea {
 .mobile-nav__header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   padding-top: 0.5rem;
 }
@@ -437,6 +443,16 @@ textarea {
   font-weight: 500;
   font-size: var(--text-base);
   color: var(--color-ink-inverse);
+}
+
+.mobile-nav__close {
+  color: var(--color-ink-inverse);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mobile-nav__divider {
