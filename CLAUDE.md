@@ -513,7 +513,47 @@ do problema da barra mobile.
 
 ---
 
-## 13. Sobre este documento
+## 13. Fluxo de trabalho: Cérebro + Motor (Claude Chat + Claude Code)
+
+Este projeto é desenvolvido com dois assistentes em conjunto: Claude Chat
+("cérebro", planejamento e decisão) e Claude Code ("motor", execução no
+repositório real). O fluxo abaixo existe para reduzir retrabalho e evitar
+os incidentes registrados em docs/LICOES.md.
+
+**Ciclo de 8 passos:**
+
+1. A pessoa descreve a intenção em linguagem natural no Claude Chat. O
+   Claude Chat converte essa linguagem natural em linguagem técnica precisa (nomes de arquivo, classes, seletores, comportamento exato)
+   antes de agir ou propor qualquer mudança.
+2. O Claude Chat lê o código real (via prompt de leitura para o Claude
+   Code, nunca por suposição).
+3. O Claude Chat monta o diff exato e mostra ANTES de qualquer aplicação.
+4. A pessoa aprova (ou pede ajuste).
+5. O Claude Chat gera um prompt de aplicação cirúrgico para o Claude
+   Code — instrução exata, com contexto explicado antes da instrução,
+   sem ambiguidade, sem "melhore" ou "ajuste como achar melhor".
+6. O Claude Code aplica e mostra o diff real que aplicou, ANTES de gravar
+   no disco, aguardando confirmação explícita ("pode aplicar").
+7. A pessoa valida no navegador.
+8. A pessoa mesma faz o commit (nunca a IA).
+
+**Regras específicas deste fluxo:**
+
+- Prompts para o Claude Code seguem o formato: CONTEXTO (o porquê da
+  mudança) → O QUE FAZER (instrução exata) → pedido explícito de diff
+  antes de gravar.
+- Diffs grandes (arquivos novos, reescrita de seções inteiras de `.md`)
+  têm risco real de perda silenciosa de conteúdo ao serem exibidos em
+  terminal — preferir edições cirúrgicas (inserir/substituir trechos
+  pontuais com âncora única) a reescritas de blocos inteiros.
+- Para confirmar integridade de uma edição grande, usar `grep -c` com
+  frases-âncora do conteúdo original E do conteúdo novo, em vez de
+  confiar em leitura visual do diff — a leitura visual já mostrou ser
+  pouco confiável neste ambiente de terminal.
+- Nunca commitar, dar `push` ou fazer merge a partir do Claude Code —
+  essas ações são sempre manuais, feitas pela pessoa.
+
+## 14. Sobre este documento
 
 Este `CLAUDE.md` é **versionado junto com o código**. Toda decisão arquitetural importante é registrada aqui. Toda IA lê isto antes de gerar código.
 
