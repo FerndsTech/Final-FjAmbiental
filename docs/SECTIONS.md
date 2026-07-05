@@ -146,6 +146,15 @@ CSS `base.css` § FAQ, JS `src/scripts/modules/faq.js`.
   migração futura (Astro Content Collections).
 - Grid 2 colunas `≥ 700px` / 1 coluna `< 700px` — breakpoint customizado.
 - CTA WhatsApp: número placeholder (`5571XXXXXXXXX`) — ver docs/PENDENCIAS.md.
+- Tag de section (`.faq__label`, texto "PERGUNTAS FREQUENTES"): mesmo
+  padrão visual do `.portfolio__label` (pill verde translúcido + dot),
+  substituindo `.faq__eyebrow` (classe órfã, nunca instanciada no HTML,
+  removida do CSS).
+- Estado inicial do acordeão: o primeiro card (`outorga-o-que-e`) nascia
+  com classe `is-open` e `aria-expanded="true"` hard-coded no HTML,
+  abrindo por padrão no load. Corrigido diretamente no HTML — `faq.js`
+  não precisou de alteração (só mede `scrollHeight` de quem já está
+  `is-open`).
 
 ---
 
@@ -188,14 +197,60 @@ Arquivo: `src/partials/footer.html`, CSS `base.css` § Footer.
 ## Header dinâmico (`.site-header`)
 
 Arquivos: `src/partials/header.html`, JS `src/scripts/modules/header.js`,
-CSS `base.css` § Header.
+CSS `base.css` § Header. Menu mobile: JS dedicado
+`src/scripts/modules/mobile-nav.js`.
 
 **Estados JS:**
 
-| Classe         | Gatilho ScrollTrigger                      | Efeito                                                                  |
-| -------------- | ------------------------------------------ | ----------------------------------------------------------------------- |
-| `.is-scrolled` | Bottom de `.hero` cruza top da viewport    | Fundo `rgba(10,22,40,0.85)` + blur 12px + altura reduz (5rem → 3.25rem) |
-| `.is-light`    | Header entra/sai de `[data-theme="light"]` | Fundo branco translúcido + texto/ícones dark                            |
+| Classe          | Gatilho ScrollTrigger                      | Efeito                                                                                                                              |
+| --------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `.is-scrolled`  | Bottom de `.hero` cruza top da viewport    | Fundo `rgba(10,22,40,0.85)` + blur 12px + altura reduz (5rem → 4rem)                                                             |
+| `.is-light`     | Header entra/sai de `[data-theme="light"]` | Fundo branco translúcido + texto/ícones dark                                                                                        |
+| `.is-menu-open` | Menu mobile aberto (via `mobile-nav.js`)   | `opacity: 0` + `pointer-events: none` — header some com fade enquanto o painel mobile está aberto (evita duplicação visual da logo) |
+
+**Correção de bug (sessão jul/2026):** o trigger de `.is-scrolled` não
+tinha `end` definido, fazendo o GSAP calcular uma janela de ativação com
+duração efetivamente zero (start e end coincidindo). A classe era
+adicionada e removida quase instantaneamente, nunca persistindo — header
+ficava sem contraste em todas as sections dark além do Hero. Corrigido
+com `end: 'max'`. Ver docs/LICOES.md #7.
+
+**Layout (`.container-main` dentro do header):** grid de 3 colunas
+(`grid-cols-[auto_1fr_auto]`): logo à esquerda, `<nav>` centralizado
+(Home, Serviços, Portfólio, Sobre — classe `.nav-link`, hover em pill
+com cor verde da marca), CTA "Solicitar Contato" isolado à direita
+(hover: `scale-105`, não muda cor — texto protegido com `hover:text-white`
+contra a regra global `a:hover { color: var(--color-fj-green) }`).
+
+**Hover do logo:** `.site-logo:hover span` fica verde em todos os temas.
+Precisou de uma regra dedicada para `.is-light` porque
+`.site-header.is-light span { color: var(--color-deep-navy) }` tinha
+especificidade maior que o `a:hover` global, travando a cor mesmo no
+hover — só funcionava em sections dark antes da correção.
+
+**Menu mobile (`#mobile-nav`):** painel lateral direito, `position: fixed`,
+desliza via `transform: translateX()`. Estrutura: cabeçalho (logo + "FJ
+Ambiental" + botão `.mobile-nav__close` dedicado) → `<hr>` divisor →
+`<nav>` com os 4 links → CTA ancorado no rodapé (`margin-top: auto`).
+Overlay (`.mobile-nav-overlay`) usa `backdrop-filter: blur(5px)` — exceção
+funcional de glassmorphism (DESIGN_SYSTEM.md §10), sinaliza prioridade
+visual do menu sobre o conteúdo.
+
+**IMPORTANTE — `#mobile-nav` e `.mobile-nav-overlay` são irmãos de
+`<header>` no DOM, não filhos dele.** Motivo: `backdrop-filter` no
+elemento pai (`.is-scrolled`/`.is-light`) transforma esse elemento no
+"containing block" de descendentes `position: fixed` (comportamento
+documentado da spec CSS, não bug de navegador) — isso quebrava o
+cálculo de `top/right/bottom` do painel quando aninhado dentro do
+header. Ver docs/LICOES.md #8. **Não mover esses elementos de volta
+para dentro do `<header>`.**
+
+Fechamento do menu: botão `.mobile-nav__close`, clique em qualquer link,
+clique no overlay, tecla `Esc`, ou resize da janela para desktop
+(`≥768px`). Scroll do `<body>` trava enquanto aberto. Ícone do botão
+toggle alterna hambúrguer/X via `aria-expanded` (CSS puro, sem JS
+manipulando ícones). **Pendente:** focus trap por teclado — ver
+docs/PENDENCIAS.md.
 
 **Ordem de inicialização em `main.js` — não alterar:**
 
@@ -203,6 +258,7 @@ CSS `base.css` § Header.
 initSmoothScroll(); // 1. Lenis primeiro — registra scroller no ScrollTrigger
 initHero(); // 2. Hero segundo
 initHeader(); // 3. Header por último — precisa de Lenis ativo
+initMobileNav(); // 4. Independente de Lenis/ScrollTrigger, ordem não é crítica
 ```
 
 Se `initHeader()` rodar antes de `initSmoothScroll()`, triggers calculam
