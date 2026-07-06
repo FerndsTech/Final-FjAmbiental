@@ -27,6 +27,7 @@ import { initReveal } from './modules/reveal.js';
 import { initFaq } from './modules/faq.js';
 import { initFooterNav } from './modules/footer.js';
 import { initMobileNav } from './modules/mobile-nav.js';
+import { initSobre } from './modules/sobre.js';
 
 // === Inicialização ===
 // Cada init retorna função de cleanup para suporte futuro a View Transitions.
@@ -40,6 +41,7 @@ function init() {
   cleanups.push(initFaq());
   cleanups.push(initFooterNav());
   cleanups.push(initMobileNav());
+  cleanups.push(initSobre());
   setTimeout(() => { requestAnimationFrame(() => ScrollTrigger.refresh()); }, 100);
 
   if (import.meta.env.DEV) {

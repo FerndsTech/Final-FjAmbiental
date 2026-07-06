@@ -1529,48 +1529,58 @@ textarea {
 
 .sobre__map-svg {
   width: 100%;
-  max-width: 400px;
+  max-width: 460px;
   height: auto;
 }
 
 .sobre__map-shape {
   fill: var(--color-border-inverse);
-  stroke: var(--color-border-inverse);
-  stroke-width: 1;
+  stroke: var(--color-deep-navy);
+  stroke-width: 2;
+}
+
+#BRBA {
+  fill: var(--color-fj-green);
 }
 
 .sobre__map-dot {
   fill: var(--color-fj-aqua);
+  opacity: 0;
 }
 
-.sobre__map-ba {
-  fill: var(--color-fj-green);
+.sobre__map-ba-pin {
+  fill: var(--color-ink-inverse);
+  stroke: var(--color-fj-green);
+  stroke-width: 3;
+  opacity: 0;
 }
 
 .sobre__map-ba-label {
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: 25px;
   font-weight: 700;
   fill: var(--color-ink-inverse);
   text-anchor: middle;
   dominant-baseline: middle;
+  opacity: 0;
 }
 
 .sobre__map-state-label {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 21px;
   fill: var(--color-slate-inverse);
   dominant-baseline: middle;
+  opacity: 0;
 }
 
 .sobre__map-callout-line {
   stroke: var(--color-border-inverse);
-  stroke-width: 1;
+  stroke-width: 2;
 }
 
 .sobre__map-callout-text {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 19px;
   fill: var(--color-slate-inverse);
   letter-spacing: 0.02em;
 }
@@ -1667,7 +1677,12 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* placeholder — sem animações nesta section nesta fase */
+  .sobre__map-dot,
+  .sobre__map-ba-pin,
+  .sobre__map-ba-label,
+  .sobre__map-state-label {
+    opacity: 1;
+  }
 }
 
 /* ============================================
