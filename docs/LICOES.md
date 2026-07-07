@@ -252,3 +252,36 @@ implementar qualquer novo painel/modal neste projeto, dado que o header
 já usa `backdrop-filter` extensivamente.
 
 **Status:** ✅ resolvido e validado no navegador, jul/2026.
+
+---
+
+## #9 — Variante de botão compartilhada pode colidir com o background da section onde é reutilizada
+
+**Contexto:** implementação dos 2 CTAs (`.sobre__cta-row`) da Section
+Sobre, jul/2026. `.btn-pill--hero` foi criada para o Hero (fundo com
+foto) e já era reutilizada com sucesso na FAQ (fundo light) — funcionando
+bem nos dois contextos.
+
+**Sintoma:** ao reutilizar a mesma classe `.btn-pill--hero` no CTA de
+WhatsApp da Section Sobre, o botão "sumiu" visualmente. `.btn-pill--hero`
+define `background: var(--color-deep-navy)`, e a Section Sobre usa
+exatamente o mesmo token como fundo (`base.css:1466`) — botão e fundo
+eram literalmente a mesma cor, sem nenhum contraste.
+
+**Causa raiz:** nenhuma variante de componente reutilizável é "segura por
+padrão" contra qualquer fundo. O contraste de `.btn-pill--hero` sempre
+foi implícito ao contexto onde já era usada (foto no Hero, fundo light na
+FAQ) — nunca foi testado contra um fundo **sólido da mesma paleta de cor**
+do próprio botão.
+
+**Correção aplicada:** em vez de alterar a definição global de
+`.btn-pill--hero` (o que afetaria Hero e FAQ, os dois contextos onde já
+funcionava), foi criado um override **escopado**
+(`.sobre__cta-row .btn-pill--hero`, `base.css:1621-1624`) só para este
+novo contexto — troca o background para `--color-deep-navy-2` (tom
+levemente diferente) e adiciona uma borda 1px translúcida para reforçar
+o contorno.
+
+**Regra derivada:** CLAUDE.md §4.20.
+
+**Status:** ✅ resolvido e validado no navegador, jul/2026.

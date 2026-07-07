@@ -100,31 +100,94 @@ CSS `base.css` § Portfólio.
 
 ## Section 04 — Sobre
 
-Arquivos: `index.html` (section #sobre, `index.html:595-707`),
-CSS `base.css` § Sobre (`base.css:1326-1534`).
+Arquivos: `index.html` (section #sobre, `index.html:598-725`),
+CSS `base.css` § Sobre (`base.css:1461-1664`),
+JS `src/scripts/modules/sobre.js`.
 
 **Status:** implementada no código. Única pendência: animação de marquee
-da band de clientes na base (ver docs/PENDENCIAS.md).
+da faixa institucional na base (ver docs/PENDENCIAS.md).
 
 **Estrutura implementada:**
 
-- Label "04 — SOBRE"
+- Label "04 — SOBRE" (pendência de padronização de tag — ver docs/PENDENCIAS.md)
 - Título "Presença técnica em **todo o Brasil.**" (negrito verde)
-- Layout: mapa SVG inline do Brasil (esq) + stats (dir)
-  - BA em verde (elipse) · PE/TO/MG como dots aqua
-  - Callout UNESCO/México com linha tracejada
+- Layout: mapa SVG do Brasil (esq) + stats em `<dl>` (dir) — grid 2
+  colunas `≥ 900px`, 1 coluna abaixo disso
 - Stats (`<dl>`, mono, verde): 100+ Projetos · 15+ Anos · 04 Estados ·
-  UNESCO Parceiro. Sub-label "Fundada em 2010" abaixo do stat de anos.
-- Band de clientes estática na base: EMBASA · YAMANA GOLD · MINERAÇÃO
-  CARAÍBA · BUNGE ALIMENTOS · UNESCO · TENDA · +50 CLIENTES
-  (marquee animado via GSAP ainda pendente)
+  UNESCO Parceiro (aqua). Sub-label "Fundada em 2010" abaixo do stat de anos.
+- 2 CTAs (`.sobre__cta-row`): WhatsApp + Formulário (ver detalhe abaixo)
+- Faixa institucional estática na base (ver detalhe abaixo)
 
-**Decisões não-óbvias:**
+**Mapa do Brasil:**
 
-- Mapa do Brasil é SVG inline no HTML (não asset separado em `src/assets/`).
-  Sem arquivo de mapa no disco — está embutido diretamente em `index.html:619-657`.
-- Nenhum módulo JS dedicado à Sobre — conteúdo estático, animações de
-  reveal via `initReveal()` global.
+- SVG inline em `index.html` (`index.html:618-658`), fonte real:
+  simplemaps.com/svg/country/br — licença "Free for Commercial and
+  Personal Use" (uso livre comercial/pessoal), ver comentário
+  `index.html:625`.
+- 27 `<path>` de estado (uma UF cada), `id` original da fonte preservado
+  (ex: `id="BRBA"`, `id="BRTO"`) — permite selecionar cada estado
+  diretamente por `#id` em `sobre.js`, sem `data-*` extra.
+- Geometria simplificada via algoritmo RDP (Ramer-Douglas-Peucker):
+  259KB → 19.6KB, para caber no orçamento de performance (CLAUDE.md §7).
+- Não existem mais dots, pins, labels soltos ou elipse decorativa no
+  SVG — o preenchimento é feito diretamente no `<path>` do próprio
+  estado via JS, sem elemento decorativo adicional.
+- Callout "UNESCO / México 2019": apenas 2 `<text>`
+  (`index.html:656-657`), sem linha tracejada ou conector — ancorado
+  numa área vazia do Atlântico no viewBox.
+
+**Estados atendidos — pintados via JS, não HTML/CSS estático:**
+
+- Bahia (`#BRBA`): verde sólido (`--color-fj-green-vivid`,
+  `fill-opacity: 1`) — é a sede.
+- Tocantins / Pernambuco / Minas Gerais (`#BRTO`, `#BRPE`, `#BRMG`):
+  mesma cor, translúcidos (`fill-opacity: 0.4`), preenchidos em stagger.
+- CSS estático (`.sobre__map-shape`, `base.css:1536-1540`) define apenas
+  o estado neutro dos demais estados: fill em `--color-border-inverse` e
+  stroke em `--color-deep-navy` (tokens diferentes um do outro) — a cor
+  final de cada estado atendido (BA/TO/PE/MG) vem inteiramente do JS,
+  sobrescrevendo esse fill neutro.
+
+**`sobre.js` — timeline única do GSAP:**
+
+- Um único `gsap.timeline()` com `ScrollTrigger` (`start: 'top 65%',
+  once: true`) sincroniza: contadores numéricos (`.sobre__stat-value`),
+  reveal do stat UNESCO (`clip-path`), preenchimento dos 4 estados e
+  fade-in do callout — não são dois `ScrollTrigger` separados.
+- `prefers-reduced-motion` tratado diretamente em JS (branch dedicado
+  no topo do `gsap.context()`, antes de criar a timeline): aplica o
+  estado final (cores e opacidade definitivos) sem animação. O único
+  fallback em CSS é `.sobre__map-callout-text { opacity: 1 }` sob
+  `@media (prefers-reduced-motion: reduce)`, como rede de segurança
+  adicional.
+
+**CTAs (`.sobre__cta-row`):**
+
+- WhatsApp: reaproveita `.btn-pill--hero` (mesma classe do Hero/FAQ),
+  ícone à esquerda, aponta para `wa.me/5571XXXXXXXXX` (placeholder —
+  ver docs/PENDENCIAS.md).
+- Formulário ("Solicitar Proposta"): reaproveita `.btn-pill` (mesma
+  classe do Footer), aponta para `/contato.html`.
+- `.sobre__cta-row .btn-pill--hero` recebe um **override escopado**
+  (`background: var(--color-deep-navy-2)` + `box-shadow` de borda 1px
+  translúcida, `base.css:1621-1624`) — primeira vez que essa variante
+  aparece sobre um fundo **sólido** dark (Hero e FAQ têm foto/fundo
+  light atrás dela). A definição global de `.btn-pill--hero`
+  (`base.css:608`) não foi alterada. Ver docs/LICOES.md #9 para o
+  incidente que motivou o override.
+
+**Faixa institucional (antiga "band de clientes" com logos):**
+
+- Logos de clientes substituídos por 5 itens de texto institucional
+  (`.sobre__clients-band` → `<ul class="sobre__clients">`): "OUTORGA
+  SUPERFICIAL E SUBTERRÂNEA" · "PESSOA FÍSICA E JURÍDICA" ·
+  "CONFORMIDADE ANA/ANEEL" · "+50 CLIENTES ATENDIDOS" · "ATUAÇÃO EM 4
+  ESTADOS".
+- Como não são mais logos de clientes, a dúvida antiga sobre
+  redundância com a Section Clientes (entre Hero e Serviços) deixa de
+  se aplicar — não há mais duplicação de conteúdo entre as duas sections.
+- Rolagem infinita (marquee) ainda não implementada — a lista é
+  estática, sem animação (ver docs/PENDENCIAS.md).
 
 ---
 

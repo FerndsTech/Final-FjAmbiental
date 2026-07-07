@@ -1473,13 +1473,13 @@ textarea {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding-top: calc(var(--header-height) + 2rem);
-  padding-bottom: 2rem;
+  padding-top: calc(var(--header-height) + 1rem);
+  padding-bottom: 1rem;
 }
 
 /* --- Header --- */
 .sobre__header {
-  margin-bottom: clamp(2rem, 4vw, 3rem);
+  margin-bottom: clamp(1.5rem, 3vw, 2rem);
 }
 
 .sobre__label {
@@ -1517,7 +1517,7 @@ textarea {
   grid-template-columns: 1fr;
   gap: clamp(2rem, 5vw, 3.5rem);
   align-items: center;
-  margin-bottom: clamp(2rem, 4vw, 3rem);
+  margin-bottom: clamp(1.5rem, 3vw, 2rem);
 }
 
 /* --- SVG mapa --- */
@@ -1529,50 +1529,22 @@ textarea {
 
 .sobre__map-svg {
   width: 100%;
-  max-width: 400px;
+  max-width: 460px;
   height: auto;
 }
 
 .sobre__map-shape {
   fill: var(--color-border-inverse);
-  stroke: var(--color-border-inverse);
-  stroke-width: 1;
-}
-
-.sobre__map-dot {
-  fill: var(--color-fj-aqua);
-}
-
-.sobre__map-ba {
-  fill: var(--color-fj-green);
-}
-
-.sobre__map-ba-label {
-  font-family: var(--font-sans);
-  font-size: 13px;
-  font-weight: 700;
-  fill: var(--color-ink-inverse);
-  text-anchor: middle;
-  dominant-baseline: middle;
-}
-
-.sobre__map-state-label {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  fill: var(--color-slate-inverse);
-  dominant-baseline: middle;
-}
-
-.sobre__map-callout-line {
-  stroke: var(--color-border-inverse);
-  stroke-width: 1;
+  stroke: var(--color-deep-navy);
+  stroke-width: 2;
 }
 
 .sobre__map-callout-text {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 25px;
   fill: var(--color-slate-inverse);
   letter-spacing: 0.02em;
+  opacity: 0;
 }
 
 /* --- Stats --- */
@@ -1585,7 +1557,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 2rem;
-  padding-block: 1.5rem;
+  padding-block: 1rem;
   border-bottom: 1px solid var(--color-border-inverse);
 }
 
@@ -1637,6 +1609,25 @@ textarea {
   color: var(--color-slate-inverse);
 }
 
+.sobre__cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: clamp(1.25rem, 3vw, 2rem);
+  margin-bottom: clamp(1.25rem, 3vw, 2rem);
+  justify-content: center;
+}
+
+.sobre__cta-row .btn-pill--hero {
+  background: var(--color-deep-navy-2);
+  box-shadow: inset 0 0 0 1px var(--color-border-inverse);
+}
+
+.sobre__cta-row .btn-pill:not(.btn-pill--hero) {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
 /* --- Band de clientes --- */
 .sobre__clients-band {
   border-top: 1px solid var(--color-border-inverse);
@@ -1667,7 +1658,9 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* placeholder — sem animações nesta section nesta fase */
+  .sobre__map-callout-text {
+    opacity: 1;
+  }
 }
 
 /* ============================================
