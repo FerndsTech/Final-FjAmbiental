@@ -281,6 +281,17 @@ Nunca deixar para "depois" — documentação que não reflete o código real
 induz retrabalho nas sessões seguintes. Exemplo: Section Sobre ficou marcada
 como "não implementada" por várias sessões após já estar completa no código.
 
+### 4.20 Variante de botão/componente reaproveitada num fundo novo precisa de checagem explícita de contraste
+
+Nenhuma variante de botão é "segura por padrão" contra qualquer fundo —
+o contraste dela sempre foi validado apenas nos contextos onde já era
+usada. Ao reaproveitar uma variante existente (ex: `.btn-pill--hero`) num
+tipo de fundo que ela nunca encontrou antes, verificar explicitamente o
+contraste contra esse fundo específico antes de assumir que "já funciona
+nos outros lugares" é garantia suficiente. Corrigir com override escopado
+no novo contexto (ex: `.sobre__cta-row .btn-pill--hero`), nunca editando
+a definição base compartilhada. Ver docs/LICOES.md #9.
+
 ---
 
 ## 5. Estrutura de pastas

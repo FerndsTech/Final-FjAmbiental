@@ -27,7 +27,8 @@
 ## Conteúdo a confirmar com cliente
 
 - [ ] **Número WhatsApp real** — substituir `5571XXXXXXXXX` no CTA da
-  Section FAQ antes do deploy
+  Section FAQ antes do deploy. Nota: o mesmo placeholder agora é usado
+  em 2 lugares (FAQ e Sobre) — ao trocar pelo número real, checar os dois.
 - [ ] **URLs das redes sociais** — Instagram e LinkedIn no Footer
   (`href="#"` hoje)
 - [ ] **Telefone do Footer** — `(71) 3000-0000` parece placeholder;
@@ -75,16 +76,6 @@
   direita os elementos de texto. **AGUARDANDO referência visual do
   cliente** antes de implementar — não iniciar sem ela. Ler
   `src/partials/footer.html` e `base.css § Footer` quando a ref chegar.
-
-- [ ] **Sobre — reorganizar faixa de clientes + mapa SVG definitivo:**
-  (a) Avaliar se a faixa de clientes da Section Sobre é necessária, pois
-  já existe a Section Clientes entre Hero e Serviços — risco de duplicação.
-  Decidir com o cliente antes de remover.
-  (b) Substituir o mapa SVG inline provisório (`index.html:619-657`) pelo
-  SVG definitivo exportado do Figma. O SVG novo precisa manter a lógica
-  de dots (BA em verde/elipse, PE/TO/MG em dots aqua) e callout
-  UNESCO/México com linha tracejada. Validar encaixe antes de commitar.
-  Alinhar ao centro após substituição.
 
 ---
 
@@ -135,4 +126,6 @@
 - [ ] `servicos.html`
 - [ ] `portfolio.html`
 - [ ] `sobre.html`
-- [ ] `contato.html`
+- [ ] `contato.html` — agora também referenciado pelos 2 novos CTAs da
+  Section Sobre (WhatsApp usa link externo `wa.me`, mas o CTA
+  "Solicitar Proposta" aponta direto para `/contato.html`)
