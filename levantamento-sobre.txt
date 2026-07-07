@@ -1,0 +1,44 @@
+          CEP 41.820-021
+        </address>
+
+        <!-- Col 3: CTA pill branca + redes sociais -->
+        <div class="footer__cta-col">
+          <a href="/contato.html" class="btn-pill">
+            <span class="btn-pill__label">Solicitar Proposta</span>
+            <span class="btn-pill__icon" aria-hidden="true">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.5"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 17L17 7M9 7h8v8"/>
+              </svg>
+            </span>
+          </a>
+          <div class="footer__social">
+---
+.sobre__clients-band {
+  border-top: 1px solid var(--color-border-inverse);
+  padding-block: 1.75rem;
+  margin-top: auto;
+}
+
+.sobre__clients {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+---
+117:              class="btn-pill btn-pill--hero"
+121:              <span class="btn-pill__icon" aria-hidden="true">
+137:              <span class="btn-pill__label">Entre em Contato</span>
+385:            <a href="/servicos.html" class="btn-pill">
+386:              <span class="btn-pill__label">Ver todos os serviços</span>
+387:              <span class="btn-pill__icon" aria-hidden="true">
+461:                <a href="/portfolio.html" class="btn-pill">
+462:                  <span class="btn-pill__label">Ver case</span>
+463:                  <span class="btn-pill__icon" aria-hidden="true">
+582:            <a href="/portfolio.html" class="btn-pill btn-pill--dark">
+583:              <span class="btn-pill__label">Conheça todos os <span class="portfolio__cta-accent">100+ projetos</span></span>
+584:              <span class="btn-pill__icon" aria-hidden="true">
+823:            <a href="https://wa.me/5571XXXXXXXXX" class="btn-pill btn-pill--hero" target="_blank" rel="noopener noreferrer">
+824:              <span class="btn-pill__icon" aria-hidden="true">
+829:              <span class="btn-pill__label">Fale com um especialista</span>

@@ -1,0 +1,24 @@
+diff --git a/src/styles/base.css b/src/styles/base.css
+index d42949a..3d23506 100644
+--- a/src/styles/base.css
++++ b/src/styles/base.css
+@@ -1609,6 +1609,19 @@ textarea {
+   color: var(--color-slate-inverse);
+ }
+ 
++.sobre__cta-row {
++  display: flex;
++  flex-wrap: wrap;
++  gap: 1rem;
++  margin-top: clamp(2rem, 4vw, 3rem);
++  justify-content: center;
++}
++
++.sobre__cta-row .btn-pill--hero {
++  background: var(--color-deep-navy-2);
++  border: 1px solid var(--color-border-inverse);
++}
++
+ /* --- Band de clientes --- */
+ .sobre__clients-band {
+   border-top: 1px solid var(--color-border-inverse);
