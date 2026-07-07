@@ -1,103 +1,110 @@
-# CONTEXTO_TRANSICAO — FJ Ambiental — jul/2026
+# CONTEXTO_TRANSICAO — FJ Ambiental — jul/2026 (sessão 2)
 
 ## ESTADO ATUAL
 
-**Branch ativa:** `main`, sincronizada com `origin/main` (commit `d421bdb`), working tree limpo. Todas as branches de feature desta sessão já foram mergeadas e podem ser consideradas fechadas: `feature/faq-tag-and-state`, `feature/header-dark-contrast`, `fix/mobile-nav-backdrop-filter`, `docs/session-wrapup`.
+**Branch ativa:** `main`, sincronizada com `origin/main` (commit `206e021`), working tree limpo. `feature/sobre-map-counters` foi mergeada (`--no-ff`, preservando os 4 commits da feature no histórico) e deletada local + remota.
 
 **O que foi concluído nesta sessão, e como:**
 
-1. **FAQ — tag de section + estado inicial fechado.**
-   - Criada `.faq__label` + `.faq__label-dot`, espelhando exatamente `.portfolio__label`/`.portfolio__label-dot` (mesmo padrão visual: pill verde translúcido `rgba(0,168,89,0.1)` + dot verde), com o texto "PERGUNTAS FREQUENTES". Substituiu `.faq__eyebrow`, que era uma classe CSS órfã (nunca tinha elemento HTML correspondente).
-   - O primeiro card do acordeão (`outorga-o-que-e`) nascia com `class="faq__card is-open"` e `aria-expanded="true"` hard-coded no HTML — por isso abria sozinho no load. Corrigido removendo esses dois atributos diretamente no HTML. Nenhuma mudança em `faq.js` foi necessária (o script só mede `scrollHeight` de cards que já estejam `is-open`).
+1. **Section Sobre — mapa real do Brasil.**
+   - Substituído o blob placeholder (`viewBox 460x530`, sem geografia real) pelo mapa real do simplemaps.com/svg/country/br (uso livre comercial/pessoal), 27 `<path>` de estado com `id` preservado (ex: `id="BRBA"`).
+   - O arquivo original tinha 259KB (muito acima do orçamento de performance do CLAUDE.md) — simplificado via Douglas-Peucker (script próprio, não `mapshaper` puro, porque este último descartava os `id` no roundtrip SVG) para 19.6KB, preservando fidelidade visual na escala de exibição (`max-width: 460px`).
+   - Estados atendidos (BA/TO/PE/MG) não usam mais dots/pins/labels soltos — são pintados diretamente via JS (`fill` + `fillOpacity`) no próprio path do estado. Bahia (sede) sólida (`fillOpacity: 1`), os outros 3 translúcidos (`fillOpacity: 0.4`), mesma cor `--color-fj-green-vivid`.
+   - CSS estático (`.sobre__map-shape`) define só o estado neutro dos demais estados: `fill: --color-border-inverse`, `stroke: --color-deep-navy` (dois tokens diferentes) — a cor final dos 4 estados atendidos vem inteiramente do JS, sobrescrevendo esse fill neutro.
+   - Callout UNESCO/México: só texto (2 `<text>`), sem linha tracejada.
 
-2. **Header — bug de contraste em sections dark (Serviços, Sobre).**
-   - Causa raiz: o `ScrollTrigger.create()` de `.is-scrolled` em `header.js` não tinha `end` definido. Sem `end`, o GSAP calcula um valor padrão que coincidia com o próprio `start` (`'bottom top'` do Hero) — criando uma janela de ativação com duração efetivamente zero. A classe `.is-scrolled` era adicionada e removida quase instantaneamente, nunca persistindo visualmente.
-   - Diagnóstico levou tempo porque 3 hipóteses plausíveis foram descartadas com evidência antes de achar a causa real: (a) utility Tailwind de cor sobrescrevendo via cascata — descartado, header.html não tinha nenhuma; (b) ordem de inicialização em `main.js` errada — descartado, `initSmoothScroll → initHero → initHeader` já estava correto; (c) sincronização Lenis↔ScrollTrigger incorreta — descartado, o padrão em `smooth-scroll.js` é literalmente a receita oficial da documentação do Lenis. A causa real só foi confirmada medindo no DevTools (aba Elements, observando a lista de classes do header em tempo real durante o scroll).
-   - Correção: adicionado `end: 'max'` ao ScrollTrigger, estendendo a janela ativa até o fim da página.
-   - Ver docs/LICOES.md #7 para o relato completo.
+2. **`sobre.js` — timeline única sincronizada.**
+   - Uma única timeline GSAP com um único `ScrollTrigger` (`start: 'top 65%', once: true`) — contadores (100+, 15+, 04), preenchimento dos 4 estados, e reveal do callout UNESCO disparam todos no mesmo ponto de scroll, com offsets internos (`0`, `0.15`, `0.3`, `0.7`) para dar ritmo.
+   - `prefers-reduced-motion` tratado diretamente no JS (aplica estado final sem animação), não mais via regra CSS estática.
 
-3. **Header — reestruturação de layout e hovers.**
-   - `.container-main` do header mudou de `flex justify-between` (2 grupos) para `grid grid-cols-[auto_1fr_auto]` (3 colunas): logo à esquerda, `<nav>` centralizado (Home + Serviços + Portfólio + Sobre, novo link "Home" adicionado), CTA "Solicitar Contato" isolado à direita.
-   - Links do nav ganharam classe `.nav-link`: hover em pill de fundo sutil (`rgba(255,255,255,0.08)` em dark, `rgba(10,22,40,0.06)` em light) + `font-weight: 500` + cor de hover verde (`--color-fj-green-vivid` em dark, `--color-fj-green` em light — mesma regra de contraste que já rege as tags de section).
-   - Hover do logo ("FJ Ambiental") não funcionava em sections light. Causa: `.site-header.is-light span { color: var(--color-deep-navy) }` tinha especificidade maior (`0-2-1`) que a regra global `a:hover { color: var(--color-fj-green) }` (`0-1-1`), travando a cor mesmo no hover. Corrigido com uma regra dedicada `.site-header.is-light .site-logo:hover span`.
-   - CTA "Solicitar Contato": hover mudou de `bg-fj-green-dim` (quase imperceptível sobre fundo já verde) para `hover:scale-105` + `hover:text-white` (o `text-white` explícito foi necessário pela mesma razão do bug do logo — a regra global `a:hover` verde ganhava da utility sem essa proteção).
-   - Altura do header em `.is-scrolled`: `3.25rem` → `4rem` (ajuste fino, decisão de preferência visual).
+3. **2 CTAs novos na Section Sobre (`.sobre__cta-row`).**
+   - WhatsApp: reaproveita `.btn-pill--hero` (mesma classe da FAQ), aponta para `wa.me/5571XXXXXXXXX` (placeholder).
+   - Formulário ("Solicitar Proposta"): reaproveita `.btn-pill` base (mesma classe do Footer), aponta para `/contato.html`.
+   - **Bug descoberto e corrigido:** `.btn-pill--hero` usa `background: var(--color-deep-navy)` — mesmo token do fundo da própria Section Sobre. Primeira vez que essa variante aparece sobre fundo sólido escuro (Hero tem foto, FAQ é light) — o botão "sumia" visualmente. Corrigido com override **escopado** (`.sobre__cta-row .btn-pill--hero`), sem tocar na definição global. Promovido a docs/LICOES.md #9 e CLAUDE.md §4.20.
+   - Diferença de altura entre as 2 variantes (52px vs 56px, padding de fábrica diferente) corrigida via override escopado no botão light, mesmo contexto.
 
-4. **Header — menu mobile implementado do zero.**
-   - O botão hamburguer já existia visualmente, mas `aria-controls="mobile-nav"` apontava para um elemento que nunca foi criado — o menu era 100% decorativo antes desta sessão.
-   - Implementado: painel lateral direito (`#mobile-nav`, `position: fixed`, desliza via `transform: translateX()`), overlay escurecido (`.mobile-nav-overlay`), módulo JS novo `src/scripts/modules/mobile-nav.js` (registrado em `main.js` após `initFooterNav()`).
-   - Fecha via: botão dedicado `.mobile-nav__close` dentro do painel, clique em qualquer link, clique no overlay, tecla `Esc`, ou resize da janela para desktop (`≥768px`). Trava scroll do `<body>` enquanto aberto.
-   - **Bug crítico corrigido:** `#mobile-nav` e `.mobile-nav-overlay` eram inicialmente filhos diretos de `<header>`. Quando o header ativava `backdrop-filter` (via `.is-scrolled` ou `.is-light`), isso tornava o header o "containing block" de descendentes `position: fixed` (comportamento documentado da spec CSS, não bug de navegador) — o painel calculava sua posição relativa ao header (~4rem de altura) em vez da viewport inteira, causando vazamento visual do conteúdo da página através dos links. Corrigido movendo os dois elementos para fora de `<header>`, como irmãos dele no DOM. Ver docs/LICOES.md #8.
-   - Ícone do botão hamburguer/X ficava invisível em tema light (herdava `text-white` sem variante). Corrigido com `.site-header.is-light .nav-toggle { color: var(--color-deep-navy) }`.
-   - Adicionado efeito de "prioridade visual": `backdrop-filter: blur(5px)` no overlay (exceção funcional documentada ao Don't de glassmorphism decorativo do DESIGN_SYSTEM.md §10) + o header real desaparece com fade suave (`opacity: 0`, `pointer-events: none` via nova classe `.is-menu-open`) enquanto o menu está aberto — evita duplicação visual entre a logo do header real e a logo dentro do painel.
+4. **Faixa de clientes substituída por faixa institucional.**
+   - Os 7 logos de clientes foram substituídos por 5 itens de texto, validados contra o site oficial (fjambiental.com.br): `OUTORGA SUPERFICIAL E SUBTERRÂNEA`, `PESSOA FÍSICA E JURÍDICA`, `CONFORMIDADE ANA/ANEEL`, `+50 CLIENTES ATENDIDOS`, `ATUAÇÃO EM 4 ESTADOS`.
+   - Resolve na prática a dúvida antiga (sessão 1) sobre a faixa da Sobre duplicar a Section Clientes — não são mais logos, a pergunta deixa de se aplicar. **Removida do PENDENCIAS.md.**
 
-**Fluxo de trabalho estabelecido nesta sessão (agora documentado em CLAUDE.md §13):** ciclo de 8 passos entre Claude Chat (planejamento, leitura, diff) e Claude Code (execução), sempre com diff mostrado antes de gravar, validação no navegador antes de commit, e commits/push/merge sempre manuais.
+5. **Ajuste de viewport.**
+   - A section cresceu além de uma tela depois dos CTAs novos. Corrigido reduzindo paddings/margins de `.sobre__container`, `.sobre__header`, `.sobre__body`, `.sobre__stat` e `.sobre__cta-row`. Validado no navegador: faixa institucional visível sem scroll adicional.
+
+6. **Documentação e fechamento — dois desvios nesta sessão, ambos corrigidos.**
+   - Durante a atualização de `docs/SECTIONS.md`, o Claude Code cometeu um erro factual real (não truncamento): descreveu `fill` e `stroke` de `.sobre__map-shape` como se usassem o mesmo token de cor, quando na verdade são dois tokens diferentes. Identificado antes do commit, corrigido via pedido pontual — reforça que documentação também precisa de revisão contra o código real, não só código em si (CLAUDE.md §4.12/§4.13).
+   - No primeiro commit de fechamento, o merge para `main` foi **planejado mas não executado** — o commit ficou preso em `feature/sobre-map-counters` local, e o `git push origin main` reportou "Everything up-to-date" porque a `main` local não tinha as mudanças. Diagnosticado e corrigido: push da feature branch primeiro, depois merge de verdade. Também escaparam 2 arquivos de diff temporários (`diff-docs-fechamento.txt`, `diff-sections-fix.txt`, gerados durante a própria revisão de documentação) que entraram no commit por engano — corrigido com `git rm` + `git commit --amend` antes do push.
+
+**Fluxo de trabalho desta sessão:** mesmo ciclo Claude Chat + Claude Code + usuário. Confirmação prática e repetida de que **arquivos grandes (SVG com 27 paths, diffs longos) truncam de forma consistente quando reimpressos no terminal** — o método que funcionou sem falha em toda a sessão foi sempre gravar em arquivo e fazer upload direto no chat, nunca copiar/colar output de `cat`/`git diff` impresso no terminal. Isso deixou de ser só uma lição transitória (como estava registrado na sessão 1) e virou prática obrigatória sempre que o conteúdo for grande.
 
 ---
 
-## PENDÊNCIAS CONHECIDAS
+## PENDÊNCIAS CONHECIDAS (herdadas da sessão 1 + atualizações desta sessão)
 
-- **Número de WhatsApp placeholder** (`5571XXXXXXXXX`) no CTA da Section FAQ — falta o número real do cliente antes do deploy.
-- **URLs das redes sociais no Footer** (`href="#"`) — Instagram e LinkedIn, aguardando links reais do cliente.
-- **Telefone do Footer** (`(71) 3000-0000`) — parece placeholder, precisa confirmar número real com o cliente.
-- **Tagline do Footer** — texto "Consultoria ambiental e recursos hídricos desde 2010..." precisa de confirmação do cliente (há um comentário no HTML sinalizando isso).
-- **Focus trap no menu mobile** (pendência NOVA desta sessão) — ao abrir `#mobile-nav`, a navegação por Tab do teclado ainda circula pelo conteúdo da página por trás, não fica presa dentro do painel. Falta: mover foco pro primeiro link ao abrir, ciclar Tab dentro do painel, devolver foco ao botão toggle ao fechar.
-- **Tags de section ainda não padronizadas** (Hero "ENGENHARIA & CONSULTORIA", Serviços "• 02 · SERVIÇOS", Sobre "04 — SOBRE") — só Portfólio (referência original) e FAQ (feita nesta sessão) seguem o padrão `.label` (pill translúcida + dot). Falta aplicar o mesmo padrão às 3 restantes.
-- **CLS da Section Serviços** — medição antiga de dev (~88% do CLS total), não remedida em produção. Falta rodar Lighthouse em build de produção.
-- **Contraste do Footer** — textos com opacidade baixa, suspeita de falha WCAG 4.5:1, não auditado ainda.
-- **`services.json` não existe** — conteúdo dos 3 cards de Serviços ainda hard-coded no HTML.
-- **`portfolio.js` não existe** — Portfólio ainda é UI estática, sem troca de case dinâmica.
-- **Sobre — decisão pendente com o cliente:** avaliar se a faixa de clientes na Section Sobre é redundante com a Section Clientes (entre Hero e Serviços) antes de decidir se remove.
-- **Sobre — mapa SVG provisório** — precisa ser substituído pelo SVG definitivo do Figma quando disponível.
-- **4 páginas internas não existem ainda:** `servicos.html`, `portfolio.html`, `sobre.html`, `contato.html`. Por isso os links do nav do header/footer que apontam pra elas são navegação padrão sem comportamento JS especial.
+- **Número de WhatsApp placeholder** (`5571XXXXXXXXX`) — agora usado em **2 lugares** (FAQ e Sobre). Ao trocar pelo número real, checar os dois.
+- **URLs das redes sociais no Footer** (`href="#"`) — inalterado.
+- **Telefone do Footer** (`(71) 3000-0000`) — inalterado.
+- **Tagline do Footer** — inalterado.
+- **Focus trap no menu mobile** — inalterado, ainda pendente.
+- **Tags de section ainda não padronizadas**: Hero, Serviços, e **Sobre ("04 — SOBRE")** continuam fora do padrão `.label` (pill translúcida + dot). Não foi tocado nesta sessão.
+- **CLS da Section Serviços** — inalterado.
+- **Contraste do Footer** — inalterado.
+- **`services.json`** — inalterado.
+- **`portfolio.js`** — inalterado.
+- ~~**Sobre — decisão de duplicação com Section Clientes**~~ — **resolvida nesta sessão** (faixa deixou de ser logos, pergunta não se aplica mais).
+- ~~**Sobre — mapa SVG provisório**~~ — **resolvida nesta sessão** (mapa real do simplemaps.com aplicado).
+- **`/contato.html`** ainda não existe — agora referenciado também pelo CTA "Solicitar Proposta" da Sobre (WhatsApp usa link externo `wa.me`, não essa página).
 
 ---
 
 ## PRÓXIMA TAREFA PRINCIPAL
 
-Segundo a ordem definida no início desta sessão em PENDENCIAS.md § "Ajustes de UI", com FAQ e Header já concluídos, a próxima é:
+**Reordenação decidida ao final desta sessão:** a fila original de PENDENCIAS.md § "Ajustes de UI" (definida na sessão 1) tinha Hero como próximo item. O usuário decidiu adiantar a **Section Portfólio** antes do Hero — mesmo padrão da sessão 2, que adiantou a Sobre fora de ordem. Hero permanece na fila, só reordenado para depois do Portfólio.
 
-**Hero — subir conteúdo.** O conteúdo principal do Hero está posicionado baixo na viewport; ajuste esperado é em `padding-top` ou `align-items` de `.hero__content`.
+**Portfólio — finalização de UI + `portfolio.js`.** Escopo ainda não detalhado nesta sessão — o usuário sinalizou que vai detalhar no próximo chat. O que já se sabe do estado atual (via SECTIONS.md § Section 03, sessão 1):
 
-**Perguntas a fazer no próximo chat antes de implementar:**
+- Hoje é UI estática: 4 thumbnails hard-coded, sem troca de case dinâmica.
+- `portfolio.js` **não existe** — precisa ser criado do zero (não é módulo já existente aguardando conexão, como foi o caso do `sobre.js`).
+- `src/content/projects.json` já existe (mencionado em LICOES.md #4, bug do sufixo `_1x` já resolvido) — provavelmente é a fonte de dados pretendida para os 8 projetos completos (hoje só 4 aparecem, hard-coded).
+- PENDENCIAS.md também lista uma pendência de UI separada e já aprovada, ainda não aplicada: "card principal maior" — aumentar o card, alinhar/aumentar conteúdo da esquerda com o título, aumentar botão proporcional ao card.
+- Setas de navegação (prev/next) já existem no HTML, dentro de `.portfolio__thumbs-row` — hoje decorativas, sem função JS.
+- Barra de progresso `.portfolio__explore-fill` já existe no HTML com largura via `style` inline — hoje estática, precisa ficar dinâmica se o JS passar a trocar de case.
 
-- Qual é a direção exata desejada — subir um pouco (ajuste fino) ou centralizar verticalmente de forma diferente?
-- Há uma referência visual (screenshot, Figma) de como deveria ficar, ou é ajuste por olho no próprio navegador?
-- Isso deve respeitar algum breakpoint específico (mobile vs desktop podem precisar de tratamento diferente)?
+**Antes de propor qualquer código:** ler `index.html` (section `#portfolio`) e `base.css § Portfólio` na íntegra, e pedir ao usuário o detalhamento prometido (que dados o `portfolio.js` deve orquestrar, se é troca de case ao clicar em thumbnail + navegação por setas + sync de stats, como já estava mapeado em PENDENCIAS.md, ou se o escopo mudou).
 
-**O que já existe e deve ser lido antes de começar:**
+**Depois do Portfólio, a fila retoma:**
 
-- `index.html`, section `#hero` — estrutura atual do HTML
-- `base.css § Hero` — CSS atual de `.hero__content`, incluindo notas já documentadas em SECTIONS.md (uso de `min-height: 100vh` não `svh`, verde vivid em vez de verde normal, CTA com ícone à esquerda em vez de à direita)
+**Hero — subir conteúdo.** Conteúdo principal posicionado baixo na viewport; ajuste esperado em `padding-top` ou `align-items` de `.hero__content`.
 
-Depois do Hero, a ordem original planejada continua: Clientes (tamanho + loop sincronizado) → Portfólio (card principal maior) → Footer (aguardando referência visual do cliente) → Sobre (aguardando decisão de duplicação + SVG do Figma).
+**Decisões já tomadas na sessão 1 sobre o Hero (não perguntar de novo quando chegar a vez):**
+
+- Direção: subir um pouco, mantendo centralizado — não recentralizar de forma diferente.
+- Sem referência visual externa — ajuste a olho, direto no navegador.
+- Breakpoint mobile vs desktop: ainda não detalhado, avaliar ao ler o CSS real (risco conhecido de `vh`/`svh` no Hero, já documentado em SECTIONS.md §01).
+
+Depois do Hero: Clientes (tamanho + loop sincronizado) → Footer (aguardando referência visual do cliente). Sobre já está fora da fila.
 
 ---
 
-## LIÇÕES TÉCNICAS DESTA SESSÃO
+## LIÇÃO TÉCNICA DESTA SESSÃO
 
-Ambas já foram promovidas para docs/LICOES.md como #7 e #8 — são regras permanentes, não transitórias, porque descrevem comportamento de bibliotecas/CSS que pode se repetir em qualquer parte futura do projeto:
+Promovida para docs/LICOES.md #9 e CLAUDE.md §4.20:
 
-- **#7 (recomendo manter como está, já promovida):** `ScrollTrigger` com `onToggle` que deve manter estado persistente sempre precisa de `end` explícito — sem ele, o GSAP pode calcular uma janela de ativação de duração efetivamente zero.
-- **#8 (recomendo manter como está, já promovida):** qualquer elemento `position: fixed` (overlays, modais, painéis) deve ser posicionado como irmão de nível alto no DOM, nunca aninhado dentro de um elemento com `backdrop-filter`/`filter`/`transform`/`will-change` — isso quebra o cálculo de posição do elemento fixo.
-
-**Lição transitória, específica desta sessão (não precisa virar regra permanente, mas vale saber):** o terminal integrado da Claude Code no VS Code tem corte de linha por largura de coluna — copiar/colar output longo (diffs grandes, `cat` de arquivos) pode truncar palavras no meio, sem indicar que houve corte. Mitigado nesta sessão aumentando a largura do painel/diminuindo zoom da fonte do terminal. Para diffs muito grandes ou reescrita de seções inteiras de `.md`, o método mais confiável validado foi usar `grep -c` com frases-âncora do conteúdo antes/depois, em vez de confiar na leitura visual do diff colado.
+- **Variante de botão compartilhada pode colidir com o background da section onde é reutilizada.** Nenhuma variante de componente é "segura por padrão" contra qualquer fundo — o contraste dela sempre foi validado só nos contextos onde já era usada. Ao reaproveitar uma variante existente num tipo de fundo novo, checar contraste explicitamente antes de assumir que "já funciona em outro lugar" é garantia suficiente. Corrigir com override escopado no novo contexto, nunca editando a definição base compartilhada.
 
 ---
 
 ## ESTADO DA DOCUMENTAÇÃO
 
-Já propagado nesta sessão (commitado em `main`, nada pendente de atualização):
+Já propagado nesta sessão (commitado e mergeado em `main`, nada pendente de atualização):
 
-- **PENDENCIAS.md** — itens concluídos removidos, item de tags atualizado, pendência de focus trap adicionada.
-- **SECTIONS.md** — seção "Header dinâmico" reescrita com o estado atual completo (layout, hovers, menu mobile, bug do ScrollTrigger); seção FAQ atualizada com a tag e a correção do estado inicial.
-- **LICOES.md** — lições #7 e #8 adicionadas.
-- **CLAUDE.md** — nova seção 13 (Fluxo Cérebro + Motor), seção antiga "Sobre este documento" renumerada para 14 sem alteração de conteúdo.
-
-**DESIGN_SYSTEM.md não foi tocado nesta sessão** — não identifiquei nada que exija atualização nele. A única aproximação foi o uso do `backdrop-filter: blur()` no overlay do menu mobile, mas isso já se enquadra na exceção documentada em DESIGN_SYSTEM.md §10 (glassmorphism funcional) sem precisar de mudança no texto — o exemplo citado lá (`.portfolio__tag-secondary`) continua válido como referência, e o novo uso é análogo o suficiente para não precisar de um segundo exemplo registrado ali. Se no futuro houver um terceiro uso, pode valer a pena generalizar a explicação.
+- **SECTIONS.md** — § Section 04 (Sobre) reescrita por completo, refletindo mapa real, JS de preenchimento, timeline única, CTAs e faixa institucional.
+- **PENDENCIAS.md** — item de faixa/mapa da Sobre removido (concluído); nota do WhatsApp atualizada (2 locais); nota de `/contato.html` atualizada.
+- **LICOES.md** — lição #9 adicionada.
+- **CLAUDE.md** — regra derivada §4.20 adicionada.
+- **DESIGN_SYSTEM.md** — não precisou de alteração (nenhum token novo, tudo reaproveitou tokens já documentados: `--color-fj-green-vivid`, `--color-deep-navy-2`, `--color-border-inverse`).
 
 ---
 
 ## RECOMENDAÇÃO FINAL
 
-Não é necessário rodar nenhum prompt de atualização de documentação antes do próximo chat — tudo já foi propagado e commitado em `main` nesta própria sessão. O próximo chat pode simplesmente anexar os 5 documentos (CLAUDE.md, DESIGN_SYSTEM.md, docs/SECTIONS.md, docs/PENDENCIAS.md, docs/LICOES.md) já atualizados, mais este CONTEXTO_TRANSICAO.md como resumo executivo, e colar o prompt de abertura preparado como primeira mensagem.
+Tudo já propagado e confirmado via `git log --oneline` (merge `206e021` no topo de `main`, working tree limpo). Não é necessário rodar nenhum prompt de atualização de documentação antes do próximo chat. O próximo chat pode anexar os 5 documentos (CLAUDE.md, DESIGN_SYSTEM.md, docs/SECTIONS.md, docs/PENDENCIAS.md, docs/LICOES.md) já atualizados, mais este CONTEXTO_TRANSICAO.md como resumo executivo, e colar o prompt de abertura preparado como primeira mensagem.
