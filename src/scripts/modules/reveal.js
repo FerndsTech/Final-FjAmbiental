@@ -10,6 +10,11 @@
  *
  *   <div data-reveal data-reveal-delay="0.2">Com delay</div>
  *
+ *   <div data-reveal data-reveal-start="top 98%">Threshold customizado —
+ *     útil para elementos que nascem perto do fim físico da section (ex.:
+ *     .portfolio__footer), onde o padrão 'top 85%' só dispara tarde demais.
+ *   </div>
+ *
  *   <ul data-reveal-stagger>
  *     <li>Cada filho anima em sequência</li>
  *     <li>Stagger automático de 80ms</li>
@@ -36,6 +41,7 @@ export function initReveal(root = document) {
 
     revealEls.forEach(el => {
       const delay = parseFloat(el.dataset.revealDelay) || 0;
+      const start = el.dataset.revealStart || 'top 85%';
 
       gsap.from(el, {
         y: 24,
@@ -45,7 +51,7 @@ export function initReveal(root = document) {
         ease: 'power3.out',
         scrollTrigger: {
           trigger: el,
-          start: 'top 85%',
+          start,
           once: true,
         },
       });

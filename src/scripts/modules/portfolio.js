@@ -244,13 +244,19 @@ export function initPortfolio(root = document) {
   prevBtn?.addEventListener('click', onPrev);
   nextBtn?.addEventListener('click', onNext);
 
-  // Pausa no hover/focus (dentro da section inteira)
+  // Pausa no hover/focus — só na área de navegação do carrossel
+  // (card, track mobile, thumbnails/setas), não na section inteira.
+  // Evita que o timer pause sozinho quando o mouse já está parado sobre
+  // título/stats no momento em que a section entra na viewport pelo scroll.
   function pause() { stopTimer(); }
   function resume() { restartTimer(); }
-  section.addEventListener('mouseenter', pause);
-  section.addEventListener('mouseleave', resume);
-  section.addEventListener('focusin', pause);
-  section.addEventListener('focusout', resume);
+  const pauseZones = [featured, track, section.querySelector('.portfolio__thumbs-wrapper')].filter(Boolean);
+  pauseZones.forEach((el) => {
+    el.addEventListener('mouseenter', pause);
+    el.addEventListener('mouseleave', resume);
+    el.addEventListener('focusin', pause);
+    el.addEventListener('focusout', resume);
+  });
 
   // --- Swipe (card featured único do desktop — thumbnails/setas ficam
   // ocultas via CSS <600px, onde quem navega é o .portfolio__track) ---
@@ -302,10 +308,12 @@ export function initPortfolio(root = document) {
     thumbs.forEach((t, i) => t.removeEventListener('click', thumbHandlers[i]));
     prevBtn?.removeEventListener('click', onPrev);
     nextBtn?.removeEventListener('click', onNext);
-    section.removeEventListener('mouseenter', pause);
-    section.removeEventListener('mouseleave', resume);
-    section.removeEventListener('focusin', pause);
-    section.removeEventListener('focusout', resume);
+    pauseZones.forEach((el) => {
+      el.removeEventListener('mouseenter', pause);
+      el.removeEventListener('mouseleave', resume);
+      el.removeEventListener('focusin', pause);
+      el.removeEventListener('focusout', resume);
+    });
     featured.removeEventListener('touchstart', onTouchStart);
     featured.removeEventListener('touchmove', onTouchMove);
     featured.removeEventListener('touchend', onTouchEnd);
