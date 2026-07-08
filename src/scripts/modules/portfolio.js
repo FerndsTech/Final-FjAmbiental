@@ -6,6 +6,20 @@
  * sobre.js). Thumbnails e barra Explorar trocam instantaneamente (sem
  * fade), para dar resposta imediata ao clique — só o conteúdo do card
  * (imagem, tags, coords, meta, headline, descrição, stats) recebe o fade.
+ *
+ * .portfolio__desc tem altura travada via JS (lockDescHeight) porque as
+ * 4 descrições têm comprimentos diferentes — sem isso, a troca de card
+ * causa CLS visível no layout empilhado do mobile (LIÇÃO: mesmo padrão
+ * de medição via scrollHeight que faq.js já usa).
+ *
+ * No mobile (<600px), a fileira de thumbnails/setas fica oculta via CSS
+ * — a navegação manual nesse breakpoint é por um carrossel real de peek
+ * (.portfolio__track), com 4 cards de imagem gerados via JS a partir de
+ * projects.json, scroll-snap nativo (sem lib nova, stack travada em
+ * CLAUDE.md §2) e sincronização de índice via IntersectionObserver. O
+ * painel de texto (headline/descrição/stats) continua único, atualizado
+ * via updateContent() — não duplicado por card, para não poluir o peek
+ * com parágrafos inteiros cortados.
  */
 
 import gsap from 'gsap';
@@ -13,6 +27,7 @@ import projectsData from '../../content/projects.json';
 
 const IMG_BASE = './src/assets/imgs/';
 const AUTO_ADVANCE_MS = 5000;
+const SWIPE_THRESHOLD = 40;
 
 export function initPortfolio(root = document) {
   const section = root.querySelector('#portfolio');
@@ -44,6 +59,10 @@ export function initPortfolio(root = document) {
 
   const prevBtn = section.querySelector('.portfolio__arrow--prev');
   const nextBtn = section.querySelector('.portfolio__arrow--next');
+
+  // Carrossel peek mobile (<600px) — track gerado via JS, oculto no desktop via CSS
+  const track = section.querySelector('.portfolio__track');
+  let trackObserver;
 
   let current = 0;
   let timer = null;
@@ -108,11 +127,49 @@ export function initPortfolio(root = document) {
     });
   }
 
-  function goTo(index, resetTimer = true) {
+  // Trava a altura de .portfolio__desc na maior entre os 4 projetos —
+  // evita CLS ao trocar de card (descrições têm comprimentos diferentes,
+  // e no layout empilhado do mobile isso mudava a altura total da section).
+  function lockDescHeight() {
+    const clone = desc.cloneNode(false);
+    clone.style.position = 'absolute';
+    clone.style.visibility = 'hidden';
+    clone.style.height = 'auto';
+    clone.style.minHeight = '0';
+    clone.style.width = desc.getBoundingClientRect().width + 'px';
+    document.body.appendChild(clone);
+
+    let max = 0;
+    projects.forEach((p) => {
+      clone.textContent = p.descricao;
+      max = Math.max(max, clone.scrollHeight);
+    });
+    document.body.removeChild(clone);
+
+    desc.style.minHeight = max + 'px';
+  }
+
+  let descResizeTimer;
+  function handleDescResize() {
+    clearTimeout(descResizeTimer);
+    descResizeTimer = setTimeout(lockDescHeight, 200);
+  }
+
+  // fromTrack: true quando goTo() foi disparado pelo próprio scroll do
+  // carrossel (IntersectionObserver) — nesse caso não reexecuta o
+  // scrollIntoView, para não brigar com o gesto de swipe do usuário.
+  function goTo(index, resetTimer = true, fromTrack = false) {
     const next = (index + projects.length) % projects.length;
     crossfade(next);
     updateNav(next);
     current = next;
+    if (track && !fromTrack) {
+      track.children[next]?.scrollIntoView({
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        inline: 'center',
+        block: 'nearest',
+      });
+    }
     if (resetTimer) restartTimer();
   }
 
@@ -127,6 +184,52 @@ export function initPortfolio(root = document) {
   function restartTimer() {
     stopTimer();
     startTimer();
+  }
+
+  // --- Carrossel peek mobile: gera os 4 cards de imagem no track ---
+  // aria-hidden no wrapper (ver HTML): os mesmos 4 projetos já são
+  // acessíveis via .portfolio__thumbs, evita leitura duplicada por
+  // leitor de tela.
+  function buildTrack() {
+    if (!track) return;
+    projects.forEach((p, i) => {
+      const card = document.createElement('article');
+      card.className = 'portfolio__featured';
+      card.dataset.index = String(i);
+      card.innerHTML = `
+        <img class="portfolio__featured-img" src="${IMG_BASE}${p.image}" alt="" loading="lazy" decoding="async" />
+        <div class="portfolio__featured-overlay" aria-hidden="true"></div>
+        <div class="portfolio__featured-tags">
+          <span class="portfolio__tag-primary">${p.tag_primaria}</span>
+          <span class="portfolio__tag-secondary">${p.tag_secundaria}</span>
+        </div>
+        <p class="portfolio__featured-coords font-mono-numerals">${p.coords}</p>
+        <div class="portfolio__featured-bottom">
+          <p class="portfolio__featured-meta font-mono-numerals">
+            <span>${p.cliente}</span><span> · </span><span>${p.ano}</span><span> · </span><span>${p.local}</span>
+          </p>
+        </div>`;
+      track.appendChild(card);
+    });
+  }
+
+  // Detecta qual card está centralizado no track (scroll-snap) e
+  // sincroniza com o painel de texto/thumbs/barra Explorar via goTo().
+  function initTrackObserver() {
+    if (!track) return;
+    trackObserver = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) {
+          const idx = Number(visible.target.dataset.index);
+          if (idx !== current) goTo(idx, true, true);
+        }
+      },
+      { root: track, threshold: [0.6, 0.75, 0.9] }
+    );
+    Array.from(track.children).forEach((card) => trackObserver.observe(card));
   }
 
   // --- Handlers (referências nomeadas para cleanup, padrão de faq.js) ---
@@ -149,10 +252,49 @@ export function initPortfolio(root = document) {
   section.addEventListener('focusin', pause);
   section.addEventListener('focusout', resume);
 
+  // --- Swipe (card featured único do desktop — thumbnails/setas ficam
+  // ocultas via CSS <600px, onde quem navega é o .portfolio__track) ---
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchActive = false;
+
+  function onTouchStart(e) {
+    const t = e.touches[0];
+    touchStartX = t.clientX;
+    touchStartY = t.clientY;
+    touchActive = true;
+  }
+  function onTouchMove(e) {
+    if (!touchActive) return;
+    const t = e.touches[0];
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+    // Gesto predominantemente horizontal: impede o scroll vertical da
+    // página para não competir com o swipe do carrossel.
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) e.preventDefault();
+  }
+  function onTouchEnd(e) {
+    if (!touchActive) return;
+    touchActive = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+    if (Math.abs(dx) > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy)) {
+      dx < 0 ? goTo(current + 1) : goTo(current - 1);
+    }
+  }
+  featured.addEventListener('touchstart', onTouchStart, { passive: true });
+  featured.addEventListener('touchmove', onTouchMove, { passive: false });
+  featured.addEventListener('touchend', onTouchEnd);
+
   // --- Estado inicial ---
   ctx = gsap.context(() => {}, section);
   updateContent(0);
   updateNav(0);
+  lockDescHeight();
+  buildTrack();
+  initTrackObserver();
+  window.addEventListener('resize', handleDescResize);
   startTimer();
 
   return function cleanupPortfolio() {
@@ -164,6 +306,12 @@ export function initPortfolio(root = document) {
     section.removeEventListener('mouseleave', resume);
     section.removeEventListener('focusin', pause);
     section.removeEventListener('focusout', resume);
+    featured.removeEventListener('touchstart', onTouchStart);
+    featured.removeEventListener('touchmove', onTouchMove);
+    featured.removeEventListener('touchend', onTouchEnd);
+    window.removeEventListener('resize', handleDescResize);
+    clearTimeout(descResizeTimer);
+    trackObserver?.disconnect();
     ctx.revert();
   };
 }

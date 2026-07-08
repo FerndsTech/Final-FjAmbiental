@@ -1087,6 +1087,10 @@ textarea {
   max-height: 440px;
 }
 
+.portfolio__track {
+  display: none;
+}
+
 .portfolio__featured-img {
   position: absolute;
   inset: 0;
@@ -1437,6 +1441,38 @@ textarea {
 
   .portfolio__stat-value {
     font-size: var(--text-xl);
+  }
+
+  .portfolio__thumbs-row {
+    display: none;
+  }
+
+  .portfolio__featured {
+    aspect-ratio: 4 / 3;
+    max-height: 480px;
+  }
+
+  .portfolio__split > .portfolio__featured {
+    display: none;
+  }
+
+  .portfolio__track {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    margin-inline: calc(var(--space-container) * -1);
+    padding-inline: var(--space-container);
+  }
+
+  .portfolio__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .portfolio__track > .portfolio__featured {
+    flex: 0 0 85%;
+    scroll-snap-align: center;
   }
 }
 
