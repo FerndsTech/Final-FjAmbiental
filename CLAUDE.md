@@ -6,6 +6,7 @@
 > Compatível com a convenção `AGENTS.md` da indústria — duplica este arquivo como `AGENTS.md` se necessário.
 
 **Documentação complementar:**
+
 - Estado atual de cada section → `docs/SECTIONS.md`
 - Histórico de bugs e diagnósticos → `docs/LICOES.md`
 - Tarefas pendentes → `docs/PENDENCIAS.md`
@@ -292,6 +293,62 @@ nos outros lugares" é garantia suficiente. Corrigir com override escopado
 no novo contexto (ex: `.sobre__cta-row .btn-pill--hero`), nunca editando
 a definição base compartilhada. Ver docs/LICOES.md #9.
 
+### 4.21 Medir layout com DevTools sempre com Device Toolbar desligado
+
+`window.innerWidth`/`innerHeight` medidos com o modo responsivo do
+DevTools ativo (`Ctrl+Shift+M`) refletem o viewport **simulado**, não a
+janela real do navegador — mesmo que os números pareçam consistentes
+entre medições repetidas. Sempre confirmar que o Device Toolbar está
+desligado antes de rodar qualquer medição de layout via Console.
+Adicionalmente: não perseguir "zero overflow exato" numa única altura
+de tela testada — criar margem de segurança (a section não precisa
+caber com folga zero, só sem sobra grosseira que revele a section
+vizinha). Ver docs/LICOES.md #10.
+
+### 4.22 Conteúdo dinâmico de comprimento variável precisa de altura travada
+
+Quando JS troca o texto de um elemento cujo tamanho depende do
+conteúdo (ex: descrições de tamanhos diferentes vindas de JSON), medir
+a maior variação possível via clone invisível e travar a altura via
+`style.minHeight` — nunca deixar o layout empilhado (mobile) absorver
+a variação, o que causa CLS visível a cada troca. Mesmo padrão de
+medição de `scrollHeight` que `faq.js` já usa. Ver docs/LICOES.md #11.
+
+### 4.23 `box-shadow` não serve para decorações com dimensões independentes
+
+`box-shadow` com `spread` negativo só produz uma cópia uniformemente
+escalada da forma original (largura e altura shrinkam juntas) — correto
+para efeitos tipo "baralho empilhado" (diagonal, sutil), incorreto para
+qualquer decoração que precise de largura e altura controladas
+independentemente (ex: fatias laterais altas e estreitas). Nesses casos,
+usar pseudo-elementos — e lembrar que pseudo-elementos são cortados por
+`overflow: hidden` do próprio elemento, precisando morar no elemento
+pai. Ver docs/LICOES.md #12.
+
+### 4.24 Mensagens de commit multi-linha no PowerShell: usar here-string
+
+`git commit -m "texto com \"aspas\" escapadas"` quebra no PowerShell
+(erro `Invalid path`, reinterpretação incorreta do conteúdo escapado).
+Usar here-string para mensagens multi-linha:
+
+```powershell
+@"
+tipo(escopo): resumo
+
+- detalhe 1
+- detalhe 2
+"@ | git commit -F -
+```
+
+Evitar aspas duplas internas na mensagem. Ver docs/LICOES.md #13.
+
+### 4.25 Confirmação no Claude Chat não chega automaticamente ao Claude Code
+
+São ferramentas/sessões separadas — "pode aplicar" dito no Claude Chat
+não é visto pelo Claude Code. Toda aprovação precisa ser colada
+manualmente na sessão do Claude Code antes de qualquer gravação. Ver
+docs/LICOES.md #14.
+
 ---
 
 ## 5. Estrutura de pastas
@@ -508,6 +565,7 @@ Sections intermediárias usam `min-height: 100svh` (não `100vh`). A unidade
 o conteúdo nunca seja cortado independente do estado da barra.
 
 **Padrão de implementação:**
+
 ```css
 .nome-da-section {
   min-height: 100svh;

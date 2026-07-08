@@ -13,6 +13,7 @@
 **Contexto:** primeira execução do `npm run dev` após o scaffold inicial.
 
 **Sintoma:**
+
 ```
 [plugin:vite:import-analysis] Failed to resolve import
 "./styles/main.css" from "src/scripts/main.js"
@@ -43,6 +44,7 @@ filho de grid em Chrome. A propriedade não garante colapso total quando há
 padding no elemento filho direto.
 
 **Correção aplicada:** abandonou-se a abordagem de grid. Padrão adotado:
+
 - CSS estático (fechado): `max-height: 0; overflow: hidden`
 - JS (aberto): mede `scrollHeight` real e aplica `element.style.maxHeight = scrollHeight + 'px'`
 - `transition: max-height` no CSS cuida da animação; JS só fornece o valor correto
@@ -145,6 +147,7 @@ arquivo em disco. O popup do VS Code perguntou qual versão deveria vencer
 truncando o arquivo no disco.
 
 **Correção aplicada:**
+
 1. `git restore src/styles/base.css` — restaurou a versão íntegra do HEAD
    (`ee5dd50`, 2059 linhas) em menos de 1 segundo.
 2. Reaplicação manual das 3 linhas de hover que não estavam commitadas:
@@ -285,3 +288,159 @@ o contorno.
 **Regra derivada:** CLAUDE.md §4.20.
 
 **Status:** ✅ resolvido e validado no navegador, jul/2026.
+
+---
+
+## #10 — DevTools em modo responsivo (Device Toolbar) contamina medições de layout
+
+**Contexto:** sessão de correção de viewport fitting da Section Portfólio,
+jul/2026. Depois do primeiro ajuste de padding/margin, `window.innerHeight`
+e a altura medida de `#portfolio` batiam exatamente iguais em repetidas
+tentativas (854=854, depois 963=963) — sinal aparentemente positivo.
+
+**Sintoma:** mesmo com as medições "batendo perfeito", o usuário reportou
+vazamento visual da section vizinha (dark) por cima e por baixo da
+Portfólio ao navegar normalmente no navegador — contradizendo os números
+medidos.
+
+**Causa raiz:** o DevTools estava em **modo responsivo forçado**
+(Device Toolbar, `Ctrl+Shift+M`), fixando a página numa moldura simulada
+de 1024×854px — independente do tamanho real da janela do navegador.
+Toda a "régua" de medição usada em 6 rodadas de debug estava presa a
+esse simulador, não à experiência real do usuário.
+
+**Diagnóstico:** confirmado rodando `window.innerWidth` com o Device
+Toolbar ainda ativo — retornou `320` (largura de celular), mesmo a
+página aparentando estar em layout desktop na tela. Isso expôs a
+contaminação.
+
+**Correção aplicada:** desligar o Device Toolbar (`Ctrl+Shift+M`) antes
+de qualquer medição de layout via Console. Reconhecido que perseguir
+"zero overflow exato" numa única altura de tela é um alvo frágil — a
+estratégia final adotada foi criar margem de segurança (a section não
+precisa caber com folga zero, só sem sobra grosseira que revele a
+section vizinha).
+
+**Regra derivada:** CLAUDE.md §4.21.
+
+**Status:** ✅ resolvido — viewport fitting validado com medição real
+(janela desacoplada, sem Device Toolbar), jul/2026.
+
+---
+
+## #11 — Troca de conteúdo dinâmico com comprimento de texto variável causa CLS em layout empilhado
+
+**Contexto:** implementação de `portfolio.js` (carrossel da Section
+Portfólio), jul/2026. `.portfolio__desc` recebe texto diferente a cada
+projeto, via `textContent`, sem altura fixa no CSS.
+
+**Sintoma:** ao trocar de card no mobile, a altura total da section
+mudava visivelmente — thumbnails, barra Explorar e CTA "pulavam" de
+posição a cada troca, e em alguns casos revelava a section seguinte
+(dark) por baixo do CTA.
+
+**Causa raiz:** as 4 descrições de `projects.json` têm comprimentos de
+texto diferentes, quebrando em números de linha diferentes. No layout
+desktop (`.portfolio__split` em 2 colunas), essa variação era absorvida
+porque o card featured domina a altura do bloco. No layout mobile
+(1 coluna, empilhado), a altura de `.portfolio__desc` soma direto na
+altura total da section — qualquer variação de linha desloca tudo
+abaixo.
+
+**Correção aplicada:** função `lockDescHeight()` em `portfolio.js`, que
+mede a altura real de cada uma das 4 descrições via um clone invisível
+(mesmo elemento, mesma largura, fora da tela) e trava
+`.portfolio__desc` na maior altura encontrada, via `style.minHeight`.
+Recalculada no resize (debounce de 200ms) porque a largura do elemento
+muda entre breakpoints. Mesmo padrão de medição de `scrollHeight` que
+`faq.js` já usa (ver LIÇÃO #2) — não foi técnica nova, foi replicação
+de convenção já validada no projeto.
+
+**Regra derivada:** CLAUDE.md §4.22.
+
+**Status:** ✅ resolvido e validado no navegador, jul/2026.
+
+---
+
+## #12 — `box-shadow` com spread negativo não serve para "peek cards" independentes
+
+**Contexto:** tentativa de criar um efeito decorativo de "cards ao lado"
+no card featured mobile (sugerindo que há mais projetos pra navegar),
+inspirado em referência visual (JCandy — carrossel de produtos com
+fatias laterais visíveis dos itens adjacentes).
+
+**Sintoma:** `box-shadow` com `spread` negativo e `offset` produziu um
+efeito quase invisível — só um traço fino no canto do card, não as
+fatias altas e visíveis da referência.
+
+**Causa raiz:** `box-shadow` com `spread` negativo encolhe a forma
+inteira de forma **uniforme** (largura e altura juntas, na mesma
+proporção) antes de deslocar — é matematicamente incapaz de produzir
+uma fatia alta e estreita (que precisa de controle independente de
+largura vs. altura). É a ferramenta certa para um efeito "baralho
+empilhado" (diagonal, sutil), não para fatias laterais literais.
+
+**Correção proposta (não aplicada ainda ao fechar esta sessão):**
+pseudo-elementos (`::before`/`::after`) no elemento pai
+(`.portfolio__split`, não em `.portfolio__featured`, que tem
+`overflow: hidden` e cortaria os pseudo-elementos) — dão controle
+independente de largura/altura, permitindo fatias altas e estreitas
+nas laterais. Ver docs/PENDENCIAS.md.
+
+**Regra derivada:** CLAUDE.md §4.23.
+
+**Status:** ⚠️ diagnosticado, correção projetada mas não aplicada —
+retomar na próxima sessão.
+
+---
+
+## #13 — Mensagem de commit com aspas escapadas quebra em PowerShell
+
+**Contexto:** commit da Fase A da task Portfólio, jul/2026. Mensagem de
+commit multi-linha continha aspas duplas internas escapadas
+(`\"texto\"`), formato válido em bash mas não em PowerShell.
+
+**Sintoma:** `git commit -m "... \"Conheça todos os 100+ projetos\" ..."`
+falhou com `fatal: Invalid path '/Conheça todos os 100+ projetos':
+No such file or directory` — o PowerShell reinterpretou o conteúdo
+escapado como se fosse um argumento de caminho separado.
+
+**Causa raiz:** o parser de linha de comando do PowerShell trata aspas
+escapadas (`\"`) de forma diferente do bash — o `git add` anterior já
+havia rodado com sucesso (arquivos ficaram staged), só o `commit -m`
+com aspas internas falhou.
+
+**Correção aplicada:** usar here-string do PowerShell
+(`@"..."@ | git commit -F -`) para mensagens de commit multi-linha,
+evitando qualquer aspas duplas internas na mensagem (substituídas por
+texto sem acentuação especial/aspas onde necessário).
+
+**Regra derivada:** CLAUDE.md §4.24.
+
+**Status:** ✅ resolvido — commits `4eaaf4e` e `90c259a` bem-sucedidos
+com o método corrigido, jul/2026.
+
+---
+
+## #14 — Confirmação dada no Claude Chat não chega automaticamente ao Claude Code
+
+**Contexto:** ao longo de toda a sessão de jul/2026 (Portfólio), diversos
+momentos em que o usuário recebeu "pode aplicar" do Claude Chat e
+presumiu que isso já autorizava o Claude Code a gravar.
+
+**Sintoma:** em um caso concreto, o Claude Code ficou parado por várias
+mensagens aguardando confirmação explícita que já havia sido dada no
+Claude Chat — nenhuma edição foi perdida, mas gerou confusão sobre por
+que o arquivo não refletia a mudança esperada (chegou a ser investigado
+como possível bug de cache/servidor antes da causa real ser identificada).
+
+**Causa raiz:** Claude Chat e Claude Code são sessões/ferramentas
+completamente separadas — o Claude Code não tem acesso ao conteúdo da
+conversa no Claude Chat. "Pode aplicar" dito num não é visto pelo outro.
+
+**Correção aplicada:** todo "pode aplicar" do Claude Chat precisa ser
+colado manualmente na sessão do Claude Code antes de qualquer gravação.
+
+**Regra derivada:** CLAUDE.md §4.25.
+
+**Status:** ✅ identificado e corrigido no fluxo de trabalho, jul/2026.

@@ -15,14 +15,14 @@ O site alterna dark e light entre sections. Esse contraste é identidade
 visual da marca — não é acidente. Regra: nunca duas sections com mesmo
 tratamento visual seguidas.
 
-| Nº  | Section   | Tema            | Background               | Status                        |
-| --- | --------- | --------------- | ------------------------ | ----------------------------- |
-| 01  | Hero      | DARK cinemático | Foto drone + overlay 40% | ✅ Implementado               |
-| 02  | Serviços  | DARK            | `--color-deep-navy`      | ✅ Implementado               |
-| 03  | Portfólio | LIGHT           | `--color-canvas`         | ✅ Implementado (UI estática) |
+| Nº  | Section   | Tema            | Background               | Status                             |
+| --- | --------- | --------------- | ------------------------ | ---------------------------------- |
+| 01  | Hero      | DARK cinemático | Foto drone + overlay 40% | ✅ Implementado                    |
+| 02  | Serviços  | DARK            | `--color-deep-navy`      | ✅ Implementado                    |
+| 03  | Portfólio | LIGHT           | `--color-canvas`         | ✅ Implementado (UI estática)      |
 | 04  | Sobre     | DARK            | `--color-deep-navy`      | ✅ Implementado (marquee pendente) |
-| 05  | FAQ       | LIGHT           | `--color-canvas`         | ✅ Implementado               |
-| 06  | Footer    | DARK            | `--color-deep-navy`      | ✅ Implementado               |
+| 05  | FAQ       | LIGHT           | `--color-canvas`         | ✅ Implementado                    |
+| 06  | Footer    | DARK            | `--color-deep-navy`      | ✅ Implementado                    |
 
 **Nota Serviços:** a implementação ficou dark (sequência Hero dark cinemático
 → Serviços dark sólido). O contraste entre imagem com overlay e fundo sólido
@@ -78,23 +78,96 @@ Arquivos: `index.html` (section #servicos), CSS `base.css` § Serviços.
 ## Section 03 — Portfólio
 
 Arquivos: `index.html` (section #portfolio, `data-theme="light"`),
-CSS `base.css` § Portfólio.
+CSS `base.css` § Portfólio, JS `src/scripts/modules/portfolio.js`.
+
+**Status:** implementada — UI finalizada, carrossel funcional (4
+projetos fixos). Pendência aberta: decoração "peek" mobile (ver
+docs/PENDENCIAS.md).
 
 **Decisões não-óbvias:**
 
-- Grid assimétrico desktop `≥ 900px`: `1.45fr 1fr`. Mobile: `1fr`.
-- Tags duplas no featured card: `.portfolio__tag-primary` (verde sólida) +
-  `.portfolio__tag-secondary` (glassmorphism). O glassmorphism é funcional —
-  distingue hierarquia semântica sobre imagem (exceção em DESIGN_SYSTEM.md §10).
+- Grid assimétrico desktop `≥ 900px`: `1.55fr 1fr` (ajustado de
+  `1.45fr 1fr` para aumentar o card featured). Mobile: `1fr`
+  (empilhado).
+- Card featured: `aspect-ratio: 16 / 10.5` (ajustado de `16 / 11` para
+  abrir margem de segurança de viewport fitting), `max-height: 440px`
+  — só entra em ação em telas bem mais largas que o breakpoint padrão,
+  já que o `aspect-ratio` costuma governar a altura real primeiro.
+- Botão "Ver case" **removido** do card featured — o card é
+  visualmente inerte (sem clique próprio). O único CTA da section é
+  "Conheça todos os 100+ projetos" (`.portfolio__footer`), apontando
+  para `/portfolio.html`.
+- **Carrossel: Opção A — 4 thumbnails fixos, não 8.** Decisão
+  explícita: apesar de `projects.json` ter 8 projetos completos
+  (mais outros no catálogo geral de "100+"), o carrossel da Home só
+  percorre os 4 primeiros do array (`disponibilidade-hidrica`,
+  `rede-hidrometrica`, `pocos-tubulares`, `medicao-vazao-pojuca`),
+  mapeados 1:1 aos 4 `<li class="portfolio__thumb">` do HTML. O
+  contador `.portfolio__explore-count` reflete `01/04`, não `01/08`.
+- Tags duplas no featured card: `.portfolio__tag-primary` (verde
+  sólida) + `.portfolio__tag-secondary` (glassmorphism). O
+  glassmorphism é funcional — distingue hierarquia semântica sobre
+  imagem (exceção em DESIGN_SYSTEM.md §10).
 - Coordenadas geográficas no card: decorativas, `aria-hidden="true"`.
-- Setas de navegação (`.portfolio__arrow--prev` / `--next`) ficam dentro de
-  `.portfolio__thumbs-row`, flanqueando `<ul class="portfolio__thumbs">` —
-  **não no header da section**.
-- Barra de progresso: `.portfolio__explore` + `.portfolio__explore-fill`
-  (largura via `style` inline). Nome correto é "Explorar", não "progress line".
-- 4 thumbnails estáticos hoje; `portfolio.js` (pendente) gerará os 8 de
-  `src/content/projects.json` dinamicamente.
-- Stats em `<dl>` — `<dt>` label + `<dd>` valor + unidade.
+- Thumbnails: `flex: 0 0 calc(25% - 7.5px)` (ajustado de
+  `calc(20% - 8px)`, que era dimensionado para 5 slots — corrigido
+  para 4, matemática recalculada com o mesmo método: N gaps de 10px
+  dividido pelo número real de itens).
+
+**`portfolio.js` — arquitetura do carrossel:**
+
+- Sem `<script>` extra de geração de DOM — os 4 thumbnails são fixos
+  no HTML; o módulo só troca o conteúdo do card featured + coluna de
+  texto + stats + qual thumbnail está `.is-active` + barra Explorar.
+- `updateContent(index)` e `updateNav(index)` são funções separadas —
+  `updateContent` (imagem, tags, coords, meta, headline, descrição,
+  stats) recebe o crossfade animado; `updateNav` (thumbnail ativo,
+  barra Explorar) troca **instantaneamente**, sem fade, para dar
+  resposta imediata ao clique.
+- Crossfade via `gsap.context()` (mesmo padrão de `sobre.js`):
+  fade-out (0.2s, `power2.in`) → troca de conteúdo → fade-in (0.4s,
+  `power3.out`). `prefers-reduced-motion`: pula a animação, troca
+  instantânea.
+- `lockDescHeight()`: mede a altura das 4 descrições via clone
+  invisível e trava `.portfolio__desc` na maior — evita CLS ao trocar
+  de card no layout empilhado do mobile (ver docs/LICOES.md #11).
+  Recalculado no resize (debounce 200ms, mesmo padrão de `faq.js`).
+- Auto-advance a cada 5000ms (`AUTO_ADVANCE_MS`), resetado por
+  qualquer interação manual (thumbnail, seta, swipe). Pausado no
+  `mouseenter`/`focusin` da section, retomado no `mouseleave`/
+  `focusout`. Desligado por completo sob `prefers-reduced-motion`.
+- **Mobile (`<600px`): thumbnails e setas ficam ocultas via CSS**
+  (`.portfolio__thumbs-row { display: none; }`) — navegação manual
+  nesse breakpoint é por **swipe** no card featured (`touchstart`/
+  `touchmove`/`touchend`, threshold de 40px, `preventDefault` só em
+  gestos predominantemente horizontais para não competir com o scroll
+  vertical da página).
+- Sem geração de DOM a partir do JSON: `import projectsData from
+'../../content/projects.json'` é lido, mas só os 4 primeiros
+  (`.slice(0, 4)`) são usados — mapeamento por índice, não por busca.
+
+**Viewport fitting (jul/2026):**
+
+- Section usa `min-height: 100svh` + `display: flex; justify-content:
+center` — quando o conteúdo é mais baixo que a tela, o navegador
+  sempre estica até bater exatamente no piso (nunca menor). Isso foi
+  confirmado por medição real (ver docs/LICOES.md #10) — não existe
+  cenário em telas desktop onde a section "sobra" espaço, contanto que
+  o conteúdo caiba dentro do piso.
+- **Cuidado ao medir:** o Device Toolbar do DevTools (`Ctrl+Shift+M`)
+  contamina qualquer medição de `window.innerWidth`/`innerHeight` —
+  sempre desligar antes de medir. Ver docs/LICOES.md #10.
+
+**Pendência aberta — decoração "peek" mobile:**
+
+Tentativa via `box-shadow` (spread negativo) não conseguiu replicar
+fatias laterais altas como a referência visual (JCandy) — só produz
+efeito "baralho empilhado" (escala uniforme), quase invisível nos
+valores testados. Substituição projetada via pseudo-elementos
+(`::before`/`::after` em `.portfolio__split`, não em
+`.portfolio__featured`, que tem `overflow: hidden` e cortaria os
+pseudo-elementos) — diff pronto, não aplicado. Ver docs/LICOES.md #12
+e docs/PENDENCIAS.md.
 
 ---
 
@@ -151,7 +224,7 @@ da faixa institucional na base (ver docs/PENDENCIAS.md).
 **`sobre.js` — timeline única do GSAP:**
 
 - Um único `gsap.timeline()` com `ScrollTrigger` (`start: 'top 65%',
-  once: true`) sincroniza: contadores numéricos (`.sobre__stat-value`),
+once: true`) sincroniza: contadores numéricos (`.sobre__stat-value`),
   reveal do stat UNESCO (`clip-path`), preenchimento dos 4 estados e
   fade-in do callout — não são dois `ScrollTrigger` separados.
 - `prefers-reduced-motion` tratado diretamente em JS (branch dedicado
@@ -267,7 +340,7 @@ CSS `base.css` § Header. Menu mobile: JS dedicado
 
 | Classe          | Gatilho ScrollTrigger                      | Efeito                                                                                                                              |
 | --------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `.is-scrolled`  | Bottom de `.hero` cruza top da viewport    | Fundo `rgba(10,22,40,0.85)` + blur 12px + altura reduz (5rem → 4rem)                                                             |
+| `.is-scrolled`  | Bottom de `.hero` cruza top da viewport    | Fundo `rgba(10,22,40,0.85)` + blur 12px + altura reduz (5rem → 4rem)                                                                |
 | `.is-light`     | Header entra/sai de `[data-theme="light"]` | Fundo branco translúcido + texto/ícones dark                                                                                        |
 | `.is-menu-open` | Menu mobile aberto (via `mobile-nav.js`)   | `opacity: 0` + `pointer-events: none` — header some com fade enquanto o painel mobile está aberto (evita duplicação visual da logo) |
 
