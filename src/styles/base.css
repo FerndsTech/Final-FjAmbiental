@@ -1366,6 +1366,7 @@ textarea {
   height: 100%;
   background: var(--color-fj-green);
   border-radius: var(--radius-pill);
+  transition: width var(--duration-base) var(--ease-in-out);
 }
 
 /* --- Footer CTA --- */
@@ -1419,6 +1420,10 @@ textarea {
   .portfolio__split {
     grid-template-columns: 1.55fr 1fr;
   }
+
+  .portfolio__editorial {
+    margin-top: -16px;
+  }
 }
 
 @media (max-width: 600px) {
@@ -1439,7 +1444,8 @@ textarea {
   .portfolio__arrow,
   .portfolio__thumb,
   .portfolio__thumb::before,
-  .portfolio__thumb-img {
+  .portfolio__thumb-img,
+  .portfolio__explore-fill {
     transition: none;
   }
 }
