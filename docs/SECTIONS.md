@@ -80,9 +80,9 @@ Arquivos: `index.html` (section #servicos), CSS `base.css` § Serviços.
 Arquivos: `index.html` (section #portfolio, `data-theme="light"`),
 CSS `base.css` § Portfólio, JS `src/scripts/modules/portfolio.js`.
 
-**Status:** implementada — UI finalizada, carrossel funcional (4
-projetos fixos). Pendência aberta: decoração "peek" mobile (ver
-docs/PENDENCIAS.md).
+**Status:** implementada e completa — UI finalizada, carrossel funcional
+(4 projetos fixos) com peek-card real no mobile, reveal no scroll
+correto em todos os elementos.
 
 **Decisões não-óbvias:**
 
@@ -116,9 +116,10 @@ docs/PENDENCIAS.md).
 
 **`portfolio.js` — arquitetura do carrossel:**
 
-- Sem `<script>` extra de geração de DOM — os 4 thumbnails são fixos
-  no HTML; o módulo só troca o conteúdo do card featured + coluna de
-  texto + stats + qual thumbnail está `.is-active` + barra Explorar.
+- Sem `<script>` extra de geração de DOM no HTML estático — os 4
+  thumbnails são fixos no HTML; o módulo troca o conteúdo do card
+  featured + coluna de texto + stats + qual thumbnail está
+  `.is-active` + barra Explorar.
 - `updateContent(index)` e `updateNav(index)` são funções separadas —
   `updateContent` (imagem, tags, coords, meta, headline, descrição,
   stats) recebe o crossfade animado; `updateNav` (thumbnail ativo,
@@ -133,18 +134,34 @@ docs/PENDENCIAS.md).
   de card no layout empilhado do mobile (ver docs/LICOES.md #11).
   Recalculado no resize (debounce 200ms, mesmo padrão de `faq.js`).
 - Auto-advance a cada 5000ms (`AUTO_ADVANCE_MS`), resetado por
-  qualquer interação manual (thumbnail, seta, swipe). Pausado no
-  `mouseenter`/`focusin` da section, retomado no `mouseleave`/
-  `focusout`. Desligado por completo sob `prefers-reduced-motion`.
-- **Mobile (`<600px`): thumbnails e setas ficam ocultas via CSS**
-  (`.portfolio__thumbs-row { display: none; }`) — navegação manual
-  nesse breakpoint é por **swipe** no card featured (`touchstart`/
-  `touchmove`/`touchend`, threshold de 40px, `preventDefault` só em
-  gestos predominantemente horizontais para não competir com o scroll
-  vertical da página).
-- Sem geração de DOM a partir do JSON: `import projectsData from
-'../../content/projects.json'` é lido, mas só os 4 primeiros
-  (`.slice(0, 4)`) são usados — mapeamento por índice, não por busca.
+  qualquer interação manual (thumbnail, seta, swipe, scroll do
+  carrossel mobile). **Pausa no hover/focus restrita à área de
+  navegação** (`.portfolio__featured`, `.portfolio__track`,
+  `.portfolio__thumbs-wrapper`) — não à section inteira, para evitar
+  que o timer pause sozinho quando o cursor já está parado sobre
+  título/stats no momento em que a section entra na viewport pelo
+  scroll (ver docs/LICOES.md #15). Desligado por completo sob
+  `prefers-reduced-motion`.
+- **Peek-card mobile (`<600px`): carrossel real via scroll-snap
+  nativo.** `.portfolio__track` é populado via JS (`buildTrack()`) a
+  partir de `projects.json` — 4 `<article class="portfolio__featured">`
+  dentro de um container `overflow-x: auto; scroll-snap-type: x
+mandatory`, cada card com `flex: 0 0 85%; scroll-snap-align: center`.
+  Um `IntersectionObserver` detecta qual card está centralizado no
+  scroll/swipe e sincroniza com o painel de texto, thumbnails e barra
+  Explorar via `goTo(idx, true, true)` (o 3º parâmetro evita loop de
+  scroll). Substitui a tentativa anterior de decoração via
+  pseudo-elementos, que não conseguia mostrar conteúdo real dos cards
+  adjacentes (ver docs/LICOES.md #12, revertida nesta sessão).
+  Desktop (`≥600px`) não é afetado: o card único original
+  (`.portfolio__split > .portfolio__featured`) permanece intocado,
+  `.portfolio__track` fica `display: none` fora do breakpoint mobile.
+  Fileira de thumbnails/setas oculta via CSS nesse breakpoint
+  (`.portfolio__thumbs-row { display: none; }`).
+- Sem geração de DOM a partir do JSON no card único desktop: `import
+projectsData from '../../content/projects.json'` é lido, mas só os 4
+  primeiros (`.slice(0, 4)`) são usados — mapeamento por índice, não
+  por busca.
 
 **Viewport fitting (jul/2026):**
 
@@ -156,18 +173,30 @@ center` — quando o conteúdo é mais baixo que a tela, o navegador
   o conteúdo caiba dentro do piso.
 - **Cuidado ao medir:** o Device Toolbar do DevTools (`Ctrl+Shift+M`)
   contamina qualquer medição de `window.innerWidth`/`innerHeight` —
-  sempre desligar antes de medir. Ver docs/LICOES.md #10.
+  sempre desligar antes de medir. Ver docs/LICOES.md #10. **Exceção:**
+  para testar gestos de swipe/drag em containers com scroll horizontal
+  (ex.: `.portfolio__track`), o Device Toolbar precisa estar **ligado**
+  com um preset de dispositivo real — clique+arrastar com mouse nunca
+  rola nativamente um container `overflow-x`, só toque real ou
+  simulação de toque.
 
-**Pendência aberta — decoração "peek" mobile:**
+**Scroll-reveal:**
 
-Tentativa via `box-shadow` (spread negativo) não conseguiu replicar
-fatias laterais altas como a referência visual (JCandy) — só produz
-efeito "baralho empilhado" (escala uniforme), quase invisível nos
-valores testados. Substituição projetada via pseudo-elementos
-(`::before`/`::after` em `.portfolio__split`, não em
-`.portfolio__featured`, que tem `overflow: hidden` e cortaria os
-pseudo-elementos) — diff pronto, não aplicado. Ver docs/LICOES.md #12
-e docs/PENDENCIAS.md.
+- `.portfolio__title`, `.portfolio__split > .portfolio__featured`
+  (`data-reveal-delay="0.1"`) e `.portfolio__editorial`
+  (`data-reveal-delay="0.15"`) usam `data-reveal` nos containers pais,
+  não nos elementos filhos individuais — porque `portfolio.js` já
+  anima a opacidade desses filhos (img, tags, coords, meta, headline,
+  desc, stats) via crossfade GSAP. Aplicar `data-reveal` nos filhos
+  também causaria dois `gsap.context()` disputando a mesma
+  propriedade. `.portfolio__track` (populado via JS) não recebe
+  `data-reveal`.
+- `.portfolio__footer` usa `data-reveal-start="top 98%"` (em vez do
+  padrão `top 85%` de `reveal.js`) — o footer nasce muito perto do fim
+  físico da section (`min-height: 100svh` deixa a altura real quase
+  idêntica à viewport), então o threshold padrão só disparava quase no
+  fim do scroll da section, dando a impressão de que o botão "já vinha
+  carregado". Ver docs/LICOES.md #16.
 
 ---
 

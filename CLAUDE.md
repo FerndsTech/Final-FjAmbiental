@@ -349,6 +349,26 @@ não é visto pelo Claude Code. Toda aprovação precisa ser colada
 manualmente na sessão do Claude Code antes de qualquer gravação. Ver
 docs/LICOES.md #14.
 
+### 4.26 Threshold de scroll-reveal fixo não serve para todo elemento
+
+`reveal.js` usa `start: 'top 85%'` por padrão para `data-reveal`.
+Elementos que nascem perto do fim físico de uma section (especialmente
+sections com `min-height: 100svh` cuja altura real fica próxima da
+altura da viewport) podem só cruzar esse threshold quase no fim do
+scroll da section — dando a impressão de que a animação "não roda".
+Usar `data-reveal-start="top 98%"` (ou outro valor mais tardio) nesses
+casos, em vez de assumir que o padrão de 85% serve para qualquer
+elemento de qualquer section. Ver docs/LICOES.md #16.
+
+### 4.27 Pausa de auto-advance por hover/focus deve escopar à área de interação, não à section
+
+Ao pausar um timer de auto-advance (carrossel, slideshow) via
+`mouseenter`/`focusin`, nunca anexar os listeners na section inteira —
+isso pausa o timer mesmo quando o cursor só está sobre texto/stats
+sem nenhuma interação real com o componente. Escopar aos elementos que
+são de fato a área de navegação (card, track, controles). Ver
+docs/LICOES.md #15.
+
 ---
 
 ## 5. Estrutura de pastas

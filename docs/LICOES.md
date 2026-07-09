@@ -389,8 +389,17 @@ nas laterais. Ver docs/PENDENCIAS.md.
 
 **Regra derivada:** CLAUDE.md §4.23.
 
-**Status:** ⚠️ diagnosticado, correção projetada mas não aplicada —
-retomar na próxima sessão.
+**Status:** ✅ resolvido — mas não como projetado. A correção via
+pseudo-elementos, mesmo aplicada, não conseguia entregar o efeito real
+pretendido (pseudo-elemento não tem como renderizar conteúdo de outro
+card). Revertida e substituída por carrossel real com scroll-snap
+nativo (`.portfolio__track`, populado via JS) — ver docs/SECTIONS.md
+§ Section 03. Lição adicional: ao aprovar uma correção "projetada" sem
+protótipo visual, validar contra uma referência visual concreta antes
+de implementar — o diagnóstico técnico (`box-shadow` não serve) estava
+certo, mas o substituto proposto também não seria capaz de atingir o
+objetivo, e isso só ficou claro quando o resultado renderizado foi
+comparado à referência (JCandy) explicitamente.
 
 ---
 
@@ -444,3 +453,65 @@ colado manualmente na sessão do Claude Code antes de qualquer gravação.
 **Regra derivada:** CLAUDE.md §4.25.
 
 **Status:** ✅ identificado e corrigido no fluxo de trabalho, jul/2026.
+
+---
+
+## #15 — Escopo de pausa em auto-advance deve ser a área de interação, não a section inteira
+
+**Contexto:** carrossel da Section Portfólio (`portfolio.js`) pausa o
+timer de auto-advance (5s) no `mouseenter`/`focusin`, para não trocar
+de conteúdo enquanto o usuário interage — boa prática de acessibilidade
+(WCAG 2.2.2).
+
+**Sintoma:** primeira troca de card demorando ~15s em vez dos 5s
+configurados; trocas seguintes normais.
+
+**Causa raiz:** os listeners de `mouseenter`/`focusin` estavam
+anexados na `section` inteira (`#portfolio`), não só na área do
+carrossel. Se o cursor do mouse já está posicionado sobre qualquer
+parte da section (título, stats, thumbnails) no momento em que ela
+entra na viewport pelo scroll, o navegador dispara `mouseenter`
+imediatamente — pausando o timer sem nenhuma interação real com o
+carrossel. O timer só recomeça quando o mouse sai da section inteira.
+
+**Correção aplicada:** restringir os listeners de pausa a um array de
+"zonas de pausa" — só os elementos que são de fato a área de
+navegação do carrossel (`.portfolio__featured`, `.portfolio__track`,
+`.portfolio__thumbs-wrapper`), não a section como um todo.
+
+**Regra derivada:** ao implementar pausa de auto-advance por
+hover/focus, escopar os listeners à área de interação real do
+componente, nunca ao container de section inteiro — mesmo que pareça
+mais simples anexar num único elemento pai.
+
+**Status:** ✅ resolvido.
+
+---
+
+## #16 — Threshold fixo de scroll-reveal falha em elementos que nascem perto do fim físico da section
+
+**Contexto:** `.portfolio__footer` (CTA final da Section Portfólio)
+usa `data-reveal`, mesmo padrão de fade-up no scroll das outras
+sections — mas a animação parecia "já carregada" ao chegar na section.
+
+**Sintoma:** o fade-up só disparava quando a próxima section (dark,
+abaixo) já estava visivelmente entrando por baixo da tela — muito mais
+tarde do que o esperado.
+
+**Causa raiz:** `reveal.js` usa um threshold fixo (`start: 'top 85%'`)
+para todos os elementos com `data-reveal`. A Section Portfólio usa
+`min-height: 100svh`, e sua altura real medida (~968px) é quase
+idêntica à altura da viewport (~965px) — ou seja, a section mal
+ultrapassa 1 tela de altura. Como `.portfolio__footer` é o último
+elemento, seu topo nasce a ~92% da altura da section (medição real:
+891.7px de 965px de viewport) — bem depois do threshold de 85%, que só
+é cruzado quando o usuário já rolou quase a section inteira.
+
+**Correção aplicada:** `reveal.js` passou a aceitar um atributo
+opcional `data-reveal-start`, sobrescrevendo o padrão `'top 85%'` por
+elemento, sem afetar nenhum elemento que não usa o atributo.
+`.portfolio__footer` usa `data-reveal-start="top 98%"`.
+
+**Regra derivada:** CLAUDE.md §4.26.
+
+**Status:** ✅ resolvido.

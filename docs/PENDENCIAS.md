@@ -19,23 +19,6 @@
       palavra no load, após preloader), fade-in no badge, parallax sutil no
       scroll — tudo respeitando `prefers-reduced-motion`
 
-- [ ] **Section Portfólio — peek-card mobile:** decoração visual (fatias
-      laterais indicando mais projetos navegáveis por swipe) ainda não
-      aplicada. Diff projetado com pseudo-elementos (`::before`/`::after`
-      em `.portfolio__split`) — substitui tentativa anterior via
-      `box-shadow`, que não funcionou (ver docs/LICOES.md #12). Valores de
-      altura/largura/opacidade são estimativa inicial, precisam validação
-      visual real no navegador antes de fechar.
-
-- [ ] **Section Portfólio — commit pendente:** `src/scripts/modules/portfolio.js`
-      e `src/styles/base.css` têm mudanças não commitadas na branch
-      `feature/portfolio-ui-js` (lockDescHeight + swipe no JS; tentativa de
-      box-shadow no CSS, a ser substituída). Resolver o peek-card mobile
-      antes de commitar, para não misturar uma tentativa descartada no
-      histórico.
-- [ ] **Arquivo temporário `proposed-css-check.txt`** na raiz do
-      projeto — apagar antes do próximo commit (não é parte do código).
-
 ---
 
 ## Conteúdo a confirmar com cliente
