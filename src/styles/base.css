@@ -951,7 +951,7 @@ textarea {
 }
 
 .clients__logo {
-  height: 36px;
+  height: 48px;
   width: auto;
   flex-shrink: 0;
   filter: brightness(0) invert(1);
@@ -972,7 +972,7 @@ textarea {
 
 @media (max-width: 600px) {
   .clients__logo {
-    height: 28px;
+    height: 36px;
   }
 }
 
