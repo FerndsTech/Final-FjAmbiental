@@ -53,6 +53,56 @@ Arquivos: `index.html` (section #hero), CSS `base.css` § Hero.
 
 ---
 
+## Section — Clientes (faixa de logos / marquee)
+
+Arquivos: `index.html` (section `.clients`, id `clientes`), CSS
+`base.css` § Section: Clientes, JS `src/scripts/modules/clients.js`.
+
+**Status:** em ajuste — arquitetura da duplicação do loop já
+reconstruída e validada, mas há um bug de stutter recorrente ainda
+não resolvido (ver docs/PENDENCIAS.md e docs/LICOES.md #17).
+
+**Arquitetura do loop infinito:**
+
+- `.clients__track` contém as 12 `<img>` reais (logos dos clientes),
+  com `alt` descritivo. `clients.js` (`initClients()`) clona cada uma
+  via `cloneNode`, marca os clones com `aria-hidden="true"`, `alt=""`
+  e `data-clients-clone="true"`, e os insere como irmãos diretos no
+  mesmo `.clients__track` — não existe mais wrapper `.clients__track-dupe`
+  nem `display: contents`. Isso garante que a segunda metade da faixa
+  é sempre idêntica à primeira (mesmos atributos, mesma ordem),
+  eliminando duplicação manual de HTML como fonte de risco.
+- Animação via `@keyframes clients-marquee`, `translateX(0)` →
+  `translateX(-50%)`, `35s linear infinite` — a metade exata do
+  percurso corresponde ao ponto em que a segunda cópia (clonada)
+  começa, criando a ilusão de loop contínuo sem salto.
+- `will-change: transform` na regra `.clients__track` — sinaliza pro
+  navegador priorizar essa animação no compositor/GPU.
+- Sob `prefers-reduced-motion: reduce`: a animação é desligada via CSS
+  (`.clients__track { animation: none; }`), e `clients.js` nem executa
+  a clonagem (checagem de `matchMedia` no início do módulo) — sem
+  animação, duplicar 12 imagens não tem função.
+- Todas as 12 `<img>` (originais e clones) usam `loading="eager"` —
+  `lazy` não funciona nesse padrão, porque as imagens só "entram na
+  tela" via `transform`, não por posição real de layout (ver
+  docs/LICOES.md #17).
+- Tamanho: `.clients__logo { height: 48px; width: auto; }` no desktop,
+  `36px` no mobile (`<600px`).
+- Monocromia: `filter: brightness(0) invert(1)` em `.clients__logo`,
+  `opacity: 0.55` (`1` no hover) — exige que os SVGs sejam vetores
+  reais com formas separadas por cor (não raster), ou o filtro perde
+  detalhe fino do desenho (ver docs/LICOES.md #17, causa 2).
+
+**Pendências conhecidas:**
+
+- Stutter recorrente no loop ao passar pela logo Yamana Gold — não
+  resolvido, ver docs/PENDENCIAS.md.
+- Atributos `width`/`height` HTML das 12 `<img>` desatualizados
+  (herdados da era raster, não batem com o `viewBox` real dos SVGs
+  vetoriais atuais) — ver docs/PENDENCIAS.md.
+
+---
+
 ## Section 02 — Serviços
 
 Arquivos: `index.html` (section #servicos), CSS `base.css` § Serviços.

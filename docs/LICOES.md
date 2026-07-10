@@ -515,3 +515,77 @@ elemento, sem afetar nenhum elemento que não usa o atributo.
 **Regra derivada:** CLAUDE.md §4.26.
 
 **Status:** ✅ resolvido.
+
+---
+
+## #17 — Duplicação manual de HTML em loops infinitos é fonte de bugs difíceis de rastrear (investigação em andamento)
+
+**Contexto:** faixa de logos da Section Clientes (`.clients__track`)
+usa a técnica clássica de marquee infinito: duplicar o conteúdo e
+animar via `translateX(-50%)`, criando a ilusão de loop contínuo.
+
+**Sintoma:** ao completar uma volta, ao passar pela logo Yamana Gold
+especificamente, a animação trava por 1-2s (espaço vazio, depois duas
+logos aparecendo juntas) antes de continuar. Recorrente, sempre no
+mesmo ponto, todo ciclo.
+
+**Causas reais encontradas e corrigidas ao longo da investigação**
+(nenhuma delas resolveu o stutter, mas todas eram problemas legítimos):
+
+1. `loading="lazy"` nas imagens duplicadas do loop nunca disparava
+   fetch, porque essas imagens só "entram na tela" via `transform`
+   (deslocamento CSS), não por posição real de layout — e
+   `loading="lazy"` calcula intersecção pela posição de layout, não
+   pela posição visual pós-transform. Corrigido para `eager`.
+2. 11 de 12 arquivos SVG de logos eram na verdade imagens PNG
+   rasterizadas em base64, embutidas dentro de um `<svg>` com máscaras
+   e filtros complexos — não vetores reais. Identificável por tamanho
+   de arquivo anormal (33KB a 554KB, vs. ~3KB esperado para um SVG
+   vetorial simples) e pela presença da string `base64` no conteúdo.
+   Isso causava tanto desproporção visual entre logos (cada raster
+   com sua própria área de canvas) quanto perda de detalhe ao aplicar
+   `filter: brightness(0) invert(1)` (o filtro empilhado sobre
+   máscaras/filtros SVG internos de uma imagem raster destrói
+   detalhe fino do desenho). Revetorizadas manualmente no Inkscape
+   (`Caminho → Traçar Bitmap`, modo "Multicolorido"/Cores, com
+   "Redimensionar página para o conteúdo" para corrigir o `viewBox`).
+3. **Duplicação manual de HTML é uma fonte real de risco**: a segunda
+   metade da faixa (`.clients__track-dupe`) era digitada à mão como
+   uma segunda lista de 12 `<img>` — nada garantia que ela permanecesse
+   idêntica à primeira lista ao longo do tempo (já vimos isso quebrar
+   uma vez, com o atributo `loading` divergindo entre as duas). Trocado
+   por geração via JS: `clients.js` clona os nós reais da primeira
+   metade (`cloneNode`), garantindo simetria estrutural permanente,
+   sem depender de disciplina manual para manter as duas listas
+   sincronizadas.
+4. `display: contents` (usado para fazer os filhos de um `<div>`
+   aninhado se comportarem como itens diretos do flex pai) foi
+   eliminado como possível fonte de inconsistência de composição —
+   suporte historicamente irregular entre navegadores em combinação
+   com elementos animados. Os clones passaram a ser irmãos diretos no
+   DOM, sem nenhum wrapper intermediário.
+5. Atributos `width`/`height` das 12 `<img>` no HTML (usados pelo
+   navegador para reservar espaço de layout antes da imagem carregar)
+   estavam desatualizados — herdados da era em que as logos eram
+   raster, não batendo com a proporção real dos novos SVGs vetoriais.
+   Desvio mensurado entre +17% (SLC) e +100% (Embasa) — a Yamana Gold
+   tem +78%, alto mas não o maior do lote. Esse mismatch causa CLS
+   real na primeira carga da página, mas **não explica** um stutter
+   que se repete a cada ciclo do loop (é evento de carga única, não
+   recorrente) — permanece como correção pendente separada, registrada
+   em docs/PENDENCIAS.md, não como causa do bug principal.
+
+**Método de diagnóstico usado:** eliminação sistemática com medição
+real a cada etapa — nunca aplicar uma correção "no escuro" sem antes
+confirmar a hipótese com dado observável (Console, DevTools Network,
+Elements, comparação de arquivo real). Cada uma das 5 causas acima foi
+corrigida e _validada_ isoladamente antes de seguir para a próxima
+hipótese — o que permitiu descartar cada uma com confiança, mesmo sem
+ter fechado a causa raiz do sintoma original ainda.
+
+**Status:** ⚠️ em investigação — causa raiz do stutter recorrente
+ainda não identificada. Hipótese em teste no momento da pausa desta
+sessão: complexidade geométrica do path SVG da Yamana Gold (mais
+pontos de curva que as outras 11, por ter sido vetorizada com
+"Suavizar"+"Empilhar" ativados no Inkscape). Retomar em
+docs/PENDENCIAS.md.
