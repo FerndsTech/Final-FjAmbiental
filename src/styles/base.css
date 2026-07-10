@@ -939,6 +939,7 @@ textarea {
   display: flex;
   align-items: center;
   width: max-content;
+  will-change: transform;
   animation: clients-marquee 35s linear infinite;
 }
 
@@ -946,9 +947,6 @@ textarea {
   animation-play-state: paused;
 }
 
-.clients__track-dupe {
-  display: contents;
-}
 
 .clients__logo {
   height: 48px;

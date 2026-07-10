@@ -29,6 +29,7 @@ import { initFooterNav } from './modules/footer.js';
 import { initMobileNav } from './modules/mobile-nav.js';
 import { initSobre } from './modules/sobre.js';
 import { initPortfolio } from './modules/portfolio.js';
+import { initClients } from './modules/clients.js';
 
 // === Inicialização ===
 // Cada init retorna função de cleanup para suporte futuro a View Transitions.
@@ -38,6 +39,7 @@ function init() {
   cleanups.push(initSmoothScroll()); // Lenis primeiro — ScrollTrigger depende do scroller
   cleanups.push(initHero());
   cleanups.push(initHeader());       // ScrollTrigger do header criado após Lenis estar ativo
+  cleanups.push(initClients());
   cleanups.push(initReveal());
   cleanups.push(initFaq());
   cleanups.push(initFooterNav());
