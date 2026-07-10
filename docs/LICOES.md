@@ -518,74 +518,127 @@ elemento, sem afetar nenhum elemento que não usa o atributo.
 
 ---
 
-## #17 — Duplicação manual de HTML em loops infinitos é fonte de bugs difíceis de rastrear (investigação em andamento)
+## #17 — Duplicação manual de HTML em loops infinitos é fonte de bugs difíceis de rastrear (RESOLVIDO)
 
-**Contexto:** faixa de logos da Section Clientes (`.clients__track`)
-usa a técnica clássica de marquee infinito: duplicar o conteúdo e
-animar via `translateX(-50%)`, criando a ilusão de loop contínuo.
+**Contexto:** faixa de logos da Section Clientes (`.clients__track`) usa
+a técnica clássica de marquee infinito: duplicar o conteúdo e animar
+via `transform`, criando a ilusão de loop contínuo.
 
-**Sintoma:** ao completar uma volta, ao passar pela logo Yamana Gold
-especificamente, a animação trava por 1-2s (espaço vazio, depois duas
-logos aparecendo juntas) antes de continuar. Recorrente, sempre no
-mesmo ponto, todo ciclo.
+**Sintoma original:** ao completar uma volta, a animação travava por
+1-2s (espaço vazio, depois duas logos aparecendo juntas) sempre no
+mesmo ponto do ciclo — inicialmente perto da logo Yamana Gold.
 
-**Causas reais encontradas e corrigidas ao longo da investigação**
-(nenhuma delas resolveu o stutter, mas todas eram problemas legítimos):
+**Causa raiz real (confirmada matematicamente):** a faixa duplicava o
+conteúdo apenas **1x** (2 conjuntos de 12 logos = 24 itens no total).
+Mas a largura de 1 conjunto de 12 logos (~1664.6px, medida real do
+projeto) é **menor** que a largura visível do `.clients__track-wrapper`
+em telas largas (~1905px, medida real). Isso cria um vão sem conteúdo
+sempre no mesmo ponto do ciclo, pouco antes do wrap da posição — dois
+conjuntos nunca foram suficientes para cobrir a tela continuamente.
+Fórmula: são necessárias pelo menos `ceil(1 + larguraWrapper /
+larguraDeUmConjunto)` cópias do conteúdo original para nunca haver vão,
+não um número fixo.
 
-1. `loading="lazy"` nas imagens duplicadas do loop nunca disparava
-   fetch, porque essas imagens só "entram na tela" via `transform`
-   (deslocamento CSS), não por posição real de layout — e
-   `loading="lazy"` calcula intersecção pela posição de layout, não
-   pela posição visual pós-transform. Corrigido para `eager`.
-2. 11 de 12 arquivos SVG de logos eram na verdade imagens PNG
-   rasterizadas em base64, embutidas dentro de um `<svg>` com máscaras
-   e filtros complexos — não vetores reais. Identificável por tamanho
-   de arquivo anormal (33KB a 554KB, vs. ~3KB esperado para um SVG
-   vetorial simples) e pela presença da string `base64` no conteúdo.
-   Isso causava tanto desproporção visual entre logos (cada raster
-   com sua própria área de canvas) quanto perda de detalhe ao aplicar
-   `filter: brightness(0) invert(1)` (o filtro empilhado sobre
-   máscaras/filtros SVG internos de uma imagem raster destrói
-   detalhe fino do desenho). Revetorizadas manualmente no Inkscape
-   (`Caminho → Traçar Bitmap`, modo "Multicolorido"/Cores, com
-   "Redimensionar página para o conteúdo" para corrigir o `viewBox`).
-3. **Duplicação manual de HTML é uma fonte real de risco**: a segunda
-   metade da faixa (`.clients__track-dupe`) era digitada à mão como
-   uma segunda lista de 12 `<img>` — nada garantia que ela permanecesse
-   idêntica à primeira lista ao longo do tempo (já vimos isso quebrar
-   uma vez, com o atributo `loading` divergindo entre as duas). Trocado
-   por geração via JS: `clients.js` clona os nós reais da primeira
-   metade (`cloneNode`), garantindo simetria estrutural permanente,
-   sem depender de disciplina manual para manter as duas listas
-   sincronizadas.
-4. `display: contents` (usado para fazer os filhos de um `<div>`
-   aninhado se comportarem como itens diretos do flex pai) foi
-   eliminado como possível fonte de inconsistência de composição —
-   suporte historicamente irregular entre navegadores em combinação
-   com elementos animados. Os clones passaram a ser irmãos diretos no
-   DOM, sem nenhum wrapper intermediário.
-5. Atributos `width`/`height` das 12 `<img>` no HTML (usados pelo
-   navegador para reservar espaço de layout antes da imagem carregar)
-   estavam desatualizados — herdados da era em que as logos eram
-   raster, não batendo com a proporção real dos novos SVGs vetoriais.
-   Desvio mensurado entre +17% (SLC) e +100% (Embasa) — a Yamana Gold
-   tem +78%, alto mas não o maior do lote. Esse mismatch causa CLS
-   real na primeira carga da página, mas **não explica** um stutter
-   que se repete a cada ciclo do loop (é evento de carga única, não
-   recorrente) — permanece como correção pendente separada, registrada
-   em docs/PENDENCIAS.md, não como causa do bug principal.
+**Por que o sintoma parecia "sempre a Yamana Gold":** ela era,
+originalmente, a última logo da lista — ou seja, a última coisa visível
+antes do vão aparecer. O sintoma sempre foi sobre a **posição** (a
+fronteira entre o fim do conteúdo original e o início do conteúdo
+duplicado), nunca sobre o arquivo daquela logo específica. Confirmado
+por teste de eliminação: mover a Yamana Gold para a primeira posição
+não fez o bug segui-la — o bug permaneceu na nova última posição
+(depois da Tenda), provando que era posicional, não relacionado ao
+conteúdo.
+
+**Hipóteses testadas e descartadas com dados reais, em ordem
+cronológica** (nenhuma delas era a causa, mas todas eram investigações
+legítimas e algumas revelaram problemas reais separados):
+
+1. `loading="lazy"` nas imagens duplicadas nunca disparava fetch,
+   porque essas imagens só "entram na tela" via `transform`, não por
+   posição real de layout. Corrigido para `eager` — problema real,
+   mas não a causa do stutter recorrente. (Regrediu uma vez ao portar
+   a técnica de fade do projeto antigo, corrigido de novo.)
+2. 11 de 12 SVGs de logos eram raster (PNG em base64) disfarçado de
+   vetor — revetorizados no Inkscape. Problema real (qualidade visual),
+   não a causa do stutter.
+3. Duplicação via HTML manual → trocada por clonagem JS
+   (`cloneNode`) — elimina risco de assimetria entre metades, mas não
+   era a causa do stutter.
+4. `display: contents` no wrapper de duplicação — removido por
+   suporte inconsistente entre navegadores, não era a causa.
+5. Mismatch `width`/`height` HTML vs. proporção real do SVG — real e
+   mensurado, causa CLS real na primeira carga, mas não o stutter
+   recorrente.
+6. Complexidade geométrica do path SVG da Yamana Gold (hipótese de
+   custo de rasterização) — descartada: revetorização mais simples
+   (sem Suavizar/Empilhar) não mudou o stutter. Também revelou
+   regressão visual (o "V" do logo ficava quase invisível sem
+   Suavizar+Empilhar — a combinação correta preserva o V e não afeta
+   o stutter).
+7. Unidade `mm` no `width`/`height` do SVG exportado (vs. sem unidade
+   nas outras 11 logos) — corrigida, não era a causa.
+8. Custo de decode assíncrono (`decoding="async"` vs `"sync"`) —
+   trocado para `sync`, não era a causa.
+9. Vídeo do Hero disputando recursos de GPU com o marquee — testado
+   comentando o vídeo (após corrigir o teste, que inicialmente não
+   refletiu no ambiente de produção por engano de cache de build), não
+   era a causa.
+10. Dev server (Vite HMR/overhead) vs. produção — bug reproduzia
+    identico em produção (`npm run build && npm run preview`),
+    eliminando essa variável.
+11. Filtro `filter: brightness(0) invert(1)` custoso em ~24 elementos
+    animados continuamente — desativado ao vivo via DevTools, bug
+    persistiu. Não era a causa.
+12. `mask-image`/`-webkit-mask-image` no fade das bordas — combinação
+    historicamente instável com elementos em composição contínua.
+    Comentado, bug persistiu. Não era a causa (mas foi substituído por
+    divs de fade + `rgba()` interpolando só alpha como parte da
+    migração para a técnica do projeto antigo, que se mostrou mais
+    limpa de qualquer forma).
+13. Arquitetura de lista única com clones intercalados → duas faixas
+    CSS independentes → duas faixas com motor de movimento em JS/rAF
+    sincronizado → uma única faixa com motor JS/rAF. Nenhuma mudança de
+    arquitetura de movimento resolveu, porque a causa nunca esteve em
+    _como_ mover, sempre em _quantas cópias_ existiam.
+14. Divergência de largura entre duas faixas clonadas — medido ao
+    vivo por 75s, diferença de 0.000px. Não era a causa.
+15. Espaçamento (`margin-right`) diferente na costura entre faixas vs.
+    espaçamento normal entre logos — medido, 56.000px em ambos os
+    casos, diferença de 0.000px. Não era a causa.
+16. Pressão de memória de GPU / tile eviction (repaint completo de
+    camada) — testado com Paint Flashing + Layer Borders do DevTools,
+    nenhum repaint visível no momento do bug. `chrome://gpu` sem sinais
+    de limitação de hardware. Não era a causa.
+17. Defasagem de sincronização entre o nascimento da faixa original
+    (presente no HTML estático) e a faixa clonada via JS — corrigido
+    via `animation-play-state: paused` + classe `.is-playing` aplicada
+    a ambas no mesmo frame. Resolveu um problema real de sincronização,
+    mas não era a causa do stutter recorrente (bug persistiu).
 
 **Método de diagnóstico usado:** eliminação sistemática com medição
-real a cada etapa — nunca aplicar uma correção "no escuro" sem antes
-confirmar a hipótese com dado observável (Console, DevTools Network,
-Elements, comparação de arquivo real). Cada uma das 5 causas acima foi
-corrigida e _validada_ isoladamente antes de seguir para a próxima
-hipótese — o que permitiu descartar cada uma com confiança, mesmo sem
-ter fechado a causa raiz do sintoma original ainda.
+real a cada etapa, incluindo instrumentação JS customizada (samplers de
+`requestAnimationFrame`, medição de `getBoundingClientRect()` em
+intervalos, comparação de largura entre elementos) quando as
+ferramentas nativas do DevTools não eram suficientes. O teste decisivo
+final — reposicionar a Yamana Gold na lista para separar "é essa logo"
+de "é a posição" — foi cogitado várias vezes ao longo da investigação
+antes de finalmente ser executado, e foi o que redirecionou a
+investigação para a causa real.
 
-**Status:** ⚠️ em investigação — causa raiz do stutter recorrente
-ainda não identificada. Hipótese em teste no momento da pausa desta
-sessão: complexidade geométrica do path SVG da Yamana Gold (mais
-pontos de curva que as outras 11, por ter sido vetorizada com
-"Suavizar"+"Empilhar" ativados no Inkscape). Retomar em
-docs/PENDENCIAS.md.
+**Correção definitiva:** `src/scripts/modules/clients.js` agora calcula
+dinamicamente quantos conjuntos de 12 logos são necessários para cobrir
+a largura do `.clients__track-wrapper` (fórmula: `ceil(1 +
+larguraWrapper / larguraDeUmConjunto)`, mais 1 conjunto de margem de
+segurança) e clona esse número de vezes, em vez de sempre clonar
+exatamente 1x. O motor de movimento continua em JS/`requestAnimationFrame`
+com uma única variável de posição aplicada a uma única `.clients__track`
+(arquitetura de lista única, não duas faixas separadas).
+
+**Efeito visual (`.clients__logo`):** o projeto usa
+`filter: brightness(0) invert(1)` + `opacity: 0.55` (não `grayscale`),
+que uniformiza todas as logos para o mesmo tom, em vez de preservar o
+tom relativo de cada uma. Registrado aqui porque essa diferença já
+causou confusão durante ajustes visuais pós-correção.
+
+**Status:** ✅ resolvido e validado visualmente. Branch
+`feature/clients-marquee`, pendente de commit e merge em `main`.

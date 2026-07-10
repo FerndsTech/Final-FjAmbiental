@@ -19,60 +19,30 @@
       palavra no load, após preloader), fade-in no badge, parallax sutil no
       scroll — tudo respeitando `prefers-reduced-motion`
 
-      - [ ] **Section Clientes — stutter no loop do marquee ao passar pela
-      logo Yamana Gold:** ao completar uma volta da faixa de logos,
-      especificamente ao chegar na Yamana Gold, a animação trava por
-      1-2s (surge um espaço vazio, depois duas logos aparecem juntas
-      de repente) antes de continuar. Sempre no mesmo ponto, todo
-      ciclo — não é falha de rede/carregamento único.
+---
 
-      **Já corrigido nesta investigação (não é a causa do stutter, mas
-      eram problemas reais):**
-      - `loading="lazy"` nas duplicatas do loop → `eager`.
-      - Tamanho das logos: 36px→48px desktop, 28px→36px mobile.
-      - 11 de 12 SVGs eram raster (PNG em base64) disfarçado de vetor
-        → revetorizados no Inkscape, viewBox padronizado `125×75`.
-      - Duplicação do loop: de HTML manual duplicado → JS clonando nós
-        reais (`src/scripts/modules/clients.js`, `initClients()`) —
-        elimina risco de assimetria entre as duas metades da faixa.
-      - Wrapper `.clients__track-dupe` + `display: contents` removido
-        — clones agora são irmãos diretos em `.clients__track`
-        (`data-clients-clone="true"`), sem aninhamento de DOM.
+## Marquee da Section Clientes — pendências novas (pós-correção)
 
-      **Hipóteses testadas e descartadas com dados reais** (ver
-      docs/LICOES.md #17): assimetria entre metades do loop,
-      aninhamento de DOM via `display: contents`, custo do filtro CSS
-      `brightness(0) invert(1)`, throttling de rede, mismatch de
-      `width`/`height` HTML vs. proporção real do SVG (esse último é
-      real e mensurado — afeta as 12 logos, não só a Yamana Gold — mas
-      é evento único de carga, não explica recorrência a cada ciclo;
-      vale corrigir de qualquer forma, ver item abaixo).
+> A Section Clientes (faixa de logos) teve seu stutter recorrente
+> resolvido — ver docs/LICOES.md #17 para o histórico completo da
+> investigação e a causa raiz real. As pendências abaixo são itens
+> menores, novos, que surgiram durante a correção — não bugs.
 
-      **Em teste no momento da pausa desta sessão:** complexidade
-      geométrica do path SVG da Yamana Gold (foi vetorizada
-      separadamente das outras 11, com "Suavizar"+"Empilhar" ativados
-      no Inkscape, gerando mais pontos de curva) — hipótese de que
-      isso cause custo de rasterização maior especificamente quando
-      ela entra na área visível do loop. Revetorização de teste em
-      andamento (sem Suavizar/Empilhar, com `Ctrl+L` Simplificar,
-      mesmo canvas `125×75` das outras 11) para confirmar por
-      eliminação antes de aplicar qualquer correção de código.
-
-      Branch: `feature/clients-marquee` (commit `c88553f`), pushada,
-      não mergeada em `main` — task não fechada.
-
-- [ ] **Section Clientes — atributos `width`/`height` desatualizados
-      nas 12 `<img>`:** todos os 12 atributos HTML de `width` (usados
-      pelo navegador para reservar espaço de layout antes da imagem
-      carregar) foram herdados da era raster antiga e não batem com a
-      proporção real dos SVGs revetorizados (desvios de +17% a +100%
-      — ver docs/LICOES.md #17 para a tabela completa). Isso causa
-      CLS na primeira carga da página (não confirmado como causa do
-      stutter recorrente, mas é um problema real e separado que
-      precisa de correção). Recalcular `width` de cada `<img>` com
-      base no `viewBox` real de cada SVG (todas em `125×75`, exceto
-      Tenda `175×75` e Yamana Gold — ainda fora do padrão, pendente da
-      revetorização em andamento).
+- [ ] **Clients.js — recálculo de conjuntos em resize:** o número de
+      cópias das 12 logos necessárias para cobrir a largura do
+      `.clients__track-wrapper` é calculado só na inicialização
+      (medindo a largura na carga). Não há recálculo em
+      resize/rotação de tela. Se a largura do wrapper mudar
+      drasticamente depois da carga (ex: rotação de tablet, ou
+      redimensionar janela desktop de forma significativa), o vão que
+      causava o stutter pode reaparecer até o próximo reload. Não é
+      urgente, mas vale registrar como pendência de robustez.
+- [ ] **Marquee — controle de pausa explícito (acessibilidade):** hoje
+      a pausa do marquee só acontece via `mouseenter`/`mouseleave` no
+      wrapper (hover). Não há controle de pausa acessível via teclado
+      ou para usuários de touch, o que pode ser relevante para WCAG
+      2.2.2 (conteúdo em movimento automático). Considerar um botão de
+      pausa explícito se o site precisar de conformidade WCAG formal.
 
 ---
 
@@ -111,11 +81,6 @@
 - [ ] **Hero — subir conteúdo:** conteúdo principal está baixo na
       viewport. Ajuste de `padding-top` ou `align-items` no `.hero__content`.
       Ler o CSS atual de `.hero__content` em `base.css § Hero` antes de editar.
-
-- [ ] **Clientes — tamanho + loop sincronizado:** logos da Section
-      Clientes (`index.html:143-177`, `base.css:780-846`) estão pequenos e
-      o loop do marquee não está sincronizado. Aumentar tamanho e corrigir
-      a animação CSS/GSAP do loop.
 
 - [ ] **Footer — redistribuir elementos:** distribuir mais à esquerda e
       direita os elementos de texto. **AGUARDANDO referência visual do
