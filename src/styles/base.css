@@ -484,7 +484,7 @@ textarea {
   margin-bottom: 1.5rem;
   display: inline-flex;
   justify-content: center;
-  background-color: var(--color-fj-green);
+  background-color: var(--color-fj-green-deep);
   color: white;
   padding: 10px 20px;
   border-radius: var(--radius-pill);
@@ -1016,7 +1016,7 @@ textarea {
   align-items: center;
   gap: 8px;
   background: rgba(0, 168, 89, 0.1);
-  color: var(--color-fj-green);
+  color: var(--color-fj-green-deep);
   padding: 6px 14px;
   border-radius: var(--radius-pill);
   font-family: var(--font-mono);
@@ -1726,7 +1726,7 @@ textarea {
   align-items: center;
   gap: 8px;
   background: rgba(0, 168, 89, 0.1);
-  color: var(--color-fj-green);
+  color: var(--color-fj-green-deep);
   padding: 6px 14px;
   border-radius: var(--radius-pill);
   font-family: var(--font-mono);

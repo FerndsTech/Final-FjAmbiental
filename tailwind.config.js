@@ -15,6 +15,7 @@ export default {
         'fj-green': {
           DEFAULT: 'var(--color-fj-green)',
           dim: 'var(--color-fj-green-dim)',
+          deep: 'var(--color-fj-green-deep)',
         },
         'fj-aqua': 'var(--color-fj-aqua)',
 
