@@ -549,31 +549,27 @@ textarea {
   padding-block: clamp(4rem, 10vh, 7rem);
 }
 
-.hero__badge {
+.hero__label {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-ink-inverse);
+  padding: 6px 14px;
   border-radius: var(--radius-pill);
-  border: 1px solid var(--color-fj-green-vivid);
-  background: rgba(0, 199, 102, 0.06);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  font-weight: 600;
-  letter-spacing: 2.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-fj-green-vivid);
-  margin-bottom: 26px;
+  margin-bottom: 14px;
 }
 
-.hero__badge-dot {
-  width: 6px;
-  height: 6px;
+.hero__label-dot {
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: var(--color-fj-green-vivid);
-  box-shadow: 0 0 6px 2px rgba(0, 199, 102, 0.55);
   flex-shrink: 0;
 }
 
@@ -687,15 +683,18 @@ textarea {
 }
 
 .services__label {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
+  background: rgba(0, 199, 102, 0.1);
+  color: var(--color-fj-green-vivid);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-fj-green-vivid);
   margin-bottom: 14px;
 }
 
@@ -703,7 +702,7 @@ textarea {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: var(--color-fj-green);
+  background: var(--color-fj-green-vivid);
   flex-shrink: 0;
 }
 
@@ -1514,11 +1513,27 @@ textarea {
 }
 
 .sobre__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 199, 102, 0.1);
+  color: var(--color-fj-green-vivid);
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
   font-size: var(--text-xs);
-  color: var(--color-slate-inverse);
-  letter-spacing: 0.12em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: 1rem;
+  margin-bottom: 14px;
+}
+
+.sobre__label-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-fj-green-vivid);
+  flex-shrink: 0;
 }
 
 .sobre__title {

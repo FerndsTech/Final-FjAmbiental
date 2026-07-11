@@ -1,108 +1,97 @@
-# CONTEXTO_TRANSICAO — FJ Ambiental — jul/2026 (sessão 3)
+CONTEXTO_TRANSICAO — FJ Ambiental — sessão encerrada, pronta para novo chat
 
-## ESTADO ATUAL
+Branch atual: `main`. Últimos dois merges consolidados:
 
-**Branch ativa:** `feature/portfolio-ui-js`, criada a partir de
-`main` (`c7e267f`). Não mergeada, não pusheada para o remoto.
+- `feature/clients-marquee` (commit `ec7e2ff` e anteriores) — fix do
+  stutter recorrente no marquee da Section Clientes.
+- `fix/accessibility-contrast` (commit `ec7e2ff`) — fix de contraste
+  WCAG AA (Lighthouse Accessibility 97 → 100).
 
-**Commits nesta sessão:**
+Ambas as branches de trabalho já foram deletadas (local e remota) após
+o merge. `docs/LICOES.md` e `docs/PENDENCIAS.md` já estão atualizados
+e commitados.
 
-- `4eaaf4e` — Fase A (UI estática): remoção do botão "Ver case", card
-  featured maior, correção do contador/barra Explorar para 01/04,
-  correção de largura dos thumbnails (4 slots, não 5), viewport
-  fitting.
-- `90c259a` — Fase B (JS): criação de `src/scripts/modules/portfolio.js`
-  — carrossel de 4 projetos fixos, crossfade via GSAP, timer de
-  auto-advance.
+## O que foi fechado nesta sessão
 
-**Working tree no momento do fechamento — NÃO COMMITADO:**
+**1. Marquee da Section Clientes (stutter recorrente) — RESOLVIDO**
+Causa raiz real: duplicação de conteúdo em apenas 1x (2 conjuntos de
+12 logos) era insuficiente para cobrir a largura do
+`.clients__track-wrapper` em telas largas, criando um vão sem conteúdo
+sempre no mesmo ponto do ciclo. Nunca teve relação com nenhuma logo
+específica, arquitetura de animação (CSS vs JS), filtro, GPU, vídeo do
+Hero, ou dev server — 17 hipóteses testadas e descartadas com dados
+reais antes de chegar na causa (histórico completo em
+`docs/LICOES.md` #17). Correção: `clients.js` agora calcula
+dinamicamente quantos conjuntos são necessários
+(`ceil(1 + larguraWrapper / larguraDeUmConjunto)` + margem de
+segurança), com motor de movimento em JS/`requestAnimationFrame` e
+arquitetura de lista única (não duas faixas separadas).
 
-- `src/scripts/modules/portfolio.js` modificado: adição de
-  `lockDescHeight()` (corrige CLS de descrição de tamanho variável) e
-  handlers de swipe (navegação mobile).
-- `src/styles/base.css` modificado: `.portfolio__thumbs-row {
-display: none }` no mobile (`<600px`), `.portfolio__featured` com
-  `aspect-ratio: 4/3` e `max-height: 480px` no mesmo breakpoint — mas
-  **ainda contém a tentativa de `box-shadow` que não funcionou**,
-  ainda não substituída pelos pseudo-elementos projetados.
-- `proposed-css-check.txt` — arquivo temporário de verificação, precisa
-  ser apagado antes do commit.
+**2. Contraste WCAG AA — RESOLVIDO**
+Lighthouse Accessibility 97 → 100 (confirmado em desktop e mobile).
+Novo token `--color-fj-green-deep: #007A40` criado em `tokens.css`
+(mais escuro que `--color-fj-green-dim`, que ainda falhava por pouco
+no cálculo de contraste). Aplicado em: CTA "Solicitar Contato"
+desktop (`header.html`) e mobile (`.mobile-nav__cta`), e nos dois
+labels de section (`.portfolio__label`, `.faq__label`). Mapeado em
+`tailwind.config.js` como `fj-green.deep`. Nenhuma outra das ~40
+ocorrências de `--color-fj-green` no projeto foi tocada — eram usos
+legítimos (ícones, bordas, contexto dark) que já passavam no
+contraste.
 
-## PRÓXIMA TAREFA PRINCIPAL
+## Estado atual do Lighthouse (produção, `npm run build && npm run preview`)
 
-**Terminar o peek-card mobile da Section Portfólio**, antes de
-qualquer outra coisa — é continuação direta de onde esta sessão parou,
-não uma nova task.
+- **Desktop:** Performance 100, Accessibility 100, Best Practices 100,
+  SEO 100.
+- **Mobile:** Performance 99, Accessibility 100, Best Practices 100,
+  SEO 100.
 
-**O que já está decidido (não perguntar de novo):**
+O único ponto não-100 (Performance mobile, 99) tem causa identificada
+e já é uma pendência existente, não um bug novo — ver abaixo.
 
-- Técnica: pseudo-elementos (`::before`/`::after`), não `box-shadow`
-  (motivo documentado em LICOES.md #12).
-- Onde: em `.portfolio__split` (não em `.portfolio__featured`, que tem
-  `overflow: hidden` e cortaria os pseudo-elementos).
-- `.portfolio__featured` precisa de `margin-inline` para abrir espaço
-  visível real nas laterais (não só sobreposição).
-- Referência visual: JCandy (fatias laterais altas e visíveis,
-  sugerindo mais cards navegáveis por swipe) — mas o projeto é
-  premium-corporativo, mais contido que o e-commerce da referência;
-  não precisa ser idêntico, só comunicar a mesma ideia.
+## Pendências novas/atualizadas identificadas nesta sessão (via Lighthouse)
 
-**O que NÃO está decidido — os valores de partida (`height: 260px`,
-`width: 14px`, `opacity: 0.55`, offsets de `4px`) foram estimados sem
-medição real, precisam de validação/ajuste no navegador antes de
-fechar** — mesmo padrão iterativo usado em toda a sessão anterior
-(propor valor de partida → validar → ajustar).
+Ainda não adicionadas em `docs/PENDENCIAS.md` — considerar registrar
+na próxima sessão:
 
-**Depois de fechar o peek-card:**
+- **Otimização de imagem do Footer (maior impacto disponível):**
+  `div.footer__map` carrega um `.jpg` de 236.3 KiB; Lighthouse estima
+  131.9 KiB de economia convertendo para WebP/AVIF. Isso é a mesma
+  pendência já registrada em `PENDENCIAS.md` sob "Build e deploy —
+  Otimização de imagens (sharp)", mas agora com dado concreto de
+  impacto e arquivo específico identificado.
+- **JS não usado — ~24 KiB** no bundle principal (`main-*.js`),
+  consistente entre testes desktop e mobile. Não identificado ainda
+  qual módulo específico é responsável.
+- **CSS render-blocking** — `main-*.css`, 9.5 KiB, ~160-300ms de
+  bloqueio de render inicial. Candidato a defer/inline parcial.
+- Itens de robustez do marquee já registrados em `PENDENCIAS.md`:
+  recálculo de conjuntos em resize, controle de pausa acessível
+  (WCAG 2.2.2).
 
-1. Apagar `proposed-css-check.txt`.
-2. Commit único cobrindo as mudanças pendentes (`lockDescHeight`,
-   swipe, `.portfolio__thumbs-row: none`, pseudo-elementos do peek —
-   **sem** deixar rastro da tentativa de `box-shadow` descartada no
-   histórico, já que nunca foi commitada).
-3. Push da branch + merge em `main` (`--no-ff`, mesmo padrão das
-   sessões anteriores) + validação de `git log --oneline` confirmando
-   o merge real antes de considerar a task fechada.
-4. Task "Portfólio — finalização de UI + `portfolio.js`" estará
-   completa. Fila retoma: **Hero — subir conteúdo** (decisões da
-   sessão 1 continuam válidas, não perguntar de novo — ver
-   PENDENCIAS.md).
+## Não mexer / já decidido
 
-## LIÇÕES TÉCNICAS DESTA SESSÃO
+- Marquee: técnica de clonagem via JS, motor de movimento em JS/rAF
+  com posição única, número de conjuntos calculado dinamicamente — não
+  reverter para CSS `@keyframes` nem fixar em 2 cópias.
+- `filter: brightness(0) invert(1)` + `opacity: 0.55` nas logos do
+  marquee é intencional (visual "premium uniforme"), não `grayscale`.
+- `--color-fj-green-deep` é especificamente para texto branco sobre
+  fundo verde ou texto verde sobre fundo claro que precisa de 4.5:1 —
+  não é substituto geral de `--color-fj-green`.
 
-5 lições promovidas a docs/LICOES.md #10-14 e CLAUDE.md §4.21-4.25:
+## Próximo passo sugerido
 
-1. DevTools em modo responsivo contamina medições de layout — sempre
-   desligar `Ctrl+Shift+M` antes de medir.
-2. Conteúdo dinâmico de comprimento variável precisa de altura travada
-   via medição (clone invisível), não CSS chutado.
-3. `box-shadow` não serve para decorações com dimensões independentes
-   de largura/altura — usar pseudo-elementos.
-4. Mensagens de commit multi-linha no PowerShell: usar here-string,
-   nunca aspas escapadas.
-5. Confirmação dada no Claude Chat não chega automaticamente ao Claude
-   Code — sempre colar manualmente na sessão dele.
+Nenhuma task em andamento. Baseado em `docs/PENDENCIAS.md`, ordem de
+prioridade que o usuário já havia definido ("Ajustes de UI —
+prioridade antes das próximas features"):
 
-## ESTADO DA DOCUMENTAÇÃO
+1. Tags das sections padronizadas (Hero, Serviços, Sobre — FAQ e
+   Portfólio já estão no padrão).
+2. Hero — subir conteúdo na viewport.
+3. Footer — redistribuir elementos (bloqueado, aguardando referência
+   visual do cliente).
 
-Já propagado nesta sessão (a aplicar via Claude Code no início da
-próxima, antes de qualquer código novo):
-
-- **SECTIONS.md** — § Section 03 (Portfólio) reescrita por completo.
-- **PENDENCIAS.md** — itens de `portfolio.js` e "card maior" removidos
-  (concluídos); adicionados: peek-card mobile pendente, commit
-  pendente, arquivo temporário a apagar.
-- **LICOES.md** — lições #10-14 adicionadas.
-- **CLAUDE.md** — regras derivadas §4.21-4.25 adicionadas.
-- **DESIGN_SYSTEM.md** — não precisou de alteração (nenhum token novo).
-
-## RECOMENDAÇÃO FINAL
-
-Diferente da sessão anterior, esta fecha **no meio de uma subtask**
-(peek-card mobile) — não há merge para `main` ainda, e o working tree
-tem mudanças reais não commitadas. O próximo chat deve: anexar os 6
-documentos (CLAUDE.md, DESIGN_SYSTEM.md, SECTIONS.md, PENDENCIAS.md,
-LICOES.md, mais este CONTEXTO_TRANSICAO.md), confirmar o estado real
-do Git (`git status`, `git log --oneline -5`) antes de qualquer ação,
-e retomar exatamente do prompt de pseudo-elementos que estava pronto
-mas não aplicado.
+Alternativa: atacar a otimização de imagem do Footer agora, já que
+tem impacto mensurado e claro (131.9 KiB) e não depende de nenhuma
+decisão externa do cliente.

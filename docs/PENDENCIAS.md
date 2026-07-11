@@ -67,17 +67,6 @@
 > (portfolio.js, páginas internas, etc.). Ordem sugerida: do menor
 > para o maior escopo.
 
-- [ ] **Tags das sections — padronizar no estilo Portfólio:** hoje cada
-      section usa um formato diferente (pill, texto simples, com número, sem
-      número). Padronizar todas no estilo da tag do Portfólio ("PORTFÓLIO
-      TÉCNICO" — pill com fundo suave, texto caps, sem número).
-      **FAQ já concluída** (`.faq__label`, texto "PERGUNTAS FREQUENTES").
-      Sections restantes: Hero ("ENGENHARIA & CONSULTORIA"), Serviços
-      ("• 02 · SERVIÇOS"), Sobre ("04 — SOBRE"). Portfólio já está no
-      padrão correto (referência original).
-      Footer não tem tag (intencional). Section Contato terá tag quando
-      for desenvolvida (modelo já existe com o cliente).
-
 - [ ] **Hero — subir conteúdo:** conteúdo principal está baixo na
       viewport. Ajuste de `padding-top` ou `align-items` no `.hero__content`.
       Ler o CSS atual de `.hero__content` em `base.css § Hero` antes de editar.
