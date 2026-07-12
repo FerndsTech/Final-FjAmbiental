@@ -2256,3 +2256,43 @@ textarea {
     transition: none;
   }
 }
+
+/* --- Back to top --- */
+.back-to-top {
+  position: fixed;
+  right: var(--space-container);
+  bottom: var(--space-container);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-fj-green-vivid, #00C766);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-modal);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--duration-base) var(--ease-out),
+              visibility var(--duration-base) var(--ease-out),
+              background-color var(--duration-fast) var(--ease-out);
+}
+
+.back-to-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.back-to-top:hover {
+  background: rgba(0, 199, 102, 0.15);
+}
+
+.back-to-top:focus-visible {
+  outline: 2px solid var(--color-fj-aqua);
+  outline-offset: 2px;
+}

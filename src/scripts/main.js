@@ -22,6 +22,7 @@ import '@fontsource/ibm-plex-mono/400.css';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { initHeader } from './modules/header.js';
 import { initHero } from './modules/hero.js';
+import { initBackToTop } from './modules/back-to-top.js';
 import { initSmoothScroll } from './modules/smooth-scroll.js';
 import { initReveal } from './modules/reveal.js';
 import { initFaq } from './modules/faq.js';
@@ -39,6 +40,7 @@ function init() {
   cleanups.push(initSmoothScroll()); // Lenis primeiro — ScrollTrigger depende do scroller
   cleanups.push(initHero());
   cleanups.push(initHeader());       // ScrollTrigger do header criado após Lenis estar ativo
+  cleanups.push(initBackToTop());
   cleanups.push(initClients());
   cleanups.push(initReveal());
   cleanups.push(initFaq());
