@@ -261,7 +261,7 @@ da faixa institucional na base (ver docs/PENDENCIAS.md).
 
 **Estrutura implementada:**
 
-- Label "04 — SOBRE" (pendência de padronização de tag — ver docs/PENDENCIAS.md)
+- Label "SOBRE" — pill com dot verde, padronizada no padrão `.portfolio__label`
 - Título "Presença técnica em **todo o Brasil.**" (negrito verde)
 - Layout: mapa SVG do Brasil (esq) + stats em `<dl>` (dir) — grid 2
   colunas `≥ 900px`, 1 coluna abaixo disso

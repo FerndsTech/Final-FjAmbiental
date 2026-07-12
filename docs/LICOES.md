@@ -642,3 +642,71 @@ causou confusão durante ajustes visuais pós-correção.
 
 **Status:** ✅ resolvido e validado visualmente. Branch
 `feature/clients-marquee`, pendente de commit e merge em `main`.
+
+---
+
+## #18 — Opacidade travada no Hero até o primeiro scroll: dois bugs sobrepostos
+
+**Contexto:** ao padronizar as tags de identificação das sections
+(Hero, Serviços, Sobre) para o padrão pill do Portfólio, notou-se que
+`.hero__label` — e depois todo o bloco acima da dobra do Hero (h1,
+descrição, CTA) — renderizava com opacidade zero no carregamento
+inicial, só aparecendo após o primeiro scroll do usuário.
+
+**Sintoma:** conteúdo do Hero (label, título, descrição, CTA)
+invisível no frame zero; aparecia normalmente assim que o usuário
+rolava a página uma vez.
+
+**Dois mecanismos distintos estavam envolvidos, descobertos em
+ordem:**
+
+1. **GSAP ScrollTrigger em elementos acima da dobra (causa
+   confirmada por leitura de código):** `reveal.js` aplica
+   `gsap.from(el, { opacity: 0, scrollTrigger: { start: 'top 85%',
+   once: true } })` a todo elemento com `data-reveal`. Para
+   elementos já visíveis no primeiro fold, o estado inicial
+   `opacity: 0` é aplicado de forma síncrona no load, e só é
+   corrigido quando o ScrollTrigger recalcula as posições — recálculo
+   que pode ficar defasado até um scroll/resize real. Correção:
+   removido `data-reveal`/`data-reveal-delay` de `.hero__label`,
+   `.hero__title`, `.hero__desc` e do CTA `.btn-pill--hero` — os
+   quatro elementos da primeira dobra não devem ter gatilho de
+   scroll.
+2. **Bug de GPU compositing com vídeo de fundo acelerado por
+   hardware (diagnosticado via teste prático no navegador — vídeo
+   ligado vs. desligado isolava o bug):** mesmo sem `data-reveal`, a
+   camada `.hero__overlay` ainda aparecia clara demais sobre o vídeo
+   no frame zero, corrigindo sozinha após o primeiro repaint forçado
+   por scroll.
+
+**Hipóteses testadas e descartadas antes da correção final:**
+
+1. `transform: translateZ(0)` em `.hero__label` — não resolveu;
+   a label não é o elemento que fica empilhado diretamente sobre o
+   vídeo, então promovê-la a uma layer própria não tinha efeito sobre
+   a composição real do bug.
+2. `transform: translateZ(0)` em `.hero__overlay` — tecnicamente
+   mais bem direcionado (é o elemento com `position: absolute;
+   z-index: 1` diretamente sobre o `<video>`), mas também não
+   resolveu.
+
+**Causa raiz e correção final:** `opacity: 0.99` aplicado diretamente
+em `.hero__video` força a criação de um stacking context confiável
+para o elemento de vídeo, contornando o atraso de composição da GPU.
+Combinado com a remoção do `data-reveal` da primeira dobra (mecanismo
+#1 acima), o bloco inteiro do Hero passou a renderizar corretamente
+no frame zero.
+
+**Nota de proveniência:** a causa do bug de GPU compositing (mecanismo
+#2) foi diagnosticada via testes práticos no navegador conduzidos fora
+desta sessão de Claude Code (fluxo Cérebro + Motor, CLAUDE.md §13) —
+relatada aqui como reportada, não medida diretamente por este agente.
+O mecanismo #1 (ScrollTrigger) foi confirmado por leitura direta de
+`reveal.js`.
+
+**Regra derivada:** reforça CLAUDE.md §4.15 — múltiplas hipóteses de
+`translateZ(0)` foram tentadas em elementos diferentes antes de
+isolar o elemento correto (`.hero__video`) via teste prático de
+isolamento (vídeo ligado/desligado).
+
+**Status:** ✅ resolvido e validado visualmente pelo usuário.
