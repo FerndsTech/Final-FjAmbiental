@@ -2345,6 +2345,7 @@ textarea {
     white-space: normal;
     text-align: center;
     margin-top: 0.5rem;
+    color: rgba(255, 255, 255, 0.22);
   }
 
   .footer__legal-text:first-of-type,
