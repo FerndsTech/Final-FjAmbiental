@@ -71,12 +71,6 @@
       viewport. Ajuste de `padding-top` ou `align-items` no `.hero__content`.
       Ler o CSS atual de `.hero__content` em `base.css § Hero` antes de editar.
 
-- [x] **Footer — redistribuir elementos:** grid de 4 colunas (Brand,
-      Navegação, Contato, CTA) alinhada às extremidades do Header, e
-      faixa inferior com tipografia de flanqueamento (wordmark
-      centralizado + copyright/localização ancorados nos cantos).
-      Ver `src/partials/footer.html` e `base.css § Footer`.
-
 ---
 
 ## Performance e acessibilidade

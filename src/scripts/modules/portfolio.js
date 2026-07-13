@@ -23,7 +23,10 @@
  */
 
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import projectsData from '../../content/projects.json';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const IMG_BASE = './src/assets/imgs/';
 const AUTO_ADVANCE_MS = 5000;
@@ -301,7 +304,18 @@ export function initPortfolio(root = document) {
   buildTrack();
   initTrackObserver();
   window.addEventListener('resize', handleDescResize);
-  startTimer();
+  // Auto-advance só roda com a section realmente visível — evita que o
+  // scrollIntoView do goTo() dispare um jump vertical durante a transição
+  // de scroll Serviços→Portfólio (timer rodando fora de contexto visível).
+  const visibilityTrigger = ScrollTrigger.create({
+    trigger: section,
+    start: 'top center',
+    end: 'bottom top',
+    onEnter: startTimer,
+    onLeave: stopTimer,
+    onEnterBack: startTimer,
+    onLeaveBack: stopTimer,
+  });
 
   return function cleanupPortfolio() {
     stopTimer();
@@ -320,6 +334,7 @@ export function initPortfolio(root = document) {
     window.removeEventListener('resize', handleDescResize);
     clearTimeout(descResizeTimer);
     trackObserver?.disconnect();
+    visibilityTrigger.kill();
     ctx.revert();
   };
 }
