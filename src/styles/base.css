@@ -670,7 +670,7 @@ textarea {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-top: calc(var(--header-height) + 2rem);
+  padding-top: 0;
   padding-bottom: 3rem;
 }
 
@@ -890,6 +890,10 @@ textarea {
   .services__header {
     grid-template-columns: 1fr;
     gap: 1.25rem;
+  }
+
+  .services {
+    padding-top: 3rem;
   }
 }
 
