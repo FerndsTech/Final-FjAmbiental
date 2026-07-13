@@ -710,3 +710,34 @@ isolar o elemento correto (`.hero__video`) via teste prático de
 isolamento (vídeo ligado/desligado).
 
 **Status:** ✅ resolvido e validado visualmente pelo usuário.
+
+---
+
+## #19 — `window.scrollTo({ behavior: 'smooth' })` nativo não permite controlar duração
+
+**Contexto:** implementação do botão Back-to-Top. O comportamento
+desejado era uma rolagem lenta e "cinemática" até o topo, não o scroll
+rápido padrão do navegador.
+
+**Causa raiz:** a Web API nativa `window.scrollTo({ top: 0, behavior:
+'smooth' })` usa uma curva de easing e duração fixas, definidas pelo
+navegador — não expõe nenhum parâmetro de duração. Não dá para tornar
+esse scroll nativo mais lento/"premium" sem trocar de mecanismo.
+
+**Correção aplicada:** como o projeto já usa Lenis para smooth scroll
+sincronizado com GSAP ScrollTrigger (`smooth-scroll.js`), o botão
+reaproveita a instância via `getLenis()` e chama
+`lenis.scrollTo(0, { duration: 2.5 })`, que aceita duração explícita
+em segundos. O `window.scrollTo` nativo continua como fallback só
+para quando o Lenis não está ativo (`prefers-reduced-motion`), caso
+em que a duração não é relevante — o scroll cai para instantâneo
+(`behavior: 'auto'`).
+
+**Regra derivada:** ao precisar de scroll programático com controle
+fino de duração/easing neste projeto, usar `getLenis()` de
+`smooth-scroll.js` em vez de `window.scrollTo` nativo — reforça a
+armadilha §4.5 do CLAUDE.md (Lenis precisa ser a fonte única de
+verdade do scroll quando está ativo, para não haver dois mecanismos
+de scroll competindo).
+
+**Status:** ✅ resolvido. Botão Back-to-Top mergeado em produção.

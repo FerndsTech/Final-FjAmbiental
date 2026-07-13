@@ -2007,7 +2007,7 @@ textarea {
 
 .footer__columns {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr;
+  grid-template-columns: 2.2fr 0.8fr 1fr auto;
   gap: 2.5rem clamp(2rem, 5vw, 4rem);
   flex: 1;
   align-items: start;
@@ -2056,7 +2056,7 @@ textarea {
   font-size: var(--text-sm);
   color: rgba(255, 255, 255, 0.55);
   line-height: 1.6;
-  max-width: 22ch;
+  max-width: 34ch;
 }
 
 .footer__nav-label,
@@ -2114,6 +2114,7 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
+  align-items: flex-end;
 }
 
 .footer__cta-btn {
@@ -2127,7 +2128,6 @@ textarea {
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
-  align-self: flex-start;
   transition: gap var(--duration-fast) var(--ease-out);
 }
 
@@ -2180,19 +2180,27 @@ textarea {
 
 .footer__bottom {
   position: relative;
-  overflow: hidden;
+  padding-bottom: 2rem;
   border-top: 0.5px solid rgba(255, 255, 255, 0.06);
 }
 
+.footer__bottom-row {
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--space-container);
+}
+
 .footer__wordmark-wrap {
-  overflow: hidden;
+  width: 100%;
+  display: block;
+  overflow: visible;
   line-height: 0.8;
-  padding: 0;
   text-align: center;
 }
 
 .footer__wordmark {
   display: block;
+  white-space: nowrap;
   font-size: clamp(3rem, 13vw, 11rem);
   font-weight: 500;
   letter-spacing: -0.03em;
@@ -2212,25 +2220,31 @@ textarea {
   user-select: none;
 }
 
-.footer__legal {
-  position: absolute;
-  bottom: 0.625rem;
-  left: 0;
-  right: 0;
-  z-index: 1;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 var(--space-container);
-}
-
 .footer__legal-text {
+  position: absolute;
+  bottom: 2rem;
+  z-index: 2;
   font-family: var(--font-mono);
   font-size: 10px;
   color: rgba(255, 255, 255, 0.30);
   letter-spacing: 0.04em;
-  pointer-events: auto;
+  white-space: nowrap;
+}
+
+.footer__legal-text:first-of-type {
+  left: var(--space-container);
+  text-align: left;
+}
+
+.footer__rights {
+  font-size: 0.85em;
+  opacity: 0.6;
+  margin-left: 0.5rem;
+}
+
+.footer__legal-text:last-of-type {
+  right: var(--space-container);
+  text-align: right;
 }
 
 /* --- Responsivo: 1 coluna ≤ 760px --- */
@@ -2240,6 +2254,29 @@ textarea {
     grid-template-columns: 1fr;
     gap: 2.5rem;
     padding-bottom: 2.5rem;
+  }
+
+  .footer__cta-col {
+    align-items: flex-start;
+  }
+
+  .footer__bottom {
+    padding-bottom: 1.5rem;
+  }
+
+  .footer__legal-text {
+    position: static;
+    display: block;
+    white-space: normal;
+    text-align: center;
+    margin-top: 0.5rem;
+  }
+
+  .footer__legal-text:first-of-type,
+  .footer__legal-text:last-of-type {
+    left: auto;
+    right: auto;
+    text-align: center;
   }
 
   .footer__wordmark {

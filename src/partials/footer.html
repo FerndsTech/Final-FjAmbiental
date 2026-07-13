@@ -12,7 +12,7 @@
 
       <div class="footer__columns">
 
-        <!-- Col 1: Brand + navegação -->
+        <!-- Col 1: Brand -->
         <div class="footer__brand">
           <a href="/" class="footer__logo-link" aria-label="FJ Ambiental — página inicial">
             <span class="footer__logo-badge">FJ</span>
@@ -22,19 +22,21 @@
           <p class="footer__tagline">
             Consultoria ambiental e recursos hídricos desde 2010. Sede em Salvador, atuação em todo o Brasil.
           </p>
-          <nav aria-label="Navegação do rodapé">
-            <p class="footer__nav-label">Navegação</p>
-            <ul class="footer__nav-list">
-              <li><a href="/">Início</a></li>
-              <li><a href="/servicos.html">Serviços</a></li>
-              <li><a href="/portfolio.html">Projetos</a></li>
-              <li><a href="/sobre.html">Sobre</a></li>
-              <li><a href="/contato.html">Contato</a></li>
-            </ul>
-          </nav>
         </div>
 
-        <!-- Col 2: Contato (dados reais do projeto) -->
+        <!-- Col 2: Navegação -->
+        <nav class="footer__nav-col" aria-label="Navegação do rodapé">
+          <p class="footer__nav-label">Navegação</p>
+          <ul class="footer__nav-list">
+            <li><a href="/">Início</a></li>
+            <li><a href="/servicos.html">Serviços</a></li>
+            <li><a href="/portfolio.html">Projetos</a></li>
+            <li><a href="/sobre.html">Sobre</a></li>
+            <li><a href="/contato.html">Contato</a></li>
+          </ul>
+        </nav>
+
+        <!-- Col 3: Contato (dados reais do projeto) -->
         <address class="footer__address">
           <p class="footer__contact-label">Contato</p>
           <a href="mailto:contato@fjambiental.com.br">contato@fjambiental.com.br</a>
@@ -45,7 +47,7 @@
           CEP 41.820-021
         </address>
 
-        <!-- Col 3: CTA pill branca + redes sociais -->
+        <!-- Col 4: CTA pill branca + redes sociais -->
         <div class="footer__cta-col">
           <a href="/contato.html" class="btn-pill">
             <span class="btn-pill__label">Solicitar Proposta</span>
@@ -89,11 +91,13 @@
 
     <!-- Faixa inferior: wordmark decorativo + legal -->
     <div class="footer__bottom">
-      <div class="footer__wordmark-wrap">
-        <span class="footer__wordmark" aria-hidden="true">FJ Ambiental</span>
-      </div>
-      <div class="footer__legal">
-        <span class="footer__legal-text">© 2026 FJ Ambiental · Todos os direitos reservados</span>
+      <div class="footer__bottom-row">
+        <span class="footer__legal-text">© 2026 FJ Ambiental <span class="footer__rights">Todos os direitos reservados</span></span>
+
+        <div class="footer__wordmark-wrap">
+          <span class="footer__wordmark" aria-hidden="true">FJ Ambiental</span>
+        </div>
+
         <span class="footer__legal-text">Salvador · Bahia · Brasil</span>
       </div>
     </div>
