@@ -49,6 +49,52 @@ body {
   line-height: 1.6;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
+  scrollbar-gutter: stable;
+}
+
+/* === Preloader === */
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: var(--color-deep-navy);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  will-change: transform;
+}
+.preloader__map {
+  position: absolute;
+  inset: 0;
+  background-image: url('../assets/img1footer.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: invert(1);
+  opacity: 0.15;
+  z-index: 0;
+  pointer-events: none;
+}
+.preloader__brand {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-sans);
+  font-size: var(--text-display);
+  letter-spacing: 0.08em;
+  font-weight: 500;
+  background: linear-gradient(to bottom, var(--color-ink-inverse) 15%, rgba(255, 255, 255, 0.05) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+.preloader__counter {
+  position: relative;
+  z-index: 1;
+  color: var(--color-fj-green-vivid);
+  font-size: var(--text-lg);
+  font-weight: 400;
 }
 
 /* ============================================
