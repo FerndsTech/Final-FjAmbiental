@@ -2405,7 +2405,7 @@ textarea {
   }
 
   .footer__wordmark {
-    font-size: clamp(2.5rem, 15vw, 6rem);
+    font-size: clamp(2.1rem, 13.5vw, 6rem);
   }
 }
 
