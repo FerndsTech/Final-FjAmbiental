@@ -410,13 +410,21 @@ textarea {
   padding: 6px 14px;
   border-radius: var(--radius-pill);
   font-weight: 500;
-  transition: background-color var(--duration-fast) var(--ease-out),
-              color var(--duration-fast) var(--ease-out);
+  background-color: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), backdrop-filter var(--duration-fast) var(--ease-out), -webkit-backdrop-filter var(--duration-fast) var(--ease-out);
 }
 
 .primary-nav .nav-link:hover {
   background-color: rgba(255, 255, 255, 0.08);
   color: var(--color-fj-green-vivid);
+}
+
+.site-header.is-light .primary-nav .nav-link {
+  background-color: rgba(10, 22, 40, 0.04);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .site-header.is-light .primary-nav .nav-link:hover {
