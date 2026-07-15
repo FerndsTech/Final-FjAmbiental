@@ -369,6 +369,18 @@ sem nenhuma interação real com o componente. Escopar aos elementos que
 são de fato a área de navegação (card, track, controles). Ver
 docs/LICOES.md #15.
 
+### 4.28 Overlays full-screen precisam de fallback síncrono independente de frameworks de animação
+
+Qualquer componente que bloqueie a tela inteira (`position: fixed;
+inset: 0`) DEVE possuir um fallback síncrono de segurança (`setTimeout`
+vanilla) fora do ciclo de vida de frameworks de animação (GSAP, etc.),
+para garantir a liberação da UI caso o script de animação falhe.
+Adicionalmente: evitar `overflow: hidden` no `body` para travar scroll
+durante o overlay se isso causar layout shift pelo sumiço da barra de
+rolagem nativa — preferir `scrollbar-gutter: stable` no `body` como
+baseline permanente, em vez de manipular `overflow` via JS. Ver
+docs/LICOES.md #20.
+
 ---
 
 ## 5. Estrutura de pastas

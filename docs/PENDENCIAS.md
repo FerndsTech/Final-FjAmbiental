@@ -91,8 +91,6 @@
 
 ## Funcionalidades globais
 
-- [ ] **Preloader** — contador 0→100% com GSAP Timeline; módulo novo em
-      `src/scripts/modules/preloader.js`. Reduz FOUC no load inicial.
 - [ ] **SplitType** — adicionar como dependência quando implementar
       micro-interações do Hero. Reveals palavra-por-palavra / linha-por-linha
       nos headings grandes.

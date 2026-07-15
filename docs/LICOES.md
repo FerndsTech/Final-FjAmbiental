@@ -741,3 +741,35 @@ verdade do scroll quando está ativo, para não haver dois mecanismos
 de scroll competindo).
 
 **Status:** ✅ resolvido. Botão Back-to-Top mergeado em produção.
+
+---
+
+## #20 — Preloader: overflow:hidden no body causava layout shift; timer de segurança precisa ser independente do GSAP
+
+**Contexto:** implementação do preloader (branch `feature/preloader`),
+jul/2026. Primeira versão travava o scroll durante o carregamento via
+`document.body.style.overflow = 'hidden'`, aplicado e removido em 4
+pontos do módulo (`initPreloader`, timer de segurança, fallback de
+`prefers-reduced-motion`, `onComplete` da timeline GSAP).
+
+**Sintoma:** o sumiço/reaparecimento da barra de rolagem nativa ao
+alternar `overflow: hidden` ↔ `''` no `body` causava um layout shift
+horizontal perceptível no fim do carregamento.
+
+**Causa raiz:** travar o scroll manipulando `overflow` no `body` muda
+a largura útil da viewport sempre que a barra de rolagem
+aparece/desaparece, a menos que o espaço dela seja reservado de forma
+permanente.
+
+**Correção aplicada:** removidas todas as atribuições de
+`document.body.style.overflow` em `preloader.js`. `scrollbar-gutter:
+stable` foi adicionado como propriedade permanente do `body` em
+`base.css`, reservando o espaço da barra independentemente do estado
+do preloader — elimina o shift sem precisar travar o scroll.
+
+**Regra derivada:** `safetyTimer` (setTimeout vanilla, 5s) permanece
+fora do `gsap.context()`/`matchMedia`, para garantir que o preloader
+seja removido mesmo se a timeline GSAP falhar ou nunca completar.
+Regra generalizada em CLAUDE.md §4.28.
+
+**Status:** ✅ resolvido e validado, jul/2026.
