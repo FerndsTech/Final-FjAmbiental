@@ -7,12 +7,9 @@ export function initPreloader(root = document) {
 
   if (!preloader || !counter) return () => {};
 
-  document.body.style.overflow = 'hidden';
-
   const safetyTimer = setTimeout(() => {
     if (preloader.style.display !== 'none') {
       preloader.style.display = 'none';
-      document.body.style.overflow = '';
       ScrollTrigger.refresh();
     }
   }, 5000);
@@ -23,14 +20,12 @@ export function initPreloader(root = document) {
     mm.add("(prefers-reduced-motion: reduce)", () => {
       clearTimeout(safetyTimer);
       preloader.style.display = 'none';
-      document.body.style.overflow = '';
     });
 
     mm.add("(prefers-reduced-motion: no-preference)", () => {
       const tl = gsap.timeline({
         onComplete: () => {
           clearTimeout(safetyTimer);
-          document.body.style.overflow = '';
           ScrollTrigger.refresh();
         }
       });
