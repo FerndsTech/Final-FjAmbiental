@@ -582,6 +582,7 @@ textarea {
   object-fit: cover;
   z-index: 0;
   opacity: 0.99;
+  transform: scale(1.05);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -44,6 +44,11 @@ Arquivos: `index.html` (section #hero), CSS `base.css` § Hero.
   Inverte o padrão das demais variantes onde o ícone fica à direita.
 - Imagem hero: `fetchpriority="high"` (não `loading="lazy"`) — é o LCP.
   Preload deve estar em `src/partials/head.html`.
+- Vídeo de fundo (`.hero__video`): usa `transform: scale(1.05)` para
+  expandir visualmente o asset e "empurrar" as bordas para fora do
+  `overflow: hidden` do container pai. Isso oculta a marca d'água da
+  ferramenta de IA (localizada no canto inferior direito) de forma leve
+  e performática, sem necessidade de re-renderizar o vídeo original.
 
 **Camadas de background (ordem z-index):**
 
@@ -432,8 +437,11 @@ com `end: 'max'`. Ver docs/LICOES.md #7.
 
 **Layout (`.container-main` dentro do header):** grid de 3 colunas
 (`grid-cols-[auto_1fr_auto]`): logo à esquerda, `<nav>` centralizado
-(Home, Serviços, Portfólio, Sobre — classe `.nav-link`, hover em pill
-com cor verde da marca), CTA "Solicitar Contato" isolado à direita
+(Home, Serviços, Portfólio, Sobre — classe `.nav-link`. Os links são
+pílulas individuais permanentes: possuem fundo branco a 4% com blur 4px
+no estado dark/transparente, e fundo navy a 4% sem blur no estado
+`.is-light`, mantendo o formato pill visível em todos os contextos.
+Hover com cor verde da marca), CTA "Solicitar Contato" isolado à direita
 (hover: `scale-105`, não muda cor — texto protegido com `hover:text-white`
 contra a regra global `a:hover { color: var(--color-fj-green) }`).
 

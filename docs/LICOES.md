@@ -773,3 +773,13 @@ seja removido mesmo se a timeline GSAP falhar ou nunca completar.
 Regra generalizada em CLAUDE.md §4.28.
 
 **Status:** ✅ resolvido e validado, jul/2026.
+
+---
+
+## #21 — Elementos translúcidos perdem visibilidade ao inverter o tema do background
+
+**Contexto:** Refinamento visual do header (`base.css` e `header.html`). Implementação de "pills" individuais nos links para destacar a navegação sobre o vídeo do Hero, utilizando fundo branco translúcido (4% de opacidade + blur).
+**Sintoma:** Ao rolar a página para uma section clara (`.is-light`), definiu-se inicialmente que o fundo das pills ficaria totalmente transparente. O formato geométrico da pílula sumia, quebrando a consistência visual da navegação.
+**Causa raiz:** O contraste em UI não depende apenas da cor do texto. Uma micro-surface (como o formato da pílula) criada por `rgba` branco em fundo escuro precisa do seu "gêmeo oposto" para existir em fundos claros.
+**Correção aplicada:** A regra do modo claro `.site-header.is-light .primary-nav .nav-link` passou a receber um `background-color: rgba(10, 22, 40, 0.04)`, espelhando a sutileza dos 4% no tom escuro (`--color-deep-navy`) e mantendo a pílula sempre demarcada.
+**Regra derivada:** Sempre testar e prever o "estado invertido" de micro-surfaces (pills, badges, tooltips) em ambos os temas de contraste das sections. O que funciona a 4% branco no dark, frequentemente precisará de 4% dark no light para manter a hierarquia geométrica.

@@ -61,18 +61,6 @@
 
 ---
 
-## Ajustes de UI — prioridade antes das próximas features
-
-> Estes ajustes devem ser concluídos antes de iniciar novas features
-> (portfolio.js, páginas internas, etc.). Ordem sugerida: do menor
-> para o maior escopo.
-
-- [ ] **Hero — subir conteúdo:** conteúdo principal está baixo na
-      viewport. Ajuste de `padding-top` ou `align-items` no `.hero__content`.
-      Ler o CSS atual de `.hero__content` em `base.css § Hero` antes de editar.
-
----
-
 ## Performance e acessibilidade
 
 - [ ] **CLS da Section Serviços** — principal fonte de layout shift
