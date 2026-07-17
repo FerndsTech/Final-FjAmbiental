@@ -360,6 +360,15 @@ Usar `data-reveal-start="top 98%"` (ou outro valor mais tardio) nesses
 casos, em vez de assumir que o padrão de 85% serve para qualquer
 elemento de qualquer section. Ver docs/LICOES.md #16.
 
+**Regra obrigatória (prevenção de Layout Shift no mobile):** CTAs ou
+qualquer elemento posicionado no extremo inferior de seções longas
+(ex.: `.portfolio__footer`) DEVEM usar `data-reveal-start="top 98%"`
+explicitamente no HTML — nunca depender do threshold padrão do GSAP.
+Gatilhos padrão nesses elementos disparam o recálculo de DOM no meio
+do scroll, causando um solavanco de layout shift perceptível no
+mobile. Esta não é uma correção pontual, mas uma regra arquitetural
+obrigatória ao criar qualquer CTA/elemento final de section.
+
 ### 4.27 Pausa de auto-advance por hover/focus deve escopar à área de interação, não à section
 
 Ao pausar um timer de auto-advance (carrossel, slideshow) via
