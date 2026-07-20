@@ -32,6 +32,7 @@ import { initMobileNav } from './modules/mobile-nav.js';
 import { initSobre } from './modules/sobre.js';
 import { initPortfolio } from './modules/portfolio.js';
 import { initClients } from './modules/clients.js';
+import { initToast } from './modules/toast.js';
 
 // === Inicialização ===
 // Cada init retorna função de cleanup para suporte futuro a View Transitions.
@@ -48,6 +49,7 @@ function init() {
   cleanups.push(initFaq());
   cleanups.push(initFooterNav());
   cleanups.push(initMobileNav());
+  cleanups.push(initToast());
   cleanups.push(initSobre());
   cleanups.push(initPortfolio());
   setTimeout(() => { requestAnimationFrame(() => ScrollTrigger.refresh()); }, 100);

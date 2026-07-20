@@ -2458,3 +2458,33 @@ textarea {
   outline: 2px solid var(--color-fj-aqua);
   outline-offset: 2px;
 }
+
+/* =========================================
+   Toast Global (Em Construção)
+   ========================================= */
+.fj-toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background-color: var(--color-deep-navy);
+  color: var(--color-ink-inverse);
+  padding: 12px 24px;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-modal);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--color-border-inverse);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.fj-toast__icon {
+  color: var(--color-fj-green-vivid);
+}

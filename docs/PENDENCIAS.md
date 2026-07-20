@@ -109,3 +109,13 @@ npm run preview`, aba anônima, sem extensões. Meta: 95+ em todas as
 - [ ] `contato.html` — agora também referenciado pelos 2 novos CTAs da
       Section Sobre (WhatsApp usa link externo `wa.me`, mas o CTA
       "Solicitar Proposta" aponta direto para `/contato.html`)
+
+---
+
+## Limpeza Técnica (Pós-Validação Fase 1)
+
+- [ ] **Remover `data-toast-trigger`:** Quando as páginas internas
+      (Serviços, Portfólio, Sobre, Contato) forem criadas e o número real
+      do WhatsApp for definido, remover o atributo `data-toast-trigger`
+      de todos os CTAs no `index.html` e `src/partials/header.html` /
+      `footer.html`, restaurando a navegação padrão.

@@ -9,6 +9,17 @@
 
 ---
 
+## ⚠️ Aviso de Estado (Fase 1 - Vercel)
+
+Todos os links e CTAs que apontam para páginas não construídas ou usam o
+WhatsApp provisório estão interceptados temporariamente pelo módulo
+`toast.js` via atributo `data-toast-trigger`. Eles disparam uma animação
+de recusa (Gaveta Trancada) para blindar a apresentação da UI/UX. Esta
+interceptação deve ser removida assim que as respectivas páginas/links
+reais entrarem em produção.
+
+---
+
 ## Ritmo de contraste global
 
 O site alterna dark e light entre sections. Esse contraste é identidade
