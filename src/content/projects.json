@@ -3,7 +3,7 @@
     "AVISO": "DADOS PLACEHOLDER — fictícios, apenas para validação visual do layout. Substituir TODOS antes de publicar. Cada projeto tem o campo _placeholder: true; quando inserir o dado real, troque para false. Coordenadas e números NÃO são reais.",
     "total_catalogo": 24,
     "total_catalogo_label": "100+",
-    "imagens_dir": "src/assets/imgs/"
+    "imagens_dir": "/images/"
   },
   "projects": [
     {

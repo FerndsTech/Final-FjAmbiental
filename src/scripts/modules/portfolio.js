@@ -22,49 +22,51 @@
  * com parágrafos inteiros cortados.
  */
 
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import projectsData from '../../content/projects.json';
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import projectsData from "../../content/projects.json";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const IMG_BASE = './src/assets/imgs/';
+const IMG_BASE = "/images/";
 const AUTO_ADVANCE_MS = 5000;
 const SWIPE_THRESHOLD = 40;
 
 export function initPortfolio(root = document) {
-  const section = root.querySelector('#portfolio');
+  const section = root.querySelector("#portfolio");
   if (!section) return () => {};
 
   const projects = projectsData.projects.slice(0, 4);
-  const thumbs = Array.from(section.querySelectorAll('.portfolio__thumb'));
+  const thumbs = Array.from(section.querySelectorAll(".portfolio__thumb"));
   if (projects.length !== thumbs.length) return () => {};
 
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
 
-  const featured      = section.querySelector('.portfolio__featured');
-  const img           = featured.querySelector('.portfolio__featured-img');
-  const tagPrimary    = featured.querySelector('.portfolio__tag-primary');
-  const tagSecondary  = featured.querySelector('.portfolio__tag-secondary');
-  const coords        = featured.querySelector('.portfolio__featured-coords');
-  const metaEl        = featured.querySelector('.portfolio__featured-meta');
-  const metaCliente   = featured.querySelector('.portfolio__meta-cliente');
-  const metaAno       = featured.querySelector('.portfolio__meta-ano');
-  const metaLocal     = featured.querySelector('.portfolio__meta-local');
+  const featured = section.querySelector(".portfolio__featured");
+  const img = featured.querySelector(".portfolio__featured-img");
+  const tagPrimary = featured.querySelector(".portfolio__tag-primary");
+  const tagSecondary = featured.querySelector(".portfolio__tag-secondary");
+  const coords = featured.querySelector(".portfolio__featured-coords");
+  const metaEl = featured.querySelector(".portfolio__featured-meta");
+  const metaCliente = featured.querySelector(".portfolio__meta-cliente");
+  const metaAno = featured.querySelector(".portfolio__meta-ano");
+  const metaLocal = featured.querySelector(".portfolio__meta-local");
 
-  const headlineL1 = section.querySelector('.portfolio__headline-l1');
-  const headlineL2 = section.querySelector('.portfolio__headline-l2');
-  const desc       = section.querySelector('.portfolio__desc');
-  const statEls    = Array.from(section.querySelectorAll('.portfolio__stat'));
+  const headlineL1 = section.querySelector(".portfolio__headline-l1");
+  const headlineL2 = section.querySelector(".portfolio__headline-l2");
+  const desc = section.querySelector(".portfolio__desc");
+  const statEls = Array.from(section.querySelectorAll(".portfolio__stat"));
 
-  const explorerFill  = section.querySelector('.portfolio__explore-fill');
-  const explorerCount = section.querySelector('.portfolio__explore-count');
+  const explorerFill = section.querySelector(".portfolio__explore-fill");
+  const explorerCount = section.querySelector(".portfolio__explore-count");
 
-  const prevBtn = section.querySelector('.portfolio__arrow--prev');
-  const nextBtn = section.querySelector('.portfolio__arrow--next');
+  const prevBtn = section.querySelector(".portfolio__arrow--prev");
+  const nextBtn = section.querySelector(".portfolio__arrow--next");
 
   // Carrossel peek mobile (<600px) — track gerado via JS, oculto no desktop via CSS
-  const track = section.querySelector('.portfolio__track');
+  const track = section.querySelector(".portfolio__track");
   let trackObserver;
 
   let current = 0;
@@ -73,7 +75,17 @@ export function initPortfolio(root = document) {
 
   // Elementos que recebem o crossfade — thumbs e barra Explorar ficam de
   // fora de propósito, trocam instantaneamente (resposta imediata ao clique).
-  const fadeTargets = [img, tagPrimary, tagSecondary, coords, metaEl, headlineL1, headlineL2, desc, ...statEls];
+  const fadeTargets = [
+    img,
+    tagPrimary,
+    tagSecondary,
+    coords,
+    metaEl,
+    headlineL1,
+    headlineL2,
+    desc,
+    ...statEls,
+  ];
 
   function updateContent(index) {
     const p = projects[index];
@@ -93,21 +105,22 @@ export function initPortfolio(root = document) {
 
     statEls.forEach((el, i) => {
       const s = p.stats[i];
-      el.querySelector('.portfolio__stat-label').textContent = s.label;
+      el.querySelector(".portfolio__stat-label").textContent = s.label;
       // dd tem um text node (valor) + <span> aninhado (unidade) — mantém o span intacto
-      el.querySelector('.portfolio__stat-value').firstChild.textContent = s.valor + ' ';
-      el.querySelector('.portfolio__stat-unit').textContent = s.unidade;
+      el.querySelector(".portfolio__stat-value").firstChild.textContent =
+        s.valor + " ";
+      el.querySelector(".portfolio__stat-unit").textContent = s.unidade;
     });
   }
 
   function updateNav(index) {
     thumbs.forEach((t, i) => {
-      t.classList.toggle('is-active', i === index);
-      t.setAttribute('aria-current', i === index ? 'true' : 'false');
+      t.classList.toggle("is-active", i === index);
+      t.setAttribute("aria-current", i === index ? "true" : "false");
     });
 
     const pct = ((index + 1) / projects.length) * 100;
-    explorerFill.style.width = pct + '%';
+    explorerFill.style.width = pct + "%";
     explorerCount.textContent = `0${index + 1} / 0${projects.length}`;
   }
 
@@ -121,10 +134,14 @@ export function initPortfolio(root = document) {
       gsap.to(fadeTargets, {
         opacity: 0,
         duration: 0.2,
-        ease: 'power2.in',
+        ease: "power2.in",
         onComplete: () => {
           updateContent(index);
-          gsap.fromTo(fadeTargets, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power3.out' });
+          gsap.fromTo(
+            fadeTargets,
+            { opacity: 0 },
+            { opacity: 1, duration: 0.4, ease: "power3.out" },
+          );
         },
       });
     });
@@ -135,11 +152,11 @@ export function initPortfolio(root = document) {
   // e no layout empilhado do mobile isso mudava a altura total da section).
   function lockDescHeight() {
     const clone = desc.cloneNode(false);
-    clone.style.position = 'absolute';
-    clone.style.visibility = 'hidden';
-    clone.style.height = 'auto';
-    clone.style.minHeight = '0';
-    clone.style.width = desc.getBoundingClientRect().width + 'px';
+    clone.style.position = "absolute";
+    clone.style.visibility = "hidden";
+    clone.style.height = "auto";
+    clone.style.minHeight = "0";
+    clone.style.width = desc.getBoundingClientRect().width + "px";
     document.body.appendChild(clone);
 
     let max = 0;
@@ -149,7 +166,7 @@ export function initPortfolio(root = document) {
     });
     document.body.removeChild(clone);
 
-    desc.style.minHeight = max + 'px';
+    desc.style.minHeight = max + "px";
   }
 
   let descResizeTimer;
@@ -168,9 +185,9 @@ export function initPortfolio(root = document) {
     current = next;
     if (track && !fromTrack) {
       track.children[next]?.scrollIntoView({
-        behavior: prefersReducedMotion ? 'auto' : 'smooth',
-        inline: 'center',
-        block: 'nearest',
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        inline: "center",
+        block: "nearest",
       });
     }
     if (resetTimer) restartTimer();
@@ -196,8 +213,8 @@ export function initPortfolio(root = document) {
   function buildTrack() {
     if (!track) return;
     projects.forEach((p, i) => {
-      const card = document.createElement('article');
-      card.className = 'portfolio__featured';
+      const card = document.createElement("article");
+      card.className = "portfolio__featured";
       card.dataset.index = String(i);
       card.innerHTML = `
         <img class="portfolio__featured-img" src="${IMG_BASE}${p.image}" alt="" loading="lazy" decoding="async" />
@@ -230,7 +247,7 @@ export function initPortfolio(root = document) {
           if (idx !== current) goTo(idx, true, true);
         }
       },
-      { root: track, threshold: [0.6, 0.75, 0.9] }
+      { root: track, threshold: [0.6, 0.75, 0.9] },
     );
     Array.from(track.children).forEach((card) => trackObserver.observe(card));
   }
@@ -238,27 +255,39 @@ export function initPortfolio(root = document) {
   // --- Handlers (referências nomeadas para cleanup, padrão de faq.js) ---
   const thumbHandlers = thumbs.map((t, i) => {
     const handler = () => goTo(i);
-    t.addEventListener('click', handler);
+    t.addEventListener("click", handler);
     return handler;
   });
 
-  function onPrev() { goTo(current - 1); }
-  function onNext() { goTo(current + 1); }
-  prevBtn?.addEventListener('click', onPrev);
-  nextBtn?.addEventListener('click', onNext);
+  function onPrev() {
+    goTo(current - 1);
+  }
+  function onNext() {
+    goTo(current + 1);
+  }
+  prevBtn?.addEventListener("click", onPrev);
+  nextBtn?.addEventListener("click", onNext);
 
   // Pausa no hover/focus — só na área de navegação do carrossel
   // (card, track mobile, thumbnails/setas), não na section inteira.
   // Evita que o timer pause sozinho quando o mouse já está parado sobre
   // título/stats no momento em que a section entra na viewport pelo scroll.
-  function pause() { stopTimer(); }
-  function resume() { restartTimer(); }
-  const pauseZones = [featured, track, section.querySelector('.portfolio__thumbs-wrapper')].filter(Boolean);
+  function pause() {
+    stopTimer();
+  }
+  function resume() {
+    restartTimer();
+  }
+  const pauseZones = [
+    featured,
+    track,
+    section.querySelector(".portfolio__thumbs-wrapper"),
+  ].filter(Boolean);
   pauseZones.forEach((el) => {
-    el.addEventListener('mouseenter', pause);
-    el.addEventListener('mouseleave', resume);
-    el.addEventListener('focusin', pause);
-    el.addEventListener('focusout', resume);
+    el.addEventListener("mouseenter", pause);
+    el.addEventListener("mouseleave", resume);
+    el.addEventListener("focusin", pause);
+    el.addEventListener("focusout", resume);
   });
 
   // --- Swipe (card featured único do desktop — thumbnails/setas ficam
@@ -292,9 +321,9 @@ export function initPortfolio(root = document) {
       dx < 0 ? goTo(current + 1) : goTo(current - 1);
     }
   }
-  featured.addEventListener('touchstart', onTouchStart, { passive: true });
-  featured.addEventListener('touchmove', onTouchMove, { passive: false });
-  featured.addEventListener('touchend', onTouchEnd);
+  featured.addEventListener("touchstart", onTouchStart, { passive: true });
+  featured.addEventListener("touchmove", onTouchMove, { passive: false });
+  featured.addEventListener("touchend", onTouchEnd);
 
   // --- Estado inicial ---
   ctx = gsap.context(() => {}, section);
@@ -303,14 +332,14 @@ export function initPortfolio(root = document) {
   lockDescHeight();
   buildTrack();
   initTrackObserver();
-  window.addEventListener('resize', handleDescResize);
+  window.addEventListener("resize", handleDescResize);
   // Auto-advance só roda com a section realmente visível — evita que o
   // scrollIntoView do goTo() dispare um jump vertical durante a transição
   // de scroll Serviços→Portfólio (timer rodando fora de contexto visível).
   const visibilityTrigger = ScrollTrigger.create({
     trigger: section,
-    start: 'top center',
-    end: 'bottom top',
+    start: "top center",
+    end: "bottom top",
     onEnter: startTimer,
     onLeave: stopTimer,
     onEnterBack: startTimer,
@@ -319,19 +348,19 @@ export function initPortfolio(root = document) {
 
   return function cleanupPortfolio() {
     stopTimer();
-    thumbs.forEach((t, i) => t.removeEventListener('click', thumbHandlers[i]));
-    prevBtn?.removeEventListener('click', onPrev);
-    nextBtn?.removeEventListener('click', onNext);
+    thumbs.forEach((t, i) => t.removeEventListener("click", thumbHandlers[i]));
+    prevBtn?.removeEventListener("click", onPrev);
+    nextBtn?.removeEventListener("click", onNext);
     pauseZones.forEach((el) => {
-      el.removeEventListener('mouseenter', pause);
-      el.removeEventListener('mouseleave', resume);
-      el.removeEventListener('focusin', pause);
-      el.removeEventListener('focusout', resume);
+      el.removeEventListener("mouseenter", pause);
+      el.removeEventListener("mouseleave", resume);
+      el.removeEventListener("focusin", pause);
+      el.removeEventListener("focusout", resume);
     });
-    featured.removeEventListener('touchstart', onTouchStart);
-    featured.removeEventListener('touchmove', onTouchMove);
-    featured.removeEventListener('touchend', onTouchEnd);
-    window.removeEventListener('resize', handleDescResize);
+    featured.removeEventListener("touchstart", onTouchStart);
+    featured.removeEventListener("touchmove", onTouchMove);
+    featured.removeEventListener("touchend", onTouchEnd);
+    window.removeEventListener("resize", handleDescResize);
     clearTimeout(descResizeTimer);
     trackObserver?.disconnect();
     visibilityTrigger.kill();
