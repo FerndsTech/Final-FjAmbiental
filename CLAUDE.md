@@ -5,11 +5,22 @@
 >
 > Compatível com a convenção `AGENTS.md` da indústria — duplica este arquivo como `AGENTS.md` se necessário.
 
-**Documentação complementar:**
+**Este arquivo contém só o que se aplica a QUALQUER linha de código.**
+O que só importa ao tocar numa área específica mora em `docs/` e é lido
+sob demanda — manter o núcleo enxuto é performance de agente, já que ele
+é carregado inteiro em toda sessão.
 
-- Estado atual de cada section → `docs/SECTIONS.md`
-- Histórico de bugs e diagnósticos → `docs/LICOES.md`
-- Tarefas pendentes → `docs/PENDENCIAS.md`
+**Documentação sob demanda:**
+
+| Documento | Ler quando |
+| --------- | ---------- |
+| `docs/ARMADILHAS.md` | Corpo completo das armadilhas do §4 — ao tocar na área correspondente |
+| `docs/PADROES-UI.md` | Construir ou alterar qualquer componente de UI (§12) |
+| `docs/SECTIONS.md` | Trabalhar numa section específica da Home |
+| `docs/LICOES.md` | Investigar um bug — histórico de diagnósticos |
+| `docs/PENDENCIAS.md` | Ver o backlog (ver §13 — migrando para o issue tracker) |
+| `docs/FASE-2-ASTRO.md` | Só quando a Fase 1 estiver no ar e validada |
+| `DESIGN_SYSTEM.md` | Tokens visuais e escalas |
 
 ---
 
@@ -154,300 +165,61 @@ return () => ctx.revert();
 
 ## 4. Armadilhas comuns de IA neste stack
 
-A IA tende a errar nestes pontos específicos. Se você for IA lendo isto, faça **checagem ativa** antes de submeter código.
-
-### 4.1 Tailwind v3 vs v4
-
-- **Estamos em v3.4.x.** Se for usar `@theme {}` ou `@layer theme` no CSS, isso é **v4** — não aplica.
-- Config em `tailwind.config.js`. `theme.extend.colors` consome CSS vars.
-- v4 será considerada na Fase 2.
-
-### 4.2 Imagens sem dimensões intrínsecas
-
-**Toda** `<img>` precisa de `width` e `height` no HTML, mesmo sendo responsiva.
-Sem isso, CLS estoura e Lighthouse cai. Para AVIF/WebP responsivo:
-
-```html
-<img
-  src="/images/hero-1024.avif"
-  srcset="
-    /images/hero-640.avif   640w,
-    /images/hero-1024.avif 1024w,
-    /images/hero-1920.avif 1920w
-  "
-  sizes="(max-width: 768px) 100vw, 80vw"
-  width="1920"
-  height="1080"
-  alt="..."
-  loading="lazy"
-  decoding="async"
-/>
-```
-
-Para a primeira imagem do hero, troque `loading="lazy"` por `fetchpriority="high"`.
-
-### 4.3 Scripts bloqueantes
-
-**Todo** `<script>` no HTML deve ter `defer` ou `type="module"`. Scripts inline são banidos exceto JSON-LD.
-
-### 4.4 GSAP fora de context
-
-Detalhado em §3.5. **Não esquecer.**
-
-### 4.5 Lenis sem sync com ScrollTrigger
-
-Quando animações de scroll disparam em momento errado, é isso. Ver `src/scripts/modules/smooth-scroll.js` para a implementação correta.
-
-### 4.6 `font-display` errado em @font-face
-
-Sempre `swap` ou `optional`. Nunca `block` (FOIT — Flash of Invisible Text).
-Como usamos @fontsource, isso já vem configurado correto. Não substituir por @import manual.
-
-### 4.7 `console.log` em produção
-
-Vite remove em build se configurado. Para garantir, manter `if (import.meta.env.DEV)` em logs.
-
-### 4.8 DOM manipulation fora de módulos
-
-**Todo** JS num módulo nomeado importado por `main.js`. Nada de `<script>` solto no fim do HTML.
-
-### 4.9 `prefers-reduced-motion` ignorado
-
-**Toda** animação respeita a preferência do usuário. Ver pattern em `smooth-scroll.js`.
-
-### 4.10 Tags semânticas erradas
-
-- Card de projeto/serviço → `<article>`, não `<div>`
-- Lista de cards → `<ul><li>...`, não `<div><div>...`
-- Navegação → `<nav>`, não `<div>` com classe `nav`
-- Hierarchia heading — não pular níveis (h1 → h3 sem h2 é erro)
-
-### 4.11 Tailwind utilities em elementos com estado JS
-
-**Nunca** adicione Tailwind utilities diretamente em elementos que recebem classes de estado via JavaScript.
-
-Exemplo problemático: `.site-header` recebe `.is-scrolled` e `.is-light` por JS. Se alguém adicionar `bg-white` via Tailwind diretamente no `<header>`, a especificidade do utilitário pode bloquear silenciosamente os overrides das classes de estado, quebrando a troca de tema sem gerar erro visível.
-
-**Regra:** elementos controlados por JS usam **apenas classes BEM custom** no HTML. Tailwind fica nos elementos filhos estáticos que não mudam de estado. Ver docs/SECTIONS.md § Header dinâmico.
-
-### 4.12 Replicar convenção "por analogia" sem mostrar a fonte
-
-Ao seguir o padrão de um arquivo existente (ex: estrutura de um JSON de conteúdo), mostrar o trecho real desse arquivo antes de aplicar o padrão a um arquivo novo. Não afirmar "seguindo a convenção de X" sem exibir o trecho de X que embasa a afirmação.
-
-### 4.13 Campos semânticos com estado não verificado
-
-Um campo com significado de estado (ex: booleano de "validado", "placeholder", "publicado") não pode afirmar um estado que não ocorreu de fato. Inicializar com o valor real no momento da criação — não com o valor aspiracional ou copiado do template.
-
-### 4.14 Acordeão: não usar `grid-template-rows: 0fr` para colapso de altura
-
-Em Chrome, o filho de grid impõe altura mínima residual — `grid-template-rows: 0fr`
-não colapsa para zero quando há padding no elemento filho.
-
-**Padrão correto:** `max-height: 0; overflow: hidden` no CSS estático +
-JS que mede `scrollHeight` real e aplica via `element.style.maxHeight`.
-Nunca usar valor fixo chutado. Ver docs/LICOES.md #2 para o diagnóstico.
-
-### 4.15 Bug visual persistente: instrumentar antes de propor hipótese
-
-Se uma correção CSS não resolver um bug visual, a próxima etapa é **medir o estado computado real** — DevTools → Computed tab → `height` do elemento — ou listar a cascata CSS completa que alcança o elemento. Não propor outra hipótese a partir de nova leitura estática do código. A causa real pode ser diferente de qualquer hipótese baseada em leitura.
-
-### 4.16 Popup "file changed on disk" no VS Code: nunca clicar sem verificar
-
-Quando o VS Code exibir "The file has been changed on disk. Do you want to
-reload it?" durante Ctrl+S: (1) não clicar em nada ainda, (2) abrir outro
-terminal, (3) rodar `git diff [arquivo]` para ver qual versão é mais atual,
-(4) só então decidir. Em caso de dúvida: fechar o VS Code sem salvar e checar
-via `git status` antes de reabrir. Origem: incidente #6 (docs/LICOES.md).
-
-### 4.17 `git restore [arquivo]` é a recuperação padrão para working tree corrompida
-
-Quando o conteúdo desejado estiver no HEAD (commitado), `git restore [arquivo]`
-restaura em 1 segundo sem risco. Antes de restaurar: anotar qualquer mudança
-no working tree que não estava commitada, para reaplicar manualmente depois.
-Origem: incidente #6 (docs/LICOES.md).
-
-### 4.18 Prompt de encerramento é obrigatório antes de fechar qualquer sessão longa
-
-Ao encerrar uma sessão de desenvolvimento (Claude Code ou Claude Chat), sempre
-gerar o bloco CONTEXTO_TRANSICAO antes de fechar. Sem ele, o próximo chat
-começa sem saber o porquê das decisões tomadas — só o "o quê", não o "como"
-e o "por quê". O prompt de encerramento está em
-`prompt-encerramento-sessao.md` (gerado na sessão de 03/07/2026).
-
-### 4.19 Documentação desatualizada é mais perigosa que ausente
-
-Ao concluir qualquer task de código, atualizar o doc correspondente
-(SECTIONS.md, PENDENCIAS.md) no mesmo commit ou no imediatamente seguinte.
-Nunca deixar para "depois" — documentação que não reflete o código real
-induz retrabalho nas sessões seguintes. Exemplo: Section Sobre ficou marcada
-como "não implementada" por várias sessões após já estar completa no código.
-
-### 4.20 Variante de botão/componente reaproveitada num fundo novo precisa de checagem explícita de contraste
-
-Nenhuma variante de botão é "segura por padrão" contra qualquer fundo —
-o contraste dela sempre foi validado apenas nos contextos onde já era
-usada. Ao reaproveitar uma variante existente (ex: `.btn-pill--hero`) num
-tipo de fundo que ela nunca encontrou antes, verificar explicitamente o
-contraste contra esse fundo específico antes de assumir que "já funciona
-nos outros lugares" é garantia suficiente. Corrigir com override escopado
-no novo contexto (ex: `.sobre__cta-row .btn-pill--hero`), nunca editando
-a definição base compartilhada. Ver docs/LICOES.md #9.
-
-### 4.21 Medir layout com DevTools sempre com Device Toolbar desligado
-
-`window.innerWidth`/`innerHeight` medidos com o modo responsivo do
-DevTools ativo (`Ctrl+Shift+M`) refletem o viewport **simulado**, não a
-janela real do navegador — mesmo que os números pareçam consistentes
-entre medições repetidas. Sempre confirmar que o Device Toolbar está
-desligado antes de rodar qualquer medição de layout via Console.
-Adicionalmente: não perseguir "zero overflow exato" numa única altura
-de tela testada — criar margem de segurança (a section não precisa
-caber com folga zero, só sem sobra grosseira que revele a section
-vizinha). Ver docs/LICOES.md #10.
-
-### 4.22 Conteúdo dinâmico de comprimento variável precisa de altura travada
-
-Quando JS troca o texto de um elemento cujo tamanho depende do
-conteúdo (ex: descrições de tamanhos diferentes vindas de JSON), medir
-a maior variação possível via clone invisível e travar a altura via
-`style.minHeight` — nunca deixar o layout empilhado (mobile) absorver
-a variação, o que causa CLS visível a cada troca. Mesmo padrão de
-medição de `scrollHeight` que `faq.js` já usa. Ver docs/LICOES.md #11.
-
-### 4.23 `box-shadow` não serve para decorações com dimensões independentes
-
-`box-shadow` com `spread` negativo só produz uma cópia uniformemente
-escalada da forma original (largura e altura shrinkam juntas) — correto
-para efeitos tipo "baralho empilhado" (diagonal, sutil), incorreto para
-qualquer decoração que precise de largura e altura controladas
-independentemente (ex: fatias laterais altas e estreitas). Nesses casos,
-usar pseudo-elementos — e lembrar que pseudo-elementos são cortados por
-`overflow: hidden` do próprio elemento, precisando morar no elemento
-pai. Ver docs/LICOES.md #12.
-
-### 4.24 Mensagens de commit multi-linha no PowerShell: usar here-string
-
-`git commit -m "texto com \"aspas\" escapadas"` quebra no PowerShell
-(erro `Invalid path`, reinterpretação incorreta do conteúdo escapado).
-Usar here-string para mensagens multi-linha:
-
-```powershell
-@"
-tipo(escopo): resumo
-
-- detalhe 1
-- detalhe 2
-"@ | git commit -F -
-```
-
-Evitar aspas duplas internas na mensagem. Ver docs/LICOES.md #13.
-
-### 4.25 Confirmação no Claude Chat não chega automaticamente ao Claude Code
-
-São ferramentas/sessões separadas — "pode aplicar" dito no Claude Chat
-não é visto pelo Claude Code. Toda aprovação precisa ser colada
-manualmente na sessão do Claude Code antes de qualquer gravação. Ver
-docs/LICOES.md #14.
-
-### 4.26 Threshold de scroll-reveal fixo não serve para todo elemento
-
-`reveal.js` usa `start: 'top 85%'` por padrão para `data-reveal`.
-Elementos que nascem perto do fim físico de uma section (especialmente
-sections com `min-height: 100svh` cuja altura real fica próxima da
-altura da viewport) podem só cruzar esse threshold quase no fim do
-scroll da section — dando a impressão de que a animação "não roda".
-Usar `data-reveal-start="top 98%"` (ou outro valor mais tardio) nesses
-casos, em vez de assumir que o padrão de 85% serve para qualquer
-elemento de qualquer section. Ver docs/LICOES.md #16.
-
-**Regra obrigatória (prevenção de Layout Shift no mobile):** CTAs ou
-qualquer elemento posicionado no extremo inferior de seções longas
-(ex.: `.portfolio__footer`) DEVEM usar `data-reveal-start="top 98%"`
-explicitamente no HTML — nunca depender do threshold padrão do GSAP.
-Gatilhos padrão nesses elementos disparam o recálculo de DOM no meio
-do scroll, causando um solavanco de layout shift perceptível no
-mobile. Esta não é uma correção pontual, mas uma regra arquitetural
-obrigatória ao criar qualquer CTA/elemento final de section.
-
-### 4.27 Pausa de auto-advance por hover/focus deve escopar à área de interação, não à section
-
-Ao pausar um timer de auto-advance (carrossel, slideshow) via
-`mouseenter`/`focusin`, nunca anexar os listeners na section inteira —
-isso pausa o timer mesmo quando o cursor só está sobre texto/stats
-sem nenhuma interação real com o componente. Escopar aos elementos que
-são de fato a área de navegação (card, track, controles). Ver
-docs/LICOES.md #15.
-
-### 4.28 Overlays full-screen precisam de fallback síncrono independente de frameworks de animação
-
-Qualquer componente que bloqueie a tela inteira (`position: fixed;
-inset: 0`) DEVE possuir um fallback síncrono de segurança (`setTimeout`
-vanilla) fora do ciclo de vida de frameworks de animação (GSAP, etc.),
-para garantir a liberação da UI caso o script de animação falhe.
-Adicionalmente: evitar `overflow: hidden` no `body` para travar scroll
-durante o overlay se isso causar layout shift pelo sumiço da barra de
-rolagem nativa — preferir `scrollbar-gutter: stable` no `body` como
-baseline permanente, em vez de manipular `overflow` via JS. Ver
-docs/LICOES.md #20.
+A IA tende a errar nestes pontos específicos. Se você for IA lendo isto,
+faça **checagem ativa** antes de submeter código.
+
+**Este é o índice. O corpo completo está em `docs/ARMADILHAS.md`** — leia
+a entrada correspondente antes de mexer na área que ela cobre. Estas
+regras são também a fonte que o eixo *Standards* do `/code-review` usa;
+não existe `CODING_STANDARDS.md` neste repo.
+
+- **4.1** Tailwind v3 vs v4
+- **4.2** Imagens sem dimensões intrínsecas
+- **4.3** Scripts bloqueantes
+- **4.4** GSAP fora de context
+- **4.5** Lenis sem sync com ScrollTrigger
+- **4.6** `font-display` errado em @font-face
+- **4.7** `console.log` em produção
+- **4.8** DOM manipulation fora de módulos
+- **4.9** `prefers-reduced-motion` ignorado
+- **4.10** Tags semânticas erradas
+- **4.11** Tailwind utilities em elementos com estado JS
+- **4.13** Campos semânticos com estado não verificado
+- **4.14** Acordeão: não usar `grid-template-rows: 0fr` para colapso de altura
+- **4.15** Bug visual persistente: instrumentar antes de propor hipótese
+- **4.19** Documentação desatualizada é mais perigosa que ausente
+- **4.20** Variante de botão/componente reaproveitada num fundo novo precisa de checagem explícita de contraste
+- **4.21** Medir layout com DevTools sempre com Device Toolbar desligado
+- **4.22** Conteúdo dinâmico de comprimento variável precisa de altura travada
+- **4.23** `box-shadow` não serve para decorações com dimensões independentes
+- **4.24** Mensagens de commit multi-linha no PowerShell: usar here-string
+- **4.26** Threshold de scroll-reveal fixo não serve para todo elemento
+- **4.27** Pausa de auto-advance por hover/focus deve escopar à área de interação, não à section
+- **4.28** Overlays full-screen precisam de fallback síncrono independente de frameworks de animação
+
+**Numeração estável — nunca renumerar.** As lacunas são propositais:
+
+- **4.16** e **4.17** viraram procedimentos humanos → `README.md` § Procedimentos manuais
+- **4.12**, **4.18** e **4.25** descreviam o fluxo antigo Chat+Code e estão
+  arquivadas em `docs/ARMADILHAS.md` § Histórico. Não são regras ativas.
+
+`docs/LICOES.md` referencia estes números; renumerar quebraria as referências.
 
 ---
 
-## 5. Estrutura de pastas
+## 5. Onde mora cada tipo de conteúdo
 
-```
-fj-ambiental/
-├── public/                        # Servido como /
-│   ├── favicon.svg                # Favicon SVG com dark mode embutido
-│   ├── manifest.webmanifest       # PWA
-│   ├── robots.txt
-│   └── images/                    # Imagens otimizadas (gerado por sharp)
-├── src/
-│   ├── partials/                  # Includes HTML
-│   │   ├── head.html              # Meta tags compartilhadas
-│   │   ├── header.html            # Navegação principal
-│   │   └── footer.html            # Footer dark
-│   ├── styles/
-│   │   ├── tokens.css             # CSS variables (FONTE DA VERDADE)
-│   │   ├── base.css               # Reset + typography defaults
-│   │   └── main.css               # Entry point
-│   ├── scripts/
-│   │   ├── main.js                # Entry point
-│   │   ├── modules/               # Um arquivo por feature
-│   │   │   ├── smooth-scroll.js   # Lenis + GSAP sync
-│   │   │   ├── reveal.js          # Fade-up on scroll
-│   │   │   ├── header.js          # Shrinking dinâmico + modo camaleão
-│   │   │   ├── hero.js            # Animações do Hero + reduced-motion
-│   │   │   └── faq.js             # Acordeão FAQ (max-height + scrollHeight)
-│   │   └── utils/                 # Helpers reutilizáveis
-│   ├── content/                   # Dados em JSON
-│   │   ├── services.json          # ⬜ pendente — ver docs/PENDENCIAS.md
-│   │   ├── projects.json          # ✅ 8 projetos placeholder
-│   │   └── faq.json               # ✅ 8 perguntas (id, question, answer)
-│   └── assets/
-│       ├── logo/                  # SVGs da marca
-│       └── icones/                # SVGs de ícones (Flaticon, com "e")
-├── docs/
-│   ├── SECTIONS.md                # Estado atual de cada section
-│   ├── LICOES.md                  # Histórico de bugs e diagnósticos
-│   └── PENDENCIAS.md              # Tarefas pendentes
-├── plugins/
-│   └── vite-plugin-includes.js    # Sistema de partials HTML
-├── scripts/                       # Scripts Node de build
-├── index.html                     # Home
-├── servicos.html                  # ⬜ pendente
-├── portfolio.html                 # ⬜ pendente
-├── sobre.html                     # ⬜ pendente
-├── contato.html                   # ⬜ pendente
-├── package.json
-├── vite.config.js
-├── tailwind.config.js
-├── postcss.config.js
-├── .gitignore
-├── .nvmrc
-├── CLAUDE.md                      # ← Você está aqui
-├── DESIGN_SYSTEM.md               # Tokens visuais documentados
-└── README.md                      # Quick start humano
-```
+O critério de decisão de 3 vias está no §3.2. Resumo operacional:
+
+| Tipo | Local |
+| ---- | ----- |
+| Chrome que repete entre páginas | `src/partials/` — via `<include src="..." />` |
+| Coleção de N itens do mesmo shape | `src/content/*.json` — lido em build-time |
+| Conteúdo editorial único de uma section | Inline no HTML da própria página |
+| Comportamento interativo de uma section | `src/scripts/modules/<feature>.js` |
+| Design tokens | `src/styles/tokens.css` — **única fonte de verdade** |
+
+A árvore completa de pastas está no `README.md` § Estrutura.
 
 ---
 
@@ -536,23 +308,10 @@ fj-ambiental/
 ## 10. Migração futura — Fase 2 (Astro)
 
 Depois do site no ar e validado em produção, migração para Astro 5.
+Mecânica, estimativa e ganhos esperados: **`docs/FASE-2-ASTRO.md`**.
 
-### Mecânica (estimativa: 2 dias úteis se Fase 1 seguiu §3)
-
-1. `npm create astro@latest` em diretório novo
-2. Copiar `src/partials/*.html` → `src/components/*.astro` (adicionar `---` no topo)
-3. Copiar `src/scripts/modules/*.js` → islands com `client:visible`
-4. Copiar `src/styles/*` direto (Astro consome CSS igual)
-5. Copiar `src/content/*.json` → Content Collections com schema Zod
-6. Migrar para Tailwind v4 simultaneamente (já que vamos refatorar config mesmo)
-7. Adicionar TypeScript com schemas type-safe
-
-### Ganhos esperados na Fase 2
-
-- View Transitions nativas entre páginas
-- Image component otimizando AVIF/WebP automaticamente
-- Type-safety em todos os imports de conteúdo
-- Lighthouse score ainda mais estável (zero JS por padrão)
+As 5 disciplinas do §3 existem para tornar essa migração cópia, não
+reescrita. Quebrar qualquer uma transforma migração em refatoração.
 
 ---
 
@@ -575,108 +334,105 @@ Antes de marcar qualquer feature como pronta, validar:
 
 ## 12. Padrões de componentes e implementação
 
-### 12.1 Botão CTA (`.btn-pill`)
+Três padrões reutilizáveis, documentados em **`docs/PADROES-UI.md`**:
 
-Componente reutilizável implementado em `src/styles/base.css`. Três variantes:
+- **12.1 Botão CTA (`.btn-pill`)** — três variantes (base, `--dark`, `--hero`)
+- **12.2 Microinteração da seta circular** — assinatura de interação do site
+- **12.3 Viewport fitting** — `min-height: 100svh` em sections intermediárias
 
-**`.btn-pill`** (base) — sobre fundo dark: fundo branco, texto navy, ícone
-navy à direita. Padding assimétrico `10px 10px 10px 26px`. Hover: gap
-14px → 18px, ícone vira verde e rotaciona -45°.
-
-**`.btn-pill--dark`** — sobre fundo light/canvas: fundo navy, texto branco,
-ícone verde à direita. Mesmo comportamento de hover.
-
-**`.btn-pill--hero`** — ícone à **esquerda**: padding `8px 28px 8px 8px`.
-Fundo navy, texto branco, ícone `--color-fj-green-vivid`. Usado no Hero
-CTA e FAQ CTA.
-
-Seta em todas as variantes: path `M7 17L17 7M9 7h8v8`, `stroke-width 2.5`.
-
-### 12.2 Microinteração da seta circular (padrão global)
-
-A rotação `-45deg` + mudança para verde no hover de qualquer "círculo com
-seta" é a assinatura de interação do site. Aplicar consistentemente em:
-botões pill, cards de serviço (se tiverem arrow), card "Ver case" do
-portfólio.
-
-### 12.3 Viewport fitting — `min-height: 100svh`
-
-Sections intermediárias usam `min-height: 100svh` (não `100vh`). A unidade
-`svh` (small viewport height) exclui a barra de URL mobile — garante que
-o conteúdo nunca seja cortado independente do estado da barra.
-
-**Padrão de implementação:**
-
-```css
-.nome-da-section {
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-top: calc(var(--header-height) + Xrem);
-  padding-bottom: Yrem;
-}
-```
-
-Exceção: o Hero usa `min-height: 100vh` — é a primeira dobra, não sofre
-do problema da barra mobile.
+Ler o documento antes de criar qualquer componente novo de UI — inclusive
+para checar se o que você vai construir já existe.
 
 ---
 
-## 13. Fluxo de trabalho: Cérebro + Motor (Claude Chat + Claude Code)
+## 13. Fluxo de trabalho: skills de engenharia no Claude Code
 
-Este projeto é desenvolvido com dois assistentes em conjunto: Claude Chat
-("cérebro", planejamento e decisão) e Claude Code ("motor", execução no
-repositório real). O fluxo abaixo existe para reduzir retrabalho e evitar
-os incidentes registrados em docs/LICOES.md.
+O desenvolvimento acontece dentro do Claude Code, usando as skills de
+engenharia instaladas em `~/.claude/skills`. O papel de "cérebro" que era
+do Claude Chat agora é do `/grill-with-docs`, que afia a ideia com acesso
+ao código real — eliminando a origem do incidente #14 (`docs/LICOES.md`).
 
-**Ciclo de 8 passos:**
+O fluxo antigo (Claude Chat "cérebro" + Claude Code "motor", com a pessoa
+traduzindo entre os dois) foi aposentado. As armadilhas que descreviam
+aquela coreografia estão arquivadas em `docs/ARMADILHAS.md` § Histórico.
 
-1. A pessoa descreve a intenção em linguagem natural no Claude Chat. O
-   Claude Chat converte essa linguagem natural em linguagem técnica precisa (nomes de arquivo, classes, seletores, comportamento exato)
-   antes de agir ou propor qualquer mudança.
-2. O Claude Chat lê o código real (via prompt de leitura para o Claude
-   Code, nunca por suposição).
-3. O Claude Chat monta o diff exato e mostra ANTES de qualquer aplicação.
-4. A pessoa aprova (ou pede ajuste).
-5. O Claude Chat gera um prompt de aplicação cirúrgico para o Claude
-   Code — instrução exata, com contexto explicado antes da instrução,
-   sem ambiguidade, sem "melhore" ou "ajuste como achar melhor".
-6. O Claude Code aplica e mostra o diff real que aplicou, ANTES de gravar
-   no disco, aguardando confirmação explícita ("pode aplicar").
-7. A pessoa valida no navegador.
-8. A pessoa mesma faz o commit (nunca a IA).
+### Ciclo
 
-**Regras específicas deste fluxo:**
+1. **`/grill-with-docs`** — entrevista até a ideia estar tecnicamente precisa.
+2. Trabalho de várias sessões? → **`/to-spec`** → **`/to-tickets`**.
+   Sessão única? → direto pro passo 3.
+3. **`/implement`** por ticket, com `/clear` entre cada um.
+4. **`/code-review`** (chamado pelo próprio `/implement`) antes do commit.
+5. A pessoa valida no navegador e aprova o merge.
 
-- Prompts para o Claude Code seguem o formato: CONTEXTO (o porquê da
-  mudança) → O QUE FAZER (instrução exata) → pedido explícito de diff
-  antes de gravar.
-- Diffs grandes (arquivos novos, reescrita de seções inteiras de `.md`)
-  têm risco real de perda silenciosa de conteúdo ao serem exibidos em
-  terminal — preferir edições cirúrgicas (inserir/substituir trechos
-  pontuais com âncora única) a reescritas de blocos inteiros.
-- Para confirmar integridade de uma edição grande, usar `grep -c` com
-  frases-âncora do conteúdo original E do conteúdo novo, em vez de
-  confiar em leitura visual do diff — a leitura visual já mostrou ser
-  pouco confiável neste ambiente de terminal.
-- Nunca commitar, dar `push` ou fazer merge a partir do Claude Code —
-  essas ações são sempre manuais, feitas pela pessoa.
+**Higiene de contexto:** manter os passos 1–2 numa única janela, sem
+`/clear` e sem `/compact` no meio. Cada `/implement` começa limpo, lendo
+só o ticket.
+
+**Skills que só a pessoa pode disparar** (`disable-model-invocation`):
+`/grill-with-docs`, `/to-spec`, `/to-tickets`, `/implement`, `/wayfinder`,
+`/triage`, `/handoff`, `/improve-codebase-architecture`,
+`/setup-vini-skills`. A IA não consegue iniciá-las sozinha.
+
+**Atenção ao nome:** o comando é `/setup-vini-skills` (nome da pasta). As
+outras skills o referenciam como `/setup-matt-pocock-skills`, que não existe.
+
+### Autoridade de git
+
+| Ação | Quem |
+| ---- | ---- |
+| `git commit` | **A IA**, sempre em branch de feature — nunca direto na `main` |
+| `git push` | A IA **pergunta antes**. Aprovado → a IA executa. Negado → a pessoa executa |
+| `merge` do PR | A IA **pergunta antes**. Aprovado → a IA executa. Negado → a pessoa executa |
+| `reset --hard`, `clean -f`, `branch -D`, `checkout .`, `push --force` | **Ninguém automaticamente.** A IA nunca roda sem pedido explícito da pessoa |
+
+**Gate obrigatório antes de todo commit:** `npm run build` verde e console
+limpo. Este projeto **não tem suíte de testes** — este é o único gate
+automático que existe, então ele não é opcional. O checklist completo é o §11.
+
+- Todo commit atualiza o doc correspondente junto (§4.19).
+- Mensagens de commit multi-linha: here-string do PowerShell (§4.24).
+- Branch por ticket. A `main` é o estado bom conhecido.
+
+### Regras que sobrevivem do fluxo antigo
+
+- Diffs grandes em `.md` têm risco real de perda silenciosa de conteúdo —
+  preferir edições cirúrgicas com âncora única, ou extração por intervalo
+  de linhas, a reescritas de blocos inteiros.
+- Confirmar integridade de edição grande com `grep -c` em frases-âncora do
+  conteúdo antigo E do novo — a leitura visual do diff em terminal já se
+  mostrou pouco confiável neste ambiente.
+
+### Configuração das skills
+
+Após rodar `/setup-vini-skills`, o issue tracker, o vocabulário de labels
+de triagem e o layout de docs de domínio ficam registrados em
+`docs/agents/`. As skills leem de lá.
+
+---
 
 ## 14. Sobre este documento
 
-Este `CLAUDE.md` é **versionado junto com o código**. Toda decisão arquitetural importante é registrada aqui. Toda IA lê isto antes de gerar código.
+Este `CLAUDE.md` é **versionado junto com o código**. Toda decisão
+arquitetural importante é registrada aqui. Toda IA lê isto antes de gerar
+código.
 
-**Quando atualizar:**
+**Quando atualizar (e em qual arquivo):**
 
-- Adicionar nova dependência
-- Mudar uma disciplina arquitetural
-- Descobrir uma armadilha nova de IA
-- Mudar performance budget
-- Implementar ou alterar uma section → atualizar `docs/SECTIONS.md`
-- Resolver um bug relevante → registrar em `docs/LICOES.md`
-- Concluir ou adicionar tarefa → atualizar `docs/PENDENCIAS.md`
-- Definir um novo padrão de componente reutilizável
-- Antes da migração Fase 1 → Fase 2
+| Mudança | Arquivo |
+| ------- | ------- |
+| Nova dependência, mudança de stack | `CLAUDE.md` §2 |
+| Mudar uma disciplina arquitetural | `CLAUDE.md` §3 |
+| Descobrir uma armadilha nova de IA | `docs/ARMADILHAS.md` + índice no §4 |
+| Mudar performance budget | `CLAUDE.md` §7 |
+| Novo padrão de componente reutilizável | `docs/PADROES-UI.md` + resumo no §12 |
+| Implementar ou alterar uma section | `docs/SECTIONS.md` |
+| Resolver um bug relevante | `docs/LICOES.md` |
+| Concluir ou adicionar tarefa | issue tracker (ver `docs/agents/`) |
+| Mudar o fluxo de trabalho ou a autoridade de git | `CLAUDE.md` §13 |
 
-**Linguagem:** português (cliente brasileiro, equipe brasileira, documentação brasileira).
+**Regra de ouro (§4.19):** documentação desatualizada é mais perigosa que
+ausente. Atualizar no mesmo commit — nunca "depois".
+
+**Linguagem:** português (cliente brasileiro, equipe brasileira,
+documentação brasileira).
