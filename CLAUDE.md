@@ -18,7 +18,7 @@ sob demanda — manter o núcleo enxuto é performance de agente, já que ele
 | `docs/PADROES-UI.md` | Construir ou alterar qualquer componente de UI (§12) |
 | `docs/SECTIONS.md` | Trabalhar numa section específica da Home |
 | `docs/LICOES.md` | Investigar um bug — histórico de diagnósticos |
-| `docs/PENDENCIAS.md` | Ver o backlog (ver §13 — migrando para o issue tracker) |
+| `docs/PENDENCIAS.md` | Só o que ainda não é issue: bloqueios de cliente e páginas não mapeadas |
 | `docs/FASE-2-ASTRO.md` | Só quando a Fase 1 estiver no ar e validada |
 | `docs/agents/` | Operar issue tracker, triagem ou docs de domínio — lido por skill (§ Agent skills) |
 | `DESIGN_SYSTEM.md` | Tokens visuais e escalas |

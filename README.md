@@ -9,7 +9,9 @@ Landing site institucional da FJ Ambiental — Consultoria Ambiental e Recursos 
 > **Documentação interna:**
 > - 📋 [docs/SECTIONS.md](./docs/SECTIONS.md) — estado atual de cada section
 > - 🔍 [docs/LICOES.md](./docs/LICOES.md) — histórico de bugs e diagnósticos
-> - ✅ [docs/PENDENCIAS.md](./docs/PENDENCIAS.md) — tarefas pendentes
+> - ✅ [docs/PENDENCIAS.md](./docs/PENDENCIAS.md) — só bloqueios de cliente e páginas não mapeadas
+>
+> **Backlog de engenharia:** [GitHub Issues](https://github.com/FerndsTech/Final-FjAmbiental/issues) — `gh issue list --state open`
 
 ---
 
