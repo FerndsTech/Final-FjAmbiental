@@ -4,7 +4,10 @@
 > e intenção de design de cada section. Não repete o que o código já diz —
 > documenta o **porquê** e o que **diverge do padrão esperado**.
 >
-> Pendências ativas → docs/PENDENCIAS.md
+> Pendências ativas → GitHub Issues (`gh issue list --state open`).
+> As menções a docs/PENDENCIAS.md abaixo continuam válidas como ponto de
+> partida: aquele arquivo hoje só guarda bloqueios de cliente e as páginas
+> internas ainda não mapeadas, e redireciona para o tracker no topo.
 > Histórico de bugs/diagnósticos → docs/LICOES.md
 
 ---
