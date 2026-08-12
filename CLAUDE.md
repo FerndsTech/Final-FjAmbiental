@@ -20,6 +20,7 @@ sob demanda — manter o núcleo enxuto é performance de agente, já que ele
 | `docs/LICOES.md` | Investigar um bug — histórico de diagnósticos |
 | `docs/PENDENCIAS.md` | Ver o backlog (ver §13 — migrando para o issue tracker) |
 | `docs/FASE-2-ASTRO.md` | Só quando a Fase 1 estiver no ar e validada |
+| `docs/agents/` | Operar issue tracker, triagem ou docs de domínio — lido por skill (§ Agent skills) |
 | `DESIGN_SYSTEM.md` | Tokens visuais e escalas |
 
 ---
@@ -405,9 +406,39 @@ automático que existe, então ele não é opcional. O checklist completo é o �
 
 ### Configuração das skills
 
-Após rodar `/setup-vini-skills`, o issue tracker, o vocabulário de labels
-de triagem e o layout de docs de domínio ficam registrados em
-`docs/agents/`. As skills leem de lá.
+O issue tracker, o vocabulário de labels de triagem e o layout de docs de
+domínio estão registrados em `docs/agents/` — resumo na seção **Agent
+skills** logo abaixo. As skills leem de lá.
+
+Os arquivos em `docs/agents/` são os únicos do projeto escritos em inglês.
+Não são documentação para pessoas: são lidos por skill, e carregam strings
+que as skills casam literalmente (a flag `PRs as a request surface`, os
+nomes dos labels, os comandos `gh`). Traduzir quebra o parsing.
+
+---
+
+## Agent skills
+
+> Seção **sem número** de propósito: as skills de engenharia procuram
+> exatamente o heading `## Agent skills`. Não renumerar, não renomear,
+> não traduzir os sub-headings.
+
+### Issue tracker
+
+GitHub Issues no repo `FerndsTech/Final-FjAmbiental`, operado via `gh` CLI.
+Ver `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Os cinco papéis canônicos, sem renomear — `needs-triage`, `needs-info`,
+`ready-for-agent`, `ready-for-human`, `wontfix`.
+Ver `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: um `CONTEXT.md` na raiz mais `docs/adr/`. Nenhum dos dois
+existe hoje — são criados sob demanda pelo `/domain-modeling`, não agora.
+Ver `docs/agents/domain.md`.
 
 ---
 
