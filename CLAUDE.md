@@ -94,6 +94,19 @@ Quando migrarmos para Astro, cada partial vira `.astro` direto, copy-paste.
 Serviços e projetos do portfólio ficam em `src/content/*.json` lidos em build-time.
 **Nunca** hardcode "23 serviços" em HTML. Migra direto para Content Collections do Astro.
 
+A leitura em build-time acontece via `<render src="<arquivo>.js" />`
+(plugin `plugins/vite-plugin-content.js`), que chama o renderer de mesmo
+nome em `plugins/renderers/` e injeta o HTML gerado. Cada renderer é
+candidato direto a virar componente `.astro` na Fase 2.
+
+O que o usuário lê no primeiro paint nasce do build, nunca de `innerHTML`
+num módulo — texto gerado no cliente sai do primeiro paint e do alcance
+dos crawlers. Um módulo JS **pode** reescrever conteúdo que já está no
+HTML (troca de card, estado de carrossel) e pode gerar elementos que só
+existem para a interação — é o que `portfolio.js` faz com o carrossel de
+peek do mobile. A linha é essa: gerar estado no cliente, sim; estrear
+conteúdo no cliente, não.
+
 #### Critério de decisão: onde um conteúdo deve viver
 
 Antes de criar qualquer section nova, decida onde o conteúdo dela mora
@@ -215,7 +228,7 @@ O critério de decisão de 3 vias está no §3.2. Resumo operacional:
 | Tipo | Local |
 | ---- | ----- |
 | Chrome que repete entre páginas | `src/partials/` — via `<include src="..." />` |
-| Coleção de N itens do mesmo shape | `src/content/*.json` — lido em build-time |
+| Coleção de N itens do mesmo shape | `src/content/*.json` — lido em build-time via `<render src="..." />` |
 | Conteúdo editorial único de uma section | Inline no HTML da própria página |
 | Comportamento interativo de uma section | `src/scripts/modules/<feature>.js` |
 | Design tokens | `src/styles/tokens.css` — **única fonte de verdade** |

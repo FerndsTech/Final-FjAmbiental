@@ -1,17 +1,22 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
 import { htmlIncludes } from './plugins/vite-plugin-includes.js';
+import { htmlContent } from './plugins/vite-plugin-content.js';
 
 /**
  * Vite configuration — FJ Ambiental
  *
  * - Multi-page setup (home + 4 páginas internas)
  * - Custom HTML includes plugin para partials reutilizáveis
+ * - Custom HTML content plugin para renderizar src/content/*.json em build-time
  * - Aliases de path para imports limpos
  */
 export default defineConfig({
   plugins: [
+    // Ordem importa: includes primeiro, para que um partial também possa
+    // conter <render src="..." />.
     htmlIncludes({ basePath: resolve(__dirname, 'src/partials') }),
+    htmlContent({ basePath: resolve(__dirname, 'plugins/renderers') }),
   ],
 
   resolve: {

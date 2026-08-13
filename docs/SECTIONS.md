@@ -124,10 +124,22 @@ não resolvido (ver docs/PENDENCIAS.md e docs/LICOES.md #17).
 
 ## Section 02 — Serviços
 
-Arquivos: `index.html` (section #servicos), CSS `base.css` § Serviços.
+Arquivos: `index.html` (section #servicos), CSS `base.css` § Serviços,
+conteúdo `src/content/services.json`, renderer `plugins/renderers/services.js`.
 
 **Decisões não-óbvias:**
 
+- Os 3 cards **não** estão escritos no HTML: `index.html` tem só o
+  `<ul class="services__grid">` com `<render src="services.js" />` dentro.
+  O conteúdo vem de `src/content/services.json` e o HTML é gerado em
+  build-time por `plugins/vite-plugin-content.js` (CLAUDE.md §3.2) — nunca
+  no cliente, para o texto continuar indexável e no primeiro paint.
+- Derivados da **ordem** do array no JSON, não repetidos nele: o número
+  ghosted (`01`/`02`/`03`), o `data-reveal-delay` (`0.1`/`0.2`/`0.3`) e o
+  `aria-label` das tags (`Especialidades de <titulo>`). Reordenar o JSON
+  reordena tudo isso junto.
+- `accent` aceita só `green` ou `aqua` — valor fora disso quebra o build
+  de propósito, em vez de gerar uma classe CSS inexistente em silêncio.
 - Grid colapsa para 1 coluna em `< 600px` — breakpoint customizado, fora
   dos breakpoints padrão do Tailwind.
 - Número ghosted ("01"/"02"/"03"): decorativo, `aria-hidden="true"`,
@@ -136,7 +148,10 @@ Arquivos: `index.html` (section #servicos), CSS `base.css` § Serviços.
   são `display: flex; flex-direction: column; height: 100%`.
 - Ícones SVG: pasta `src/assets/icones/` (**com "e"** — não `icons/`),
   inline no HTML, cor via `currentColor` herdado de `.service-card__icon--green`
-  ou `.service-card__icon--aqua`.
+  ou `.service-card__icon--aqua`. O inline é feito pelo renderer, que
+  limpa o que vem da Flaticon (`id`, `width`/`height`, `enable-background`,
+  `xmlns`) e troca `fill="rgb(0,0,0)"` por `currentColor` — o arquivo em
+  `src/assets/icones/` fica intocado, do jeito que veio.
 - Todo o CSS desta section está em `src/styles/base.css`.
   Não existe `src/styles/sections/`.
 

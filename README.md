@@ -104,14 +104,17 @@ fj-ambiental/
 │   ├── content/                   # Dados em JSON
 │   │   ├── projects.json          # 8 projetos placeholder
 │   │   ├── faq.json               # 8 perguntas (id, question, answer)
-│   │   └── services.json          # ⬜ pendente
+│   │   └── services.json          # 3 pilares — renderizado em build-time
 │   └── assets/
 │       ├── logo/                  # SVGs da marca
 │       ├── icones/                # SVGs de ícones (Flaticon, com "e")
 │       └── imgs/
 ├── docs/                          # Ver índice em CLAUDE.md
 ├── plugins/
-│   └── vite-plugin-includes.js    # Sistema de partials HTML
+│   ├── vite-plugin-includes.js    # Sistema de partials HTML (<include src="...">)
+│   ├── vite-plugin-content.js     # JSON → HTML em build-time (<render src="...">)
+│   └── renderers/                 # Um renderer por section com conteúdo em JSON
+│       └── services.js            # src/content/services.json → cards da section Serviços
 ├── index.html                     # Home — única página existente hoje
 ├── CLAUDE.md                      # Regras para IA
 ├── DESIGN_SYSTEM.md               # Tokens visuais documentados
