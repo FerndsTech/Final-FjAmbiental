@@ -1,0 +1,35 @@
+{
+  "_meta": {
+    "descricao": "Os 3 pilares exibidos na section Serviços da Home. Lido em build-time por plugins/renderers/services.js — a ordem do array define o número ghosted (01/02/03) e o data-reveal-delay de cada card. Os valores aceitos em accent e a pasta dos ícones são validados lá; não duplicar a regra aqui.",
+    "atencao": "O H2 da section (index.html) diz 'Três pilares da engenharia hídrica' — copy editorial, inline por decisão do CLAUDE.md §3.2. Adicionar ou remover item aqui exige revisar esse título."
+  },
+  "services": [
+    {
+      "id": "outorga",
+      "titulo": "Outorga",
+      "subtitulo": "RECURSOS HÍDRICOS",
+      "accent": "green",
+      "icone": "outorga.svg",
+      "descricao": "Regularização do uso da água perante órgãos ambientais — captação, barramento, perfuração e lançamento de efluentes.",
+      "tags": ["Poços (APPO)", "Captação", "Barramento"]
+    },
+    {
+      "id": "hidrometria",
+      "titulo": "Hidrometria",
+      "subtitulo": "MEDIÇÃO EM CAMPO",
+      "accent": "aqua",
+      "icone": "hidrometria.svg",
+      "descricao": "Instalação de estações, medição de vazão e sedimentos, curvas de descarga e consistência de séries históricas.",
+      "tags": ["Fluviométrica", "ADCP", "Topobatimetria"]
+    },
+    {
+      "id": "hidrologia",
+      "titulo": "Hidrologia",
+      "subtitulo": "ESTUDOS PREDITIVOS",
+      "accent": "green",
+      "icone": "hidrologia.svg",
+      "descricao": "Vazão regularizada, previsão de cheias, estudos hidrossedimentológicos e modelagem de qualidade de água.",
+      "tags": ["Vazão regul.", "Cheias", "Modelo SMAP"]
+    }
+  ]
+}
