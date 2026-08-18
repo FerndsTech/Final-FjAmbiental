@@ -783,3 +783,85 @@ Regra generalizada em CLAUDE.md §4.28.
 **Causa raiz:** O contraste em UI não depende apenas da cor do texto. Uma micro-surface (como o formato da pílula) criada por `rgba` branco em fundo escuro precisa do seu "gêmeo oposto" para existir em fundos claros.
 **Correção aplicada:** A regra do modo claro `.site-header.is-light .primary-nav .nav-link` passou a receber um `background-color: rgba(10, 22, 40, 0.04)`, espelhando a sutileza dos 4% no tom escuro (`--color-deep-navy`) e mantendo a pílula sempre demarcada.
 **Regra derivada:** Sempre testar e prever o "estado invertido" de micro-surfaces (pills, badges, tooltips) em ambos os temas de contraste das sections. O que funciona a 4% branco no dark, frequentemente precisará de 4% dark no light para manter a hierarquia geométrica.
+
+---
+
+## #22 — Marquee da Section Sobre: dois bugs que o build não pega e o console não reclama (RESOLVIDO)
+
+**Contexto:** issue #5 — dar rolagem infinita à faixa institucional da
+base da Section Sobre (`.sobre__clients`), que existia como lista
+estática. A Section Clientes já tinha um marquee funcionando, então o
+caminho óbvio era reaproveitar a abordagem em vez de reescrevê-la.
+
+**Decisão de arquitetura:** o motor saiu de `clients.js` para
+`src/scripts/modules/marquee.js`, e as duas faixas passaram a chamá-lo.
+A matemática do número de cópias é a causa raiz da lição #17; duplicá-la
+por section seria convidar aquele bug de volta pela porta dos fundos.
+`clients.js` virou 20 linhas de descrição da faixa (seletores, 35s,
+`alt=""` nos clones) e nada de motor.
+
+### Bug A — constante de animação medida antes do swap da webfont
+
+**Como apareceu:** a faixa da Sobre andava a **25,4 px/s** medidos,
+contra **27,03 px/s** esperados (`setWidth / 45s`). A faixa de Clientes,
+no mesmo teste e com o mesmo código, batia exato: 47,55 contra 47,56.
+
+**Causa raiz:** `setWidth` é medido uma vez e vira, ao mesmo tempo, a
+velocidade (`setWidth / durationS`) **e** a distância do wrap
+(`position %= setWidth`). A medição rodava no `DOMContentLoaded`, antes
+da IBM Plex Mono ser aplicada. Numa faixa de **texto**, isso congela um
+valor menor que o período real de repetição: 1143px medidos contra
+1216,44px reais. A faixa de Clientes é imune porque logos são `<img>`
+com dimensões intrínsecas — não mudam de largura quando a fonte troca.
+
+**Por que era difícil de ver:** o erro de 6% não produz salto no boot. O
+layout final está correto, a animação parece fluida, e o defeito só se
+manifesta como um pulo de ~73px na costura **a cada volta de 45s** —
+exatamente o tipo de sintoma que a lição #17 levou 17 hipóteses para
+rastrear. Foi pego por medição de velocidade em wall-clock, não a olho.
+
+**Correção:** `marquee.js` faz toda a medição e a clonagem dentro de
+`document.fonts.ready.then(...)`, e devolve um cleanup que funciona
+mesmo se a promise ainda não resolveu (flag `cancelled`). Depois da
+correção: 27,06 medidos contra 27,03 esperados.
+
+**Regra derivada:** CLAUDE.md §4.29.
+
+### Bug B — o fade das bordas da Section Clientes nunca funcionou
+
+**Como apareceu:** ao construir o fade da faixa nova, a comparação com
+o fade existente da Section Clientes mostrou
+`getComputedStyle(...).backgroundImage === "none"` — nos dois lados.
+
+**Causa raiz:** `rgba(var(--color-deep-navy-rgb), 1)` com o token
+guardando `10 22 40`. Isso mistura a sintaxe moderna (space-separated)
+com a legada (vírgulas), é inválido em CSS Color 4, e o navegador
+descarta a declaração inteira sem avisar. Build verde, console limpo,
+nenhum 404 — o bug só existe como "essa decoração nunca apareceu".
+
+**Correção:** `rgb(var(--color-deep-navy-rgb) / 1)` nos quatro
+gradientes (dois da Clientes, dois da Sobre). Os fades da Section
+Clientes passaram a renderizar pela primeira vez.
+
+**Regra derivada:** CLAUDE.md §4.30.
+
+### Invariantes verificados no navegador antes do commit
+
+Medidos em produção (`npm run build && npm run preview`), 1440px:
+
+- Período de repetição = `setWidth` com precisão de **0,001px**
+  (`periodMin` 1216,437 / `periodMax` 1216,438) — a costura é exata,
+  que é o que impede o salto do wrap.
+- `larguraTotal - setWidth >= larguraViewport` nas duas faixas — a
+  invariante anti-vão da lição #17.
+- Velocidade em wall-clock dentro de 0,1% do esperado nas duas faixas.
+- 375 / 1440 / 1920: uma linha só, `docOverflow` 0, console limpo.
+- `prefers-reduced-motion: reduce` (contexto emulado): zero clones,
+  `transform: none`, `flex-wrap: wrap`, fades escondidos — a lista
+  estática de antes, com **uma diferença deliberada**: o gradiente de
+  `font-size`/`opacity` por `nth-child` no mobile foi removido e não
+  volta neste modo. Com os itens ciclando, um degradê preso à posição no
+  DOM não tem significado, e os clones nem seriam alcançados pelo
+  seletor. A faixa fica uniforme nos dois modos.
+
+**Status:** ✅ resolvido e validado. Branch `feat/sobre-clients-marquee`.

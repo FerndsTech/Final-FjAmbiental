@@ -213,6 +213,38 @@ rolagem nativa — preferir `scrollbar-gutter: stable` no `body` como
 baseline permanente, em vez de manipular `overflow` via JS. Ver
 docs/LICOES.md #20.
 
+### 4.29 Medida de layout que vira constante de animação precisa esperar `document.fonts.ready`
+
+Sempre que uma largura/altura medida uma única vez no boot vira
+**constante** de uma animação — velocidade, distância de wrap, offset de
+parallax — a medição não pode acontecer antes do swap da webfont. Fontes
+self-hosted carregam depois do `DOMContentLoaded`; qualquer caixa cujo
+tamanho dependa de texto muda de largura nesse momento, e a constante
+congelada fica errada para sempre.
+
+O sintoma é traiçoeiro porque **não é um salto no boot**: o layout final
+está certo, só a constante está errada — o erro reaparece a cada ciclo da
+animação. Medido no marquee da Section Sobre: 1143px antes das fontes
+contra 1216px depois, ~6% de erro e ~73px de salto na costura por volta.
+
+Regra: envolver a medição em `document.fonts.ready.then(...)` e devolver
+um cleanup que funcione mesmo se a promise ainda não resolveu. Faixas de
+imagem com `width`/`height` intrínsecos não sofrem disso — mas esperar
+não custa nada para elas, então o motor espera sempre. Ver
+`src/scripts/modules/marquee.js` e docs/LICOES.md #22.
+
+### 4.30 `rgba()` não aceita canal space-separated: com tokens `R G B`, usar `rgb(... / alpha)`
+
+Os tokens de cor deste projeto guardam o canal sem vírgula
+(`--color-deep-navy-rgb: 10 22 40`). Escrever
+`rgba(var(--color-deep-navy-rgb), 1)` mistura a sintaxe moderna
+(space-separated) com a legada (vírgulas): é **inválido**, e o navegador
+descarta a declaração inteira em silêncio — um `linear-gradient` com essa
+cor computa `background-image: none` e simplesmente não aparece. Não há
+erro no console e o build passa: o bug só existe como "essa decoração
+nunca funcionou". A forma correta é `rgb(var(--color-deep-navy-rgb) / 1)`.
+Ver docs/LICOES.md #22.
+
 ---
 
 ## Histórico — armadilhas do fluxo antigo (Claude Chat + Claude Code)

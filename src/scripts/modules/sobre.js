@@ -1,9 +1,31 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { initMarquee } from './marquee.js';
+
+// Segundos para a faixa institucional percorrer a largura de 1 conjunto
+// dos 5 itens. Mais lento que a faixa de logos da Section Clientes (35s):
+// aqui o conteúdo é texto, que precisa de tempo para ser lido.
+//
+// "Band de clientes" é o nome herdado das classes (`.sobre__clients*`):
+// o conteúdo hoje é institucional ("OUTORGA SUPERFICIAL E SUBTERRÂNEA",
+// "ATUAÇÃO EM 4 ESTADOS"), não logo de cliente. Renomear a família de
+// classes é limpeza separada; a constante ao menos não mente.
+const BAND_DURATION_S = 45;
 
 export function initSobre(root = document) {
   const section = root.querySelector('#sobre');
   if (!section) return () => {};
+
+  // Faixa institucional da base: mesmo motor da Section Clientes
+  // (marquee.js), fora do gsap.context porque o movimento é rAF puro,
+  // não uma animação do GSAP.
+  const cleanupBand = initMarquee({
+    viewport: section.querySelector('.sobre__clients-viewport'),
+    track: section.querySelector('.sobre__clients'),
+    itemSelector: '.sobre__client',
+    durationS: BAND_DURATION_S,
+    cloneAttr: 'data-sobre-clients-clone',
+  });
 
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -98,5 +120,8 @@ export function initSobre(root = document) {
     }
   }, root);
 
-  return () => ctx.revert();
+  return () => {
+    cleanupBand();
+    ctx.revert();
+  };
 }

@@ -34,7 +34,7 @@ tratamento visual seguidas.
 | 01  | Hero      | DARK cinemático | Foto drone + overlay 40% | ✅ Implementado                    |
 | 02  | Serviços  | DARK            | `--color-deep-navy`      | ✅ Implementado                    |
 | 03  | Portfólio | LIGHT           | `--color-canvas`         | ✅ Implementado (UI estática)      |
-| 04  | Sobre     | DARK            | `--color-deep-navy`      | ✅ Implementado (marquee pendente) |
+| 04  | Sobre     | DARK            | `--color-deep-navy`      | ✅ Implementado                    |
 | 05  | FAQ       | LIGHT           | `--color-canvas`         | ✅ Implementado                    |
 | 06  | Footer    | DARK            | `--color-deep-navy`      | ✅ Implementado                    |
 
@@ -77,24 +77,38 @@ Arquivos: `index.html` (section #hero), CSS `base.css` § Hero.
 Arquivos: `index.html` (section `.clients`, id `clientes`), CSS
 `base.css` § Section: Clientes, JS `src/scripts/modules/clients.js`.
 
-**Status:** em ajuste — arquitetura da duplicação do loop já
-reconstruída e validada, mas há um bug de stutter recorrente ainda
-não resolvido (ver docs/PENDENCIAS.md e docs/LICOES.md #17).
+**Status:** ✅ implementada. O stutter recorrente investigado em
+docs/LICOES.md #17 está resolvido (causa raiz: número de cópias fixo).
 
 **Arquitetura do loop infinito:**
 
+- **O motor mora em `src/scripts/modules/marquee.js`**, compartilhado
+  com a faixa institucional da Section Sobre. `clients.js` só descreve
+  a faixa (seletores, 35s de duração, `alt=""` nos clones) e delega.
+  A matemática do número de cópias — causa raiz da lição #17 — existe
+  num lugar só, de propósito: reimplementá-la por section convidaria o
+  mesmo bug de volta.
 - `.clients__track` contém as 12 `<img>` reais (logos dos clientes),
-  com `alt` descritivo. `clients.js` (`initClients()`) clona cada uma
-  via `cloneNode`, marca os clones com `aria-hidden="true"`, `alt=""`
-  e `data-clients-clone="true"`, e os insere como irmãos diretos no
-  mesmo `.clients__track` — não existe mais wrapper `.clients__track-dupe`
-  nem `display: contents`. Isso garante que a segunda metade da faixa
-  é sempre idêntica à primeira (mesmos atributos, mesma ordem),
-  eliminando duplicação manual de HTML como fonte de risco.
-- Animação via `@keyframes clients-marquee`, `translateX(0)` →
-  `translateX(-50%)`, `35s linear infinite` — a metade exata do
-  percurso corresponde ao ponto em que a segunda cópia (clonada)
-  começa, criando a ilusão de loop contínuo sem salto.
+  com `alt` descritivo. O motor clona cada uma via `cloneNode`, marca
+  os clones com `aria-hidden="true"`, `alt=""` e
+  `data-clients-clone="true"`, e os insere como irmãos diretos no
+  mesmo `.clients__track` — não existe wrapper `.clients__track-dupe`
+  nem `display: contents`. Isso garante que cada conjunto da faixa é
+  idêntico ao original (mesmos atributos, mesma ordem), eliminando
+  duplicação manual de HTML como fonte de risco.
+- **Número de cópias é calculado, não fixo:** `ceil(1 + larguraWrapper /
+  setWidth) + 1`. Com 2 conjuntos fixos, 1 conjunto de logos podia ser
+  mais estreito que o wrapper em telas largas e abrir um vão sem
+  conteúdo sempre no mesmo ponto do ciclo — o stutter da lição #17.
+- Movimento por `requestAnimationFrame`, não `@keyframes`: uma única
+  variável de posição, `35s` para percorrer 1 conjunto, e wrap por
+  módulo (`position %= setWidth`) — robusto mesmo se o navegador
+  atrasar o rAF (aba em background).
+- Espaçamento por `margin-right` no `.clients__logo`, **nunca `gap` na
+  track**: com `gap`, a costura entre o último item e o primeiro clone
+  ganha um espaço que o `setWidth` medido antes da clonagem não
+  contabiliza, e o wrap salta (ver `marquee.js`).
+- Pausa no `mouseenter` do `.clients__track-wrapper` (CLAUDE.md §4.27).
 - `will-change: transform` na regra `.clients__track` — sinaliza pro
   navegador priorizar essa animação no compositor/GPU.
 - Sob `prefers-reduced-motion: reduce`: a animação é desligada via CSS
@@ -114,8 +128,6 @@ não resolvido (ver docs/PENDENCIAS.md e docs/LICOES.md #17).
 
 **Pendências conhecidas:**
 
-- Stutter recorrente no loop ao passar pela logo Yamana Gold — não
-  resolvido, ver docs/PENDENCIAS.md.
 - Atributos `width`/`height` HTML das 12 `<img>` desatualizados
   (herdados da era raster, não batem com o `viewBox` real dos SVGs
   vetoriais atuais) — ver docs/PENDENCIAS.md.
@@ -290,8 +302,8 @@ Arquivos: `index.html` (section #sobre, `index.html:598-725`),
 CSS `base.css` § Sobre (`base.css:1461-1664`),
 JS `src/scripts/modules/sobre.js`.
 
-**Status:** implementada no código. Única pendência: animação de marquee
-da faixa institucional na base (ver docs/PENDENCIAS.md).
+**Status:** ✅ implementada, incluindo o marquee da faixa institucional
+da base (issue #5).
 
 **Estrutura implementada:**
 
@@ -372,8 +384,22 @@ once: true`) sincroniza: contadores numéricos (`.sobre__stat-value`),
 - Como não são mais logos de clientes, a dúvida antiga sobre
   redundância com a Section Clientes (entre Hero e Serviços) deixa de
   se aplicar — não há mais duplicação de conteúdo entre as duas sections.
-- Rolagem infinita (marquee) ainda não implementada — a lista é
-  estática, sem animação (ver docs/PENDENCIAS.md).
+- **Rolagem infinita implementada (issue #5)** pelo motor compartilhado
+  `src/scripts/modules/marquee.js` — o mesmo da Section Clientes,
+  chamado de dentro de `sobre.js`. Duração de **45s** por conjunto
+  (contra 35s da faixa de logos): aqui o conteúdo é texto e precisa de
+  tempo para ser lido.
+- Estrutura: `.sobre__clients-band` > `.sobre__clients-viewport`
+  (`overflow: hidden`, ancora os dois `.sobre__clients-fade`) >
+  `<ul class="sobre__clients">` (a track). Espaçamento por
+  `margin-right` no `.sobre__client`, nunca `gap` — ver `marquee.js`.
+- Sob `prefers-reduced-motion: reduce` o motor não clona nem anima, e o
+  CSS devolve a lista estática de antes: `flex-wrap: wrap`,
+  `overflow: visible` no viewport e fades escondidos.
+- O gradiente antigo por `nth-child` (font-size e opacity decrescentes
+  no mobile) foi removido: com os itens ciclando, um degradê preso à
+  posição no DOM não tem mais significado, e os clones nem seriam
+  alcançados pelo seletor.
 
 ---
 

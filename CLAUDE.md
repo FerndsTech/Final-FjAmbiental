@@ -210,6 +210,8 @@ não existe `CODING_STANDARDS.md` neste repo.
 - **4.26** Threshold de scroll-reveal fixo não serve para todo elemento
 - **4.27** Pausa de auto-advance por hover/focus deve escopar à área de interação, não à section
 - **4.28** Overlays full-screen precisam de fallback síncrono independente de frameworks de animação
+- **4.29** Medida de layout que vira constante de animação precisa esperar `document.fonts.ready`
+- **4.30** `rgba()` não aceita canal space-separated: com tokens `R G B`, usar `rgb(... / alpha)`
 
 **Numeração estável — nunca renumerar.** As lacunas são propositais:
 
@@ -353,6 +355,7 @@ Três padrões reutilizáveis, documentados em **`docs/PADROES-UI.md`**:
 - **12.1 Botão CTA (`.btn-pill`)** — três variantes (base, `--dark`, `--hero`)
 - **12.2 Microinteração da seta circular** — assinatura de interação do site
 - **12.3 Viewport fitting** — `min-height: 100svh` em sections intermediárias
+- **12.4 Faixa infinita (marquee)** — motor único em `marquee.js`, com contrato de CSS
 
 Ler o documento antes de criar qualquer componente novo de UI — inclusive
 para checar se o que você vai construir já existe.
